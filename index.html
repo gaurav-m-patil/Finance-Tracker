@@ -216,17 +216,21 @@
                 
                 <hr style="border-color: rgba(255,255,255,0.2);">
                 
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <small class="text-white-50 d-block">Employee</small>
+                <div class="row g-2 text-start">
+                    <div class="col-6">
+                        <small class="text-white-50 d-block">Employee Share</small>
                         <strong id="displayEmpPF">₹0</strong>
                     </div>
-                    <div>
-                        <small class="text-white-50 d-block">Employer</small>
+                    <div class="col-6">
+                        <small class="text-white-50 d-block">Employer Share</small>
                         <strong id="displayEmployerPF">₹0</strong>
                     </div>
-                    <div class="text-end">
-                        <small class="text-white-50 d-block">EPS Pension</small>
+                    <div class="col-6 mt-2">
+                        <small class="text-white-50 d-block">Interest Earned</small>
+                        <strong id="displayInterestEarned">₹0</strong>
+                    </div>
+                    <div class="col-6 mt-2">
+                        <small class="text-white-50 d-block">EPS Pension Fund</small>
                         <strong id="displayPension">₹0</strong>
                     </div>
                 </div>
@@ -273,6 +277,28 @@
             }
             
             return 0; 
+        }
+
+        function getAnnualInterestRate(monthYearStr) {
+            if (!monthYearStr) return 0.0825;
+            let str = String(monthYearStr).trim().toUpperCase();
+            let parts = str.split('-');
+            if (parts.length !== 2) return 0.0825;
+            
+            let m = monthMap[parts[0]];
+            let y = parseInt(parts[1]);
+            
+            if (isNaN(y) || !m) return 0.0825;
+            
+            // Financial Year logic: April to March
+            let fyStartYear = (m >= 4) ? y : y - 1;
+            
+            if (fyStartYear >= 2023) return 0.0825;
+            if (fyStartYear === 2022) return 0.0815;
+            if (fyStartYear === 2021) return 0.0810;
+            if (fyStartYear === 2020) return 0.0850;
+            
+            return 0.0850;
         }
 
         window.onload = () => {
@@ -353,7 +379,7 @@
             let totalPensionEPS = 0;
             let runningBalance = 0;
             let accumulatedInterest = 0;
-            const annualInterestRate = 0.085;
+            let totalLifetimeInterest = 0;
 
             let sortedData = [...cachedSalaryData].sort((a, b) => getSortValue(a.monthYear) - getSortValue(b.monthYear));
 
@@ -364,6 +390,7 @@
                 let empPF = Number(row.employeePF) || 0;
                 let monthStr = row.monthYear ? String(row.monthYear).substring(0, 3).toUpperCase() : "";
                 
+                let annualInterestRate = getAnnualInterestRate(row.monthYear);
                 let monthlyInterest = runningBalance * (annualInterestRate / 12);
                 accumulatedInterest += monthlyInterest;
                 
@@ -380,16 +407,19 @@
                 
                 if (monthStr === "MAR" || monthStr.includes("MAR")) {
                     runningBalance += accumulatedInterest;
+                    totalLifetimeInterest += accumulatedInterest;
                     accumulatedInterest = 0; 
                 }
             });
 
+            let totalDisplayedInterest = totalLifetimeInterest + accumulatedInterest;
             let totalMainPF = runningBalance + accumulatedInterest;
 
             document.getElementById("displayInHand").innerText = "₹ " + totalInHandAllTime.toLocaleString("en-IN");
             document.getElementById("displayTotalPF").innerText = "₹ " + Math.round(totalMainPF).toLocaleString("en-IN");
             document.getElementById("displayEmpPF").innerText = "₹" + totalEmployeePF.toLocaleString("en-IN");
             document.getElementById("displayEmployerPF").innerText = "₹" + totalEmployerPF.toLocaleString("en-IN");
+            document.getElementById("displayInterestEarned").innerText = "₹" + Math.round(totalDisplayedInterest).toLocaleString("en-IN");
             document.getElementById("displayPension").innerText = "₹" + totalPensionEPS.toLocaleString("en-IN");
         }
 

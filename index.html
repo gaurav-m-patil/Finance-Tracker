@@ -203,16 +203,17 @@
                 </button>
             </div>
 
+            <!-- In-Hand Card updated to Total Accumulated -->
             <div class="md-card insight-card-primary mb-3">
-                <p class="mb-1 text-white-50" style="font-weight: 500;">Latest In-Hand Salary</p>
+                <p class="mb-1 text-white-50" style="font-weight: 500;">Total In-Hand Salary</p>
                 <h2 id="displayInHand" style="font-weight: 700;">₹ 0</h2>
-                <small id="displayMonthLabel" class="text-white-50">Pending sync...</small>
+                <small id="displayMonthLabel" class="text-white-50">All time</small>
             </div>
 
             <div class="md-card insight-card-success mb-3">
                 <p class="mb-1 text-white-50" style="font-weight: 500;">Total PF Accumulated</p>
                 <h2 id="displayTotalPF" style="font-weight: 700;">₹ 0</h2>
-                <small id="displayInterest" class="text-white-50 d-block mb-2">Includes accrued interest</small>
+                <small class="text-white-50 d-block mb-2">Includes accrued interest</small>
                 
                 <hr style="border-color: rgba(255,255,255,0.2);">
                 
@@ -256,53 +257,70 @@
         
         let cachedSalaryData = JSON.parse(localStorage.getItem("salaryData")) || [];
 
+        const monthMap = { "JAN":1, "FEB":2, "MAR":3, "APR":4, "MAY":5, "JUN":6, "JUL":7, "AUG":8, "SEP":9, "OCT":10, "NOV":11, "DEC":12 };
+
+        // Bulletproof numeric sorter for Month-Year strings
+        function getSortValue(monthYearStr) {
+            if (!monthYearStr) return 0;
+            const p = monthYearStr.split('-');
+            if (p.length !== 2) return 0;
+            const m = monthMap[p[0].toUpperCase()];
+            const y = parseInt(p[1]);
+            if (m === undefined || isNaN(y)) return 0;
+            return (y * 100) + m; // Output format: 202610
+        }
+
         window.onload = () => {
             syncWithSheetQuietly();
         };
 
-        // Date String to Timestamp helper for strict chronological sorting
-        function getTimestamp(monthYearStr) {
-            if (!monthYearStr) return 0;
-            const parts = monthYearStr.split('-');
-            if (parts.length !== 2) return 0;
-            const d = new Date(`${parts[0]} 1, ${parts[1]}`);
-            return isNaN(d.getTime()) ? 0 : d.getTime();
+        function populateFields(record) {
+            if (!record) return;
+            document.getElementById("empNumber").value = record.empNumber || "";
+            document.getElementById("bankName").value = record.bankName || "";
+            document.getElementById("bankAccount").value = record.bankAccount || "";
+            document.getElementById("grade").value = record.grade || "";
+            document.getElementById("uan").value = record.uan || "";
+            if (record.taxRegime) document.getElementById("taxRegime").value = record.taxRegime;
+            
+            document.getElementById("totalEarnings").value = record.totalEarnings || "";
+            document.getElementById("totalDeductions").value = record.totalDeductions || "";
+            document.getElementById("employeePF").value = record.employeePF || "";
+            document.getElementById("taxDeduction").value = record.taxDeduction || "";
+            document.getElementById("gratuity").value = record.gratuity || "";
         }
 
-        // Listen for Month/Year input to trigger dynamic auto-population
+        function autoPopulateLatest() {
+            if (cachedSalaryData.length === 0) return;
+            // Only auto-fill if the user hasn't started typing earnings
+            if (document.getElementById("totalEarnings").value !== "") return;
+            
+            const sortedData = [...cachedSalaryData].sort((a, b) => getSortValue(a.monthYear) - getSortValue(b.monthYear));
+            populateFields(sortedData[sortedData.length - 1]);
+        }
+
+        // Dynamically find closest prior month when typing date
         function handleDateInput() {
             const m = document.getElementById("monthPart").value.toUpperCase();
             const y = document.getElementById("yearPart").value;
             
             if (m.length === 3 && y.length === 4) {
-                const targetTimestamp = getTimestamp(`${m}-${y}`);
-                if (targetTimestamp === 0) return;
+                const targetVal = getSortValue(`${m}-${y}`);
+                if (targetVal === 0) return;
 
                 let priorRecord = null;
-                let maxPriorTimestamp = 0;
+                let maxPriorVal = 0;
 
-                // Find the closest chronological record prior to the entered date
                 cachedSalaryData.forEach(row => {
-                    const rowTimestamp = getTimestamp(row.monthYear);
-                    if (rowTimestamp < targetTimestamp && rowTimestamp > maxPriorTimestamp) {
-                        maxPriorTimestamp = rowTimestamp;
+                    const rowVal = getSortValue(row.monthYear);
+                    if (rowVal < targetVal && rowVal > maxPriorVal) {
+                        maxPriorVal = rowVal;
                         priorRecord = row;
                     }
                 });
 
                 if (priorRecord) {
-                    document.getElementById("empNumber").value = priorRecord.empNumber || "";
-                    document.getElementById("bankName").value = priorRecord.bankName || "";
-                    document.getElementById("bankAccount").value = priorRecord.bankAccount || "";
-                    document.getElementById("grade").value = priorRecord.grade || "";
-                    document.getElementById("uan").value = priorRecord.uan || "";
-                    if (priorRecord.taxRegime) document.getElementById("taxRegime").value = priorRecord.taxRegime;
-                    
-                    document.getElementById("totalEarnings").value = priorRecord.totalEarnings || "";
-                    document.getElementById("totalDeductions").value = priorRecord.totalDeductions || "";
-                    document.getElementById("employeePF").value = priorRecord.employeePF || "";
-                    document.getElementById("taxDeduction").value = priorRecord.taxDeduction || "";
-                    document.getElementById("gratuity").value = priorRecord.gratuity || "";
+                    populateFields(priorRecord);
                 }
             }
         }
@@ -317,6 +335,10 @@
                 if (data && data.length > 0) {
                     cachedSalaryData = data;
                     localStorage.setItem("salaryData", JSON.stringify(data));
+
+                    if(document.getElementById("entry-tab").classList.contains("active")) {
+                        autoPopulateLatest();
+                    }
 
                     if(document.getElementById("insights-tab").classList.contains("active") || forceUpdate) {
                         renderInsights();
@@ -333,6 +355,7 @@
                 return;
             }
 
+            let totalInHandAllTime = 0;
             let totalEmployeePF = 0;
             let totalEmployerPF = 0;
             let totalPensionEPS = 0;
@@ -340,10 +363,14 @@
             let accumulatedInterest = 0;
             const annualInterestRate = 0.085;
 
-            // Ensure chronological compounding by sorting the local array before rendering
-            let sortedData = [...cachedSalaryData].sort((a, b) => getTimestamp(a.monthYear) - getTimestamp(b.monthYear));
+            let sortedData = [...cachedSalaryData].sort((a, b) => getSortValue(a.monthYear) - getSortValue(b.monthYear));
 
             sortedData.forEach(row => {
+                // Total In-Hand Math
+                let inHand = (Number(row.totalEarnings) || 0) - (Number(row.totalDeductions) || 0);
+                totalInHandAllTime += inHand;
+
+                // PF Math
                 let empPF = Number(row.employeePF) || 0;
                 let monthStr = row.monthYear ? String(row.monthYear).substring(0, 3).toUpperCase() : "";
                 
@@ -367,16 +394,13 @@
                 }
             });
 
-            const lastRow = sortedData[sortedData.length - 1];
-            let latestInHand = (Number(lastRow.totalEarnings) || 0) - (Number(lastRow.totalDeductions) || 0);
             let totalMainPF = runningBalance + accumulatedInterest;
 
-            document.getElementById("displayInHand").innerText = "₹ " + latestInHand.toLocaleString("en-IN");
+            document.getElementById("displayInHand").innerText = "₹ " + totalInHandAllTime.toLocaleString("en-IN");
             document.getElementById("displayTotalPF").innerText = "₹ " + Math.round(totalMainPF).toLocaleString("en-IN");
             document.getElementById("displayEmpPF").innerText = "₹" + totalEmployeePF.toLocaleString("en-IN");
             document.getElementById("displayEmployerPF").innerText = "₹" + totalEmployerPF.toLocaleString("en-IN");
             document.getElementById("displayPension").innerText = "₹" + totalPensionEPS.toLocaleString("en-IN");
-            document.getElementById("displayMonthLabel").innerText = lastRow.monthYear || "Latest Record";
         }
 
         document.getElementById("salaryForm").addEventListener("submit", function(e) {
@@ -386,8 +410,7 @@
             
             const combinedMonthYear = document.getElementById("monthPart").value.toUpperCase() + "-" + document.getElementById("yearPart").value;
 
-            // Fail-safe: Check for duplicate month
-            const isDuplicate = cachedSalaryData.some(row => row.monthYear.toUpperCase() === combinedMonthYear);
+            const isDuplicate = cachedSalaryData.some(row => row.monthYear && row.monthYear.toUpperCase() === combinedMonthYear);
             if (isDuplicate) {
                 alert(`A record for ${combinedMonthYear} already exists! Please enter a new month or check the Insights tab.`);
                 return;

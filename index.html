@@ -12,9 +12,8 @@
         body {
             background-color: #f4f6f8;
             font-family: 'Roboto', sans-serif;
-            padding-bottom: 70px; /* Space for bottom nav */
+            padding-bottom: 70px;
         }
-        /* Material Card Styling */
         .md-card {
             background: #fff;
             border-radius: 16px;
@@ -22,7 +21,6 @@
             border: none;
             padding: 20px;
         }
-        /* Gradient Insight Cards */
         .insight-card-primary {
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             color: white;
@@ -31,7 +29,6 @@
             background: linear-gradient(135deg, #0ba360 0%, #3cba92 100%);
             color: white;
         }
-        /* Mobile Bottom Navigation Bar */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -78,11 +75,16 @@
             margin-top: 10px;
             font-weight: 600;
         }
+        /* Custom dual-input container to match floating label height */
+        .dual-input-box {
+            height: 58px;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+        }
     </style>
 </head>
 <body>
 
-    <!-- Main Content Area -->
     <div class="tab-content" id="appTabsContent">
         
         <!-- Data Entry Tab -->
@@ -94,15 +96,19 @@
                     
                     <div class="section-title">Identity & Bank Details</div>
                     <div class="row g-2">
+                        <!-- Split Month & Year Field -->
                         <div class="col-6">
-                            <div class="form-floating mb-2">
-                                <input type="text" class="form-control" id="monthYear" placeholder="Oct-2026" required>
-                                <label>Month & Year</label>
+                            <label style="font-size: 12px; color: #5f6368; margin-left: 10px; margin-bottom: 2px;">Month & Year</label>
+                            <div class="d-flex align-items-center dual-input-box bg-white px-2 mb-2">
+                                <input type="text" id="monthPart" class="form-control border-0 text-uppercase text-center p-0" placeholder="OCT" maxlength="3" required style="box-shadow: none; font-size: 16px;">
+                                <span class="mx-1 text-muted fw-bold">-</span>
+                                <input type="number" id="yearPart" class="form-control border-0 text-center p-0" placeholder="2026" inputmode="numeric" pattern="[0-9]*" required style="box-shadow: none; font-size: 16px;">
                             </div>
                         </div>
                         <div class="col-6">
+                            <label style="font-size: 12px; color: transparent; margin-bottom: 2px;">Spacer</label>
                             <div class="form-floating mb-2">
-                                <input type="number" class="form-control" id="empNumber" placeholder="Emp No" required>
+                                <input type="number" class="form-control" id="empNumber" placeholder="Emp No" inputmode="numeric" pattern="[0-9]*" required>
                                 <label>Employee No</label>
                             </div>
                         </div>
@@ -114,7 +120,7 @@
                         </div>
                         <div class="col-12">
                             <div class="form-floating mb-2">
-                                <input type="number" class="form-control" id="bankAccount" placeholder="Acc No" required>
+                                <input type="number" class="form-control" id="bankAccount" placeholder="Acc No" inputmode="numeric" pattern="[0-9]*" required>
                                 <label>Bank Account Number</label>
                             </div>
                         </div>
@@ -126,7 +132,7 @@
                         </div>
                         <div class="col-4">
                             <div class="form-floating mb-2">
-                                <input type="number" class="form-control" id="uan" placeholder="UAN" required>
+                                <input type="number" class="form-control" id="uan" placeholder="UAN" inputmode="numeric" pattern="[0-9]*" required>
                                 <label>UAN</label>
                             </div>
                         </div>
@@ -145,31 +151,31 @@
                     <div class="row g-2">
                         <div class="col-6">
                             <div class="form-floating mb-2">
-                                <input type="number" class="form-control" id="totalEarnings" placeholder="0" required>
+                                <input type="number" class="form-control" id="totalEarnings" placeholder="0" inputmode="numeric" pattern="[0-9]*" required>
                                 <label>Total Earnings (₹)</label>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="form-floating mb-2">
-                                <input type="number" class="form-control" id="totalDeductions" placeholder="0" required>
+                                <input type="number" class="form-control" id="totalDeductions" placeholder="0" inputmode="numeric" pattern="[0-9]*" required>
                                 <label>Total Deductions (₹)</label>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="form-floating mb-2">
-                                <input type="number" class="form-control" id="employeePF" placeholder="0" required>
+                                <input type="number" class="form-control" id="employeePF" placeholder="0" inputmode="numeric" pattern="[0-9]*" required>
                                 <label>Emp. PF (₹)</label>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="form-floating mb-2">
-                                <input type="number" class="form-control" id="taxDeduction" placeholder="0" required>
+                                <input type="number" class="form-control" id="taxDeduction" placeholder="0" inputmode="numeric" pattern="[0-9]*" required>
                                 <label>Tax Cut (₹)</label>
                             </div>
                         </div>
                         <div class="col-4">
                             <div class="form-floating mb-2">
-                                <input type="number" class="form-control" id="gratuity" placeholder="0" required>
+                                <input type="number" class="form-control" id="gratuity" placeholder="0" inputmode="numeric" pattern="[0-9]*" required>
                                 <label>Gratuity (₹)</label>
                             </div>
                         </div>
@@ -271,7 +277,6 @@
                     cachedSalaryData = data;
                     localStorage.setItem("salaryData", JSON.stringify(data));
                     
-                    // If user is currently looking at Insights tab, update it live
                     if(document.getElementById("insights-tab").classList.contains("active")) {
                         renderInsights();
                     }
@@ -303,33 +308,30 @@
                 }
             });
 
-            // Get latest salary metrics
             const lastRow = cachedSalaryData[cachedSalaryData.length - 1];
             let latestInHand = (Number(lastRow.totalEarnings) || 0) - (Number(lastRow.totalDeductions) || 0);
             let totalMainPF = totalEmployeePF + totalEmployerPF;
 
-            // Update UI Fast
             document.getElementById("displayInHand").innerText = "₹ " + latestInHand.toLocaleString("en-IN");
             document.getElementById("displayTotalPF").innerText = "₹ " + totalMainPF.toLocaleString("en-IN");
             document.getElementById("displayEmpPF").innerText = "₹" + totalEmployeePF.toLocaleString("en-IN");
             document.getElementById("displayEmployerPF").innerText = "₹" + totalEmployerPF.toLocaleString("en-IN");
             document.getElementById("displayPension").innerText = "₹" + totalPensionEPS.toLocaleString("en-IN");
-            
-            // Note: Since API doesn't return monthYear yet, we label as Latest Record. 
-            // We can add monthYear to doGet in Code.gs later if needed.
             document.getElementById("displayMonthLabel").innerText = "Latest Record";
         }
 
-        // Form Submit - Optimistic UI Update
+        // Form Submit
         document.getElementById("salaryForm").addEventListener("submit", function(e) {
             e.preventDefault();
             const btn = document.getElementById("submitBtn");
             const originalBtnHtml = btn.innerHTML;
             btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Saving...`;
 
-            // 1. Build Payload
+            // Concatenate Month and Year
+            const combinedMonthYear = document.getElementById("monthPart").value.toUpperCase() + "-" + document.getElementById("yearPart").value;
+
             const payload = {
-                monthYear: document.getElementById("monthYear").value,
+                monthYear: combinedMonthYear,
                 bankName: document.getElementById("bankName").value,
                 bankAccount: document.getElementById("bankAccount").value,
                 empNumber: document.getElementById("empNumber").value,
@@ -343,14 +345,14 @@
                 gratuity: Number(document.getElementById("gratuity").value)
             };
 
-            // 2. Save static fields to local storage for next time
+            // Save static fields
             localStorage.setItem("bankName", payload.bankName);
             localStorage.setItem("bankAccount", payload.bankAccount);
             localStorage.setItem("empNumber", payload.empNumber);
             localStorage.setItem("grade", payload.grade);
             localStorage.setItem("uan", payload.uan);
 
-            // 3. Optimistic Local Update (Make UI feel instant)
+            // Optimistic Cache Update
             cachedSalaryData.push({
                 totalEarnings: payload.totalEarnings,
                 totalDeductions: payload.totalDeductions,
@@ -358,7 +360,6 @@
             });
             localStorage.setItem("salaryData", JSON.stringify(cachedSalaryData));
 
-            // 4. Send network request in the background
             fetch(API_URL, {
                 method: "POST",
                 body: JSON.stringify(payload)
@@ -371,8 +372,9 @@
                 setTimeout(() => {
                     btn.innerHTML = originalBtnHtml;
                     btn.classList.replace("btn-success", "btn-primary");
-                    // Clear only monetary fields
-                    document.getElementById("monthYear").value = "";
+                    // Clear variable fields
+                    document.getElementById("monthPart").value = "";
+                    document.getElementById("yearPart").value = "";
                     document.getElementById("totalEarnings").value = "";
                     document.getElementById("totalDeductions").value = "";
                     document.getElementById("employeePF").value = "";

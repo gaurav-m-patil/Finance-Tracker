@@ -6,83 +6,130 @@
 </head>
 <body class="p-4 bg-light">
     <div class="container bg-white p-4 rounded shadow-sm max-w-lg">
-        <h3 class="mb-4">Log Salary Details</h3>
-        <form id="salaryForm">
-            
-            **Identity & Bank Details**
-            <div class="row g-3 mb-3 mt-1">
-                <div class="col-md-4">
-                    <label>Month & Year</label>
-                    <input type="text" class="form-control" id="monthYear" placeholder="e.g. Oct 2026" required>
-                </div>
-                <div class="col-md-4">
-                    <label>Bank Account Name</label>
-                    <input type="text" class="form-control" id="bankName" required>
-                </div>
-                <div class="col-md-4">
-                    <label>Bank Account Number</label>
-                    <input type="number" class="form-control" id="bankAccount" required>
-                </div>
-                <div class="col-md-3">
-                    <label>Employee Number</label>
-                    <input type="number" class="form-control" id="empNumber" required>
-                </div>
-                <div class="col-md-3">
-                    <label>Grade</label>
-                    <input type="text" class="form-control" id="grade" required>
-                </div>
-                <div class="col-md-3">
-                    <label>UAN</label>
-                    <input type="number" class="form-control" id="uan" required>
-                </div>
-                <div class="col-md-3">
-                    <label>Tax Regime</label>
-                    <select class="form-select" id="taxRegime" required>
-                        <option value="New">New</option>
-                        <option value="Old">Old</option>
-                    </select>
-                </div>
+        <h3 class="mb-4">Financial Command Center</h3>
+        
+        <!-- Tab Navigation -->
+        <ul class="nav nav-tabs mb-4" id="appTabs">
+            <li class="nav-item">
+                <a class="nav-link active" id="entry-tab" data-bs-toggle="tab" href="#entry">Data Entry</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="insights-tab" data-bs-toggle="tab" href="#insights" onclick="loadInsights()">Insights</a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <!-- Data Entry Tab -->
+            <div class="tab-pane fade show active" id="entry">
+                <form id="salaryForm">
+                    <strong class="text-muted">Identity & Bank Details</strong>
+                    <div class="row g-3 mb-3 mt-1">
+                        <div class="col-md-4">
+                            <label>Month & Year</label>
+                            <input type="text" class="form-control" id="monthYear" placeholder="e.g. Oct-2026" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Bank Account Name</label>
+                            <input type="text" class="form-control" id="bankName" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Bank Account Number</label>
+                            <input type="number" class="form-control" id="bankAccount" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label>Employee Number</label>
+                            <input type="number" class="form-control" id="empNumber" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label>Grade</label>
+                            <input type="text" class="form-control" id="grade" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label>UAN</label>
+                            <input type="number" class="form-control" id="uan" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label>Tax Regime</label>
+                            <select class="form-select" id="taxRegime" required>
+                                <option value="New">New</option>
+                                <option value="Old">Old</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr>
+                    <strong class="text-muted">Earnings & Deductions</strong>
+                    <div class="row g-3 mb-3 mt-1">
+                        <div class="col-md-6">
+                            <label>Total Earnings (₹)</label>
+                            <input type="number" class="form-control" id="totalEarnings" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Total Deductions (₹)</label>
+                            <input type="number" class="form-control" id="totalDeductions" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Employee PF (₹)</label>
+                            <input type="number" class="form-control" id="employeePF" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Tax Deduction (₹)</label>
+                            <input type="number" class="form-control" id="taxDeduction" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Gratuity (₹)</label>
+                            <input type="number" class="form-control" id="gratuity" required>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-dark w-100 mt-4" id="submitBtn">Submit to Sheet</button>
+                </form>
             </div>
 
-            <hr>
-            **Earnings & Deductions**
-            <div class="row g-3 mb-3 mt-1">
-                <div class="col-md-6">
-                    <label>Total Earnings (₹)</label>
-                    <input type="number" class="form-control" id="totalEarnings" required>
-                </div>
-                <div class="col-md-6">
-                    <label>Total Deductions (₹)</label>
-                    <input type="number" class="form-control" id="totalDeductions" required>
-                </div>
-                <div class="col-md-4">
-                    <label>Employee PF (₹)</label>
-                    <input type="number" class="form-control" id="employeePF" required>
-                </div>
-                <div class="col-md-4">
-                    <label>Tax Deduction (₹)</label>
-                    <input type="number" class="form-control" id="taxDeduction" required>
-                </div>
-                <div class="col-md-4">
-                    <label>Gratuity (₹)</label>
-                    <input type="number" class="form-control" id="gratuity" required>
+            <!-- Insights Tab -->
+            <div class="tab-pane fade" id="insights">
+                <div class="row mt-3">
+                    <div class="col-md-6 mb-3">
+                        <div class="card bg-primary text-white">
+                            <div class="card-body">
+                                <h5>Latest In-Hand Salary</h5>
+                                <h3 id="displayInHand">₹ 0</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card bg-success text-white">
+                            <div class="card-body">
+                                <h5>Total PF Accumulated</h5>
+                                <h3 id="displayTotalPF">₹ 0</h3>
+                                <small>(Employee contribution only)</small>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            <button type="submit" class="btn btn-dark w-100 mt-4" id="submitBtn">Submit to Sheet</button>
-        </form>
+        </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Paste your Apps Script Web App URL here
         const API_URL = "https://script.google.com/macros/s/AKfycbxw50bYSCs1TSMYGm5HaOsc-y0jf2mAtE8l56_2NhYgI4HxQmtRQhP-9O4cKLC3vYxgsw/exec";
 
+        // Auto-populate static fields on page load
+        window.onload = () => {
+            document.getElementById("bankName").value = localStorage.getItem("bankName") || "";
+            document.getElementById("bankAccount").value = localStorage.getItem("bankAccount") || "";
+            document.getElementById("empNumber").value = localStorage.getItem("empNumber") || "";
+            document.getElementById("grade").value = localStorage.getItem("grade") || "";
+            document.getElementById("uan").value = localStorage.getItem("uan") || "";
+        };
+
+        // Form Submit Logic
         document.getElementById("salaryForm").addEventListener("submit", function(e) {
             e.preventDefault();
             const btn = document.getElementById("submitBtn");
             btn.innerText = "Submitting...";
 
-            // Gather all 12 data points
             const payload = {
                 monthYear: document.getElementById("monthYear").value,
                 bankName: document.getElementById("bankName").value,
@@ -98,6 +145,13 @@
                 gratuity: document.getElementById("gratuity").value
             };
 
+            // Save static fields to local storage for the next time
+            localStorage.setItem("bankName", payload.bankName);
+            localStorage.setItem("bankAccount", payload.bankAccount);
+            localStorage.setItem("empNumber", payload.empNumber);
+            localStorage.setItem("grade", payload.grade);
+            localStorage.setItem("uan", payload.uan);
+
             fetch(API_URL, {
                 method: "POST",
                 body: JSON.stringify(payload)
@@ -105,14 +159,53 @@
             .then(response => response.json())
             .then(data => {
                 alert("Salary Logged Successfully!");
-                document.getElementById("salaryForm").reset();
                 btn.innerText = "Submit to Sheet";
+                // Clear only the variable fields, keep the static ones
+                document.getElementById("monthYear").value = "";
+                document.getElementById("totalEarnings").value = "";
+                document.getElementById("totalDeductions").value = "";
+                document.getElementById("employeePF").value = "";
+                document.getElementById("taxDeduction").value = "";
+                document.getElementById("gratuity").value = "";
             })
             .catch(error => {
                 alert("Error saving data.");
                 btn.innerText = "Submit to Sheet";
             });
         });
+
+        // Insights Logic
+        function loadInsights() {
+            document.getElementById("displayInHand").innerText = "Loading...";
+            document.getElementById("displayTotalPF").innerText = "Loading...";
+
+            fetch(API_URL)
+            .then(response => response.json())
+            .then(data => {
+                if(data && data.length > 0) {
+                    let totalPF = 0;
+                    let latestInHand = 0;
+
+                    data.forEach(row => {
+                        totalPF += row.employeePF;
+                    });
+
+                    // Get the very last row for the latest salary
+                    const lastRow = data[data.length - 1];
+                    latestInHand = lastRow.totalEarnings - lastRow.totalDeductions;
+
+                    document.getElementById("displayInHand").innerText = "₹ " + latestInHand.toLocaleString();
+                    document.getElementById("displayTotalPF").innerText = "₹ " + totalPF.toLocaleString();
+                } else {
+                    document.getElementById("displayInHand").innerText = "₹ 0";
+                    document.getElementById("displayTotalPF").innerText = "₹ 0";
+                }
+            })
+            .catch(error => {
+                document.getElementById("displayInHand").innerText = "Error";
+                document.getElementById("displayTotalPF").innerText = "Error";
+            });
+        }
     </script>
 </body>
 </html>

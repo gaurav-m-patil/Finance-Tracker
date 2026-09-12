@@ -198,7 +198,7 @@
         <div class="tab-pane fade" id="insights" role="tabpanel">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h4 style="font-weight: 700; color: #202124; margin: 0;">Insights</h4>
-                <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="syncWithSheetQuietly()">
+                <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="syncWithSheetQuietly(true)">
                     <span class="material-icons" style="font-size: 16px; vertical-align: middle;">sync</span> Sync
                 </button>
             </div>
@@ -257,24 +257,68 @@
         let cachedSalaryData = JSON.parse(localStorage.getItem("salaryData")) || [];
 
         window.onload = () => {
-            document.getElementById("bankName").value = localStorage.getItem("bankName") || "";
-            document.getElementById("bankAccount").value = localStorage.getItem("bankAccount") || "";
-            document.getElementById("empNumber").value = localStorage.getItem("empNumber") || "";
-            document.getElementById("grade").value = localStorage.getItem("grade") || "";
-            document.getElementById("uan").value = localStorage.getItem("uan") || "";
-            
             syncWithSheetQuietly();
         };
 
-        function syncWithSheetQuietly() {
+        // Date String to Timestamp helper for strict chronological sorting
+        function getTimestamp(monthYearStr) {
+            if (!monthYearStr) return 0;
+            const parts = monthYearStr.split('-');
+            if (parts.length !== 2) return 0;
+            const d = new Date(`${parts[0]} 1, ${parts[1]}`);
+            return isNaN(d.getTime()) ? 0 : d.getTime();
+        }
+
+        // Listen for Month/Year input to trigger dynamic auto-population
+        function handleDateInput() {
+            const m = document.getElementById("monthPart").value.toUpperCase();
+            const y = document.getElementById("yearPart").value;
+            
+            if (m.length === 3 && y.length === 4) {
+                const targetTimestamp = getTimestamp(`${m}-${y}`);
+                if (targetTimestamp === 0) return;
+
+                let priorRecord = null;
+                let maxPriorTimestamp = 0;
+
+                // Find the closest chronological record prior to the entered date
+                cachedSalaryData.forEach(row => {
+                    const rowTimestamp = getTimestamp(row.monthYear);
+                    if (rowTimestamp < targetTimestamp && rowTimestamp > maxPriorTimestamp) {
+                        maxPriorTimestamp = rowTimestamp;
+                        priorRecord = row;
+                    }
+                });
+
+                if (priorRecord) {
+                    document.getElementById("empNumber").value = priorRecord.empNumber || "";
+                    document.getElementById("bankName").value = priorRecord.bankName || "";
+                    document.getElementById("bankAccount").value = priorRecord.bankAccount || "";
+                    document.getElementById("grade").value = priorRecord.grade || "";
+                    document.getElementById("uan").value = priorRecord.uan || "";
+                    if (priorRecord.taxRegime) document.getElementById("taxRegime").value = priorRecord.taxRegime;
+                    
+                    document.getElementById("totalEarnings").value = priorRecord.totalEarnings || "";
+                    document.getElementById("totalDeductions").value = priorRecord.totalDeductions || "";
+                    document.getElementById("employeePF").value = priorRecord.employeePF || "";
+                    document.getElementById("taxDeduction").value = priorRecord.taxDeduction || "";
+                    document.getElementById("gratuity").value = priorRecord.gratuity || "";
+                }
+            }
+        }
+
+        document.getElementById("monthPart").addEventListener("input", handleDateInput);
+        document.getElementById("yearPart").addEventListener("input", handleDateInput);
+
+        function syncWithSheetQuietly(forceUpdate = false) {
             fetch(API_URL)
             .then(response => response.json())
             .then(data => {
                 if (data && data.length > 0) {
                     cachedSalaryData = data;
                     localStorage.setItem("salaryData", JSON.stringify(data));
-                    
-                    if(document.getElementById("insights-tab").classList.contains("active")) {
+
+                    if(document.getElementById("insights-tab").classList.contains("active") || forceUpdate) {
                         renderInsights();
                     }
                 }
@@ -292,14 +336,16 @@
             let totalEmployeePF = 0;
             let totalEmployerPF = 0;
             let totalPensionEPS = 0;
-            
             let runningBalance = 0;
             let accumulatedInterest = 0;
             const annualInterestRate = 0.085;
 
-            cachedSalaryData.forEach(row => {
+            // Ensure chronological compounding by sorting the local array before rendering
+            let sortedData = [...cachedSalaryData].sort((a, b) => getTimestamp(a.monthYear) - getTimestamp(b.monthYear));
+
+            sortedData.forEach(row => {
                 let empPF = Number(row.employeePF) || 0;
-                let monthStr = row.monthYear ? row.monthYear.substring(0, 3).toUpperCase() : "";
+                let monthStr = row.monthYear ? String(row.monthYear).substring(0, 3).toUpperCase() : "";
                 
                 let monthlyInterest = runningBalance * (annualInterestRate / 12);
                 accumulatedInterest += monthlyInterest;
@@ -321,7 +367,7 @@
                 }
             });
 
-            const lastRow = cachedSalaryData[cachedSalaryData.length - 1];
+            const lastRow = sortedData[sortedData.length - 1];
             let latestInHand = (Number(lastRow.totalEarnings) || 0) - (Number(lastRow.totalDeductions) || 0);
             let totalMainPF = runningBalance + accumulatedInterest;
 
@@ -330,16 +376,24 @@
             document.getElementById("displayEmpPF").innerText = "₹" + totalEmployeePF.toLocaleString("en-IN");
             document.getElementById("displayEmployerPF").innerText = "₹" + totalEmployerPF.toLocaleString("en-IN");
             document.getElementById("displayPension").innerText = "₹" + totalPensionEPS.toLocaleString("en-IN");
-            document.getElementById("displayMonthLabel").innerText = "Latest Record";
+            document.getElementById("displayMonthLabel").innerText = lastRow.monthYear || "Latest Record";
         }
 
         document.getElementById("salaryForm").addEventListener("submit", function(e) {
             e.preventDefault();
             const btn = document.getElementById("submitBtn");
             const originalBtnHtml = btn.innerHTML;
-            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Saving...`;
-
+            
             const combinedMonthYear = document.getElementById("monthPart").value.toUpperCase() + "-" + document.getElementById("yearPart").value;
+
+            // Fail-safe: Check for duplicate month
+            const isDuplicate = cachedSalaryData.some(row => row.monthYear.toUpperCase() === combinedMonthYear);
+            if (isDuplicate) {
+                alert(`A record for ${combinedMonthYear} already exists! Please enter a new month or check the Insights tab.`);
+                return;
+            }
+
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Saving...`;
 
             const payload = {
                 monthYear: combinedMonthYear,
@@ -356,18 +410,7 @@
                 gratuity: Number(document.getElementById("gratuity").value)
             };
 
-            localStorage.setItem("bankName", payload.bankName);
-            localStorage.setItem("bankAccount", payload.bankAccount);
-            localStorage.setItem("empNumber", payload.empNumber);
-            localStorage.setItem("grade", payload.grade);
-            localStorage.setItem("uan", payload.uan);
-
-            cachedSalaryData.push({
-                monthYear: payload.monthYear,
-                totalEarnings: payload.totalEarnings,
-                totalDeductions: payload.totalDeductions,
-                employeePF: payload.employeePF
-            });
+            cachedSalaryData.push(payload);
             localStorage.setItem("salaryData", JSON.stringify(cachedSalaryData));
 
             fetch(API_URL, {
@@ -384,11 +427,6 @@
                     btn.classList.replace("btn-success", "btn-primary");
                     document.getElementById("monthPart").value = "";
                     document.getElementById("yearPart").value = "";
-                    document.getElementById("totalEarnings").value = "";
-                    document.getElementById("totalDeductions").value = "";
-                    document.getElementById("employeePF").value = "";
-                    document.getElementById("taxDeduction").value = "";
-                    document.getElementById("gratuity").value = "";
                 }, 2000);
             })
             .catch(error => {

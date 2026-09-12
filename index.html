@@ -260,12 +260,19 @@
 
         function getSortValue(monthYearStr) {
             if (!monthYearStr) return 0;
-            const p = monthYearStr.split('-');
-            if (p.length !== 2) return 0;
-            const m = monthMap[p[0].toUpperCase()];
-            const y = parseInt(p[1]);
-            if (m === undefined || isNaN(y)) return 0;
-            return (y * 100) + m; 
+            let str = String(monthYearStr).trim().toUpperCase();
+            
+            let parts = str.split('-');
+            if (parts.length === 2 && monthMap[parts[0]]) {
+                return (parseInt(parts[1]) * 100) + monthMap[parts[0]];
+            }
+            
+            let d = new Date(monthYearStr);
+            if (!isNaN(d.getTime())) {
+                return (d.getFullYear() * 100) + (d.getMonth() + 1);
+            }
+            
+            return 0; 
         }
 
         window.onload = () => {
@@ -273,18 +280,19 @@
         };
 
         function populateStaticFields(record) {
-            if (!record) return;
-            document.getElementById("empNumber").value = record.empNumber || "";
-            document.getElementById("bankName").value = record.bankName || "";
-            document.getElementById("bankAccount").value = record.bankAccount || "";
-            document.getElementById("grade").value = record.grade || "";
-            document.getElementById("uan").value = record.uan || "";
-            if (record.taxRegime) document.getElementById("taxRegime").value = record.taxRegime;
+            document.getElementById("empNumber").value = (record && record.empNumber) || localStorage.getItem("empNumber") || "";
+            document.getElementById("bankName").value = (record && record.bankName) || localStorage.getItem("bankName") || "";
+            document.getElementById("bankAccount").value = (record && record.bankAccount) || localStorage.getItem("bankAccount") || "";
+            document.getElementById("grade").value = (record && record.grade) || localStorage.getItem("grade") || "";
+            document.getElementById("uan").value = (record && record.uan) || localStorage.getItem("uan") || "";
             
-            // Note: totalEarnings, totalDeductions, etc., have been explicitly removed from here.
+            if (record && record.taxRegime) {
+                document.getElementById("taxRegime").value = record.taxRegime;
+            } else if (localStorage.getItem("taxRegime")) {
+                document.getElementById("taxRegime").value = localStorage.getItem("taxRegime");
+            }
         }
 
-        // Trigger dynamic auto-population only when month is 3 letters and year is exactly 4 digits
         function handleDateInput() {
             const m = document.getElementById("monthPart").value.toUpperCase();
             const y = document.getElementById("yearPart").value;
@@ -304,9 +312,12 @@
                     }
                 });
 
-                if (priorRecord) {
-                    populateStaticFields(priorRecord);
+                if (!priorRecord && cachedSalaryData.length > 0) {
+                    let sorted = [...cachedSalaryData].sort((a,b) => getSortValue(a.monthYear) - getSortValue(b.monthYear));
+                    priorRecord = sorted[sorted.length - 1];
                 }
+
+                populateStaticFields(priorRecord);
             }
         }
 
@@ -367,7 +378,7 @@
                     runningBalance += (empPF + employerPF);
                 }
                 
-                if (monthStr === "MAR") {
+                if (monthStr === "MAR" || monthStr.includes("MAR")) {
                     runningBalance += accumulatedInterest;
                     accumulatedInterest = 0; 
                 }
@@ -389,7 +400,7 @@
             
             const combinedMonthYear = document.getElementById("monthPart").value.toUpperCase() + "-" + document.getElementById("yearPart").value;
 
-            const isDuplicate = cachedSalaryData.some(row => row.monthYear && row.monthYear.toUpperCase() === combinedMonthYear);
+            const isDuplicate = cachedSalaryData.some(row => row.monthYear && getSortValue(row.monthYear) === getSortValue(combinedMonthYear));
             if (isDuplicate) {
                 alert(`A record for ${combinedMonthYear} already exists! Please enter a new month or check the Insights tab.`);
                 return;
@@ -411,6 +422,13 @@
                 taxDeduction: Number(document.getElementById("taxDeduction").value),
                 gratuity: Number(document.getElementById("gratuity").value)
             };
+
+            localStorage.setItem("empNumber", payload.empNumber);
+            localStorage.setItem("bankName", payload.bankName);
+            localStorage.setItem("bankAccount", payload.bankAccount);
+            localStorage.setItem("grade", payload.grade);
+            localStorage.setItem("uan", payload.uan);
+            localStorage.setItem("taxRegime", payload.taxRegime);
 
             cachedSalaryData.push(payload);
             localStorage.setItem("salaryData", JSON.stringify(cachedSalaryData));

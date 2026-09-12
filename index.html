@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Financial Command Center</title>
-    <!-- Bootstrap 5 for Layout & Floating Labels -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Google Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
         body {
@@ -14,6 +12,18 @@
             font-family: 'Roboto', sans-serif;
             padding-bottom: 70px;
         }
+        
+        /* Hide number input arrows for Chrome, Safari, Edge, Opera */
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        /* Hide number input arrows for Firefox */
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
         .md-card {
             background: #fff;
             border-radius: 16px;
@@ -75,7 +85,6 @@
             margin-top: 10px;
             font-weight: 600;
         }
-        /* Custom dual-input container to match floating label height */
         .dual-input-box {
             height: 58px;
             border: 1px solid #dee2e6;
@@ -96,7 +105,6 @@
                     
                     <div class="section-title">Identity & Bank Details</div>
                     <div class="row g-2">
-                        <!-- Split Month & Year Field -->
                         <div class="col-6">
                             <label style="font-size: 12px; color: #5f6368; margin-left: 10px; margin-bottom: 2px;">Month & Year</label>
                             <div class="d-flex align-items-center dual-input-box bg-white px-2 mb-2">
@@ -253,22 +261,18 @@
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbxw50bYSCs1TSMYGm5HaOsc-y0jf2mAtE8l56_2NhYgI4HxQmtRQhP-9O4cKLC3vYxgsw/exec";
         
-        // Load data from local cache instantly
         let cachedSalaryData = JSON.parse(localStorage.getItem("salaryData")) || [];
 
         window.onload = () => {
-            // Restore static user fields
             document.getElementById("bankName").value = localStorage.getItem("bankName") || "";
             document.getElementById("bankAccount").value = localStorage.getItem("bankAccount") || "";
             document.getElementById("empNumber").value = localStorage.getItem("empNumber") || "";
             document.getElementById("grade").value = localStorage.getItem("grade") || "";
             document.getElementById("uan").value = localStorage.getItem("uan") || "";
-
-            // Fetch fresh data in the background silently
+            
             syncWithSheetQuietly();
         };
 
-        // Background Sync Function
         function syncWithSheetQuietly() {
             fetch(API_URL)
             .then(response => response.json())
@@ -285,7 +289,6 @@
             .catch(err => console.error("Background sync failed: ", err));
         }
 
-        // Render Insights completely offline using Cache
         function renderInsights() {
             if (cachedSalaryData.length === 0) {
                 document.getElementById("displayInHand").innerText = "₹ 0";
@@ -320,14 +323,12 @@
             document.getElementById("displayMonthLabel").innerText = "Latest Record";
         }
 
-        // Form Submit
         document.getElementById("salaryForm").addEventListener("submit", function(e) {
             e.preventDefault();
             const btn = document.getElementById("submitBtn");
             const originalBtnHtml = btn.innerHTML;
             btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Saving...`;
 
-            // Concatenate Month and Year
             const combinedMonthYear = document.getElementById("monthPart").value.toUpperCase() + "-" + document.getElementById("yearPart").value;
 
             const payload = {
@@ -345,14 +346,12 @@
                 gratuity: Number(document.getElementById("gratuity").value)
             };
 
-            // Save static fields
             localStorage.setItem("bankName", payload.bankName);
             localStorage.setItem("bankAccount", payload.bankAccount);
             localStorage.setItem("empNumber", payload.empNumber);
             localStorage.setItem("grade", payload.grade);
             localStorage.setItem("uan", payload.uan);
 
-            // Optimistic Cache Update
             cachedSalaryData.push({
                 totalEarnings: payload.totalEarnings,
                 totalDeductions: payload.totalDeductions,
@@ -372,7 +371,6 @@
                 setTimeout(() => {
                     btn.innerHTML = originalBtnHtml;
                     btn.classList.replace("btn-success", "btn-primary");
-                    // Clear variable fields
                     document.getElementById("monthPart").value = "";
                     document.getElementById("yearPart").value = "";
                     document.getElementById("totalEarnings").value = "";

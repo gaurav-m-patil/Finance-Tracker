@@ -8,21 +8,68 @@
     <div class="container bg-white p-4 rounded shadow-sm max-w-lg">
         <h3 class="mb-4">Log Salary Details</h3>
         <form id="salaryForm">
-            <!-- Example of the first row of inputs -->
-            <div class="row g-3 mb-3">
-                <div class="col-md-6">
+            
+            **Identity & Bank Details**
+            <div class="row g-3 mb-3 mt-1">
+                <div class="col-md-4">
                     <label>Month & Year</label>
                     <input type="text" class="form-control" id="monthYear" placeholder="e.g. Oct 2026" required>
                 </div>
+                <div class="col-md-4">
+                    <label>Bank Account Name</label>
+                    <input type="text" class="form-control" id="bankName" required>
+                </div>
+                <div class="col-md-4">
+                    <label>Bank Account Number</label>
+                    <input type="number" class="form-control" id="bankAccount" required>
+                </div>
+                <div class="col-md-3">
+                    <label>Employee Number</label>
+                    <input type="number" class="form-control" id="empNumber" required>
+                </div>
+                <div class="col-md-3">
+                    <label>Grade</label>
+                    <input type="text" class="form-control" id="grade" required>
+                </div>
+                <div class="col-md-3">
+                    <label>UAN</label>
+                    <input type="number" class="form-control" id="uan" required>
+                </div>
+                <div class="col-md-3">
+                    <label>Tax Regime</label>
+                    <select class="form-select" id="taxRegime" required>
+                        <option value="New">New</option>
+                        <option value="Old">Old</option>
+                    </select>
+                </div>
+            </div>
+
+            <hr>
+            **Earnings & Deductions**
+            <div class="row g-3 mb-3 mt-1">
                 <div class="col-md-6">
-                    <label>Total Earnings</label>
+                    <label>Total Earnings (₹)</label>
                     <input type="number" class="form-control" id="totalEarnings" required>
+                </div>
+                <div class="col-md-6">
+                    <label>Total Deductions (₹)</label>
+                    <input type="number" class="form-control" id="totalDeductions" required>
+                </div>
+                <div class="col-md-4">
+                    <label>Employee PF (₹)</label>
+                    <input type="number" class="form-control" id="employeePF" required>
+                </div>
+                <div class="col-md-4">
+                    <label>Tax Deduction (₹)</label>
+                    <input type="number" class="form-control" id="taxDeduction" required>
+                </div>
+                <div class="col-md-4">
+                    <label>Gratuity (₹)</label>
+                    <input type="number" class="form-control" id="gratuity" required>
                 </div>
             </div>
             
-            <!-- You will add the other 10 inputs following the same structure here -->
-            
-            <button type="submit" class="btn btn-primary w-100 mt-3" id="submitBtn">Submit to Sheet</button>
+            <button type="submit" class="btn btn-dark w-100 mt-4" id="submitBtn">Submit to Sheet</button>
         </form>
     </div>
 
@@ -35,11 +82,20 @@
             const btn = document.getElementById("submitBtn");
             btn.innerText = "Submitting...";
 
-            // Gather data from inputs
+            // Gather all 12 data points
             const payload = {
                 monthYear: document.getElementById("monthYear").value,
+                bankName: document.getElementById("bankName").value,
+                bankAccount: document.getElementById("bankAccount").value,
+                empNumber: document.getElementById("empNumber").value,
+                grade: document.getElementById("grade").value,
+                uan: document.getElementById("uan").value,
+                taxRegime: document.getElementById("taxRegime").value,
                 totalEarnings: document.getElementById("totalEarnings").value,
-                // Add the rest of your input values here matching the exact keys in the Apps Script
+                totalDeductions: document.getElementById("totalDeductions").value,
+                employeePF: document.getElementById("employeePF").value,
+                taxDeduction: document.getElementById("taxDeduction").value,
+                gratuity: document.getElementById("gratuity").value
             };
 
             fetch(API_URL, {

@@ -13,13 +13,11 @@
             padding-bottom: 70px;
         }
         
-        /* Hide number input arrows for Chrome, Safari, Edge, Opera */
         input::-webkit-outer-spin-button,
         input::-webkit-inner-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
-        /* Hide number input arrows for Firefox */
         input[type=number] {
             -moz-appearance: textfield;
         }
@@ -96,7 +94,6 @@
 
     <div class="tab-content" id="appTabsContent">
         
-        <!-- Data Entry Tab -->
         <div class="tab-pane fade show active" id="entry" role="tabpanel">
             <h4 class="mb-4" style="font-weight: 700; color: #202124;">Add Salary Record</h4>
             
@@ -198,7 +195,6 @@
             </div>
         </div>
 
-        <!-- Insights Tab -->
         <div class="tab-pane fade" id="insights" role="tabpanel">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h4 style="font-weight: 700; color: #202124; margin: 0;">Insights</h4>
@@ -207,17 +203,16 @@
                 </button>
             </div>
 
-            <!-- In-Hand Card -->
             <div class="md-card insight-card-primary mb-3">
                 <p class="mb-1 text-white-50" style="font-weight: 500;">Latest In-Hand Salary</p>
                 <h2 id="displayInHand" style="font-weight: 700;">₹ 0</h2>
                 <small id="displayMonthLabel" class="text-white-50">Pending sync...</small>
             </div>
 
-            <!-- PF Card -->
             <div class="md-card insight-card-success mb-3">
                 <p class="mb-1 text-white-50" style="font-weight: 500;">Total PF Accumulated</p>
                 <h2 id="displayTotalPF" style="font-weight: 700;">₹ 0</h2>
+                <small id="displayInterest" class="text-white-50 d-block mb-2">Includes accrued interest</small>
                 
                 <hr style="border-color: rgba(255,255,255,0.2);">
                 
@@ -240,7 +235,6 @@
 
     </div>
 
-    <!-- Material Bottom Navigation -->
     <ul class="nav nav-tabs bottom-nav" id="bottomNav" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="entry-tab" data-bs-toggle="tab" data-bs-target="#entry" type="button" role="tab">
@@ -256,7 +250,6 @@
         </li>
     </ul>
 
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbxw50bYSCs1TSMYGm5HaOsc-y0jf2mAtE8l56_2NhYgI4HxQmtRQhP-9O4cKLC3vYxgsw/exec";
@@ -299,24 +292,41 @@
             let totalEmployeePF = 0;
             let totalEmployerPF = 0;
             let totalPensionEPS = 0;
+            
+            let runningBalance = 0;
+            let accumulatedInterest = 0;
+            const annualInterestRate = 0.085;
 
             cachedSalaryData.forEach(row => {
                 let empPF = Number(row.employeePF) || 0;
-                totalEmployeePF += empPF;
+                let monthStr = row.monthYear ? row.monthYear.substring(0, 3).toUpperCase() : "";
+                
+                let monthlyInterest = runningBalance * (annualInterestRate / 12);
+                accumulatedInterest += monthlyInterest;
                 
                 if (empPF > 0) {
                     let epsCut = (empPF >= 1800) ? 1250 : Math.round(empPF * (8.33 / 12));
+                    let employerPF = empPF - epsCut;
+                    
+                    totalEmployeePF += empPF;
+                    totalEmployerPF += employerPF;
                     totalPensionEPS += epsCut;
-                    totalEmployerPF += (empPF - epsCut);
+                    
+                    runningBalance += (empPF + employerPF);
+                }
+                
+                if (monthStr === "MAR") {
+                    runningBalance += accumulatedInterest;
+                    accumulatedInterest = 0; 
                 }
             });
 
             const lastRow = cachedSalaryData[cachedSalaryData.length - 1];
             let latestInHand = (Number(lastRow.totalEarnings) || 0) - (Number(lastRow.totalDeductions) || 0);
-            let totalMainPF = totalEmployeePF + totalEmployerPF;
+            let totalMainPF = runningBalance + accumulatedInterest;
 
             document.getElementById("displayInHand").innerText = "₹ " + latestInHand.toLocaleString("en-IN");
-            document.getElementById("displayTotalPF").innerText = "₹ " + totalMainPF.toLocaleString("en-IN");
+            document.getElementById("displayTotalPF").innerText = "₹ " + Math.round(totalMainPF).toLocaleString("en-IN");
             document.getElementById("displayEmpPF").innerText = "₹" + totalEmployeePF.toLocaleString("en-IN");
             document.getElementById("displayEmployerPF").innerText = "₹" + totalEmployerPF.toLocaleString("en-IN");
             document.getElementById("displayPension").innerText = "₹" + totalPensionEPS.toLocaleString("en-IN");
@@ -353,6 +363,7 @@
             localStorage.setItem("uan", payload.uan);
 
             cachedSalaryData.push({
+                monthYear: payload.monthYear,
                 totalEarnings: payload.totalEarnings,
                 totalDeductions: payload.totalDeductions,
                 employeePF: payload.employeePF

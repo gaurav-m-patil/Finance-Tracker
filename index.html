@@ -1,138 +1,333 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Financial Command Center</title>
+    <!-- Bootstrap 5 for Layout & Floating Labels -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f6f8;
+            font-family: 'Roboto', sans-serif;
+            padding-bottom: 70px; /* Space for bottom nav */
+        }
+        /* Material Card Styling */
+        .md-card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.1);
+            border: none;
+            padding: 20px;
+        }
+        /* Gradient Insight Cards */
+        .insight-card-primary {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+        }
+        .insight-card-success {
+            background: linear-gradient(135deg, #0ba360 0%, #3cba92 100%);
+            color: white;
+        }
+        /* Mobile Bottom Navigation Bar */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        .nav-link {
+            color: #5f6368;
+            text-align: center;
+            padding: 12px 0;
+            flex: 1;
+            border-radius: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .nav-link.active {
+            color: #1a73e8 !important;
+            background: none !important;
+            border: none !important;
+        }
+        .nav-link .material-icons {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+        .tab-content {
+            padding: 15px;
+            max-width: 600px;
+            margin: auto;
+        }
+        .section-title {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #5f6368;
+            margin-bottom: 15px;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+    </style>
 </head>
-<body class="p-4 bg-light">
-    <div class="container bg-white p-4 rounded shadow-sm max-w-lg">
-        <h3 class="mb-4">Financial Command Center</h3>
-        
-        <!-- Tab Navigation -->
-        <ul class="nav nav-tabs mb-4" id="appTabs">
-            <li class="nav-item">
-                <a class="nav-link active" id="entry-tab" data-bs-toggle="tab" href="#entry">Data Entry</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" id="insights-tab" data-bs-toggle="tab" href="#insights" onclick="loadInsights()">Insights</a>
-            </li>
-        </ul>
+<body>
 
-        <div class="tab-content">
-            <!-- Data Entry Tab -->
-            <div class="tab-pane fade show active" id="entry">
+    <!-- Main Content Area -->
+    <div class="tab-content" id="appTabsContent">
+        
+        <!-- Data Entry Tab -->
+        <div class="tab-pane fade show active" id="entry" role="tabpanel">
+            <h4 class="mb-4" style="font-weight: 700; color: #202124;">Add Salary Record</h4>
+            
+            <div class="md-card mb-4">
                 <form id="salaryForm">
-                    <strong class="text-muted">Identity & Bank Details</strong>
-                    <div class="row g-3 mb-3 mt-1">
-                        <div class="col-md-4">
-                            <label>Month & Year</label>
-                            <input type="text" class="form-control" id="monthYear" placeholder="e.g. Oct-2026" required>
+                    
+                    <div class="section-title">Identity & Bank Details</div>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="form-floating mb-2">
+                                <input type="text" class="form-control" id="monthYear" placeholder="Oct-2026" required>
+                                <label>Month & Year</label>
+                            </div>
                         </div>
-                        <div class="col-md-4">
-                            <label>Bank Account Name</label>
-                            <input type="text" class="form-control" id="bankName" required>
+                        <div class="col-6">
+                            <div class="form-floating mb-2">
+                                <input type="number" class="form-control" id="empNumber" placeholder="Emp No" required>
+                                <label>Employee No</label>
+                            </div>
                         </div>
-                        <div class="col-md-4">
-                            <label>Bank Account Number</label>
-                            <input type="number" class="form-control" id="bankAccount" required>
+                        <div class="col-12">
+                            <div class="form-floating mb-2">
+                                <input type="text" class="form-control" id="bankName" placeholder="Bank Name" required>
+                                <label>Bank Account Name</label>
+                            </div>
                         </div>
-                        <div class="col-md-3">
-                            <label>Employee Number</label>
-                            <input type="number" class="form-control" id="empNumber" required>
+                        <div class="col-12">
+                            <div class="form-floating mb-2">
+                                <input type="number" class="form-control" id="bankAccount" placeholder="Acc No" required>
+                                <label>Bank Account Number</label>
+                            </div>
                         </div>
-                        <div class="col-md-3">
-                            <label>Grade</label>
-                            <input type="text" class="form-control" id="grade" required>
+                        <div class="col-4">
+                            <div class="form-floating mb-2">
+                                <input type="text" class="form-control" id="grade" placeholder="Grade" required>
+                                <label>Grade</label>
+                            </div>
                         </div>
-                        <div class="col-md-3">
-                            <label>UAN</label>
-                            <input type="number" class="form-control" id="uan" required>
+                        <div class="col-4">
+                            <div class="form-floating mb-2">
+                                <input type="number" class="form-control" id="uan" placeholder="UAN" required>
+                                <label>UAN</label>
+                            </div>
                         </div>
-                        <div class="col-md-3">
-                            <label>Tax Regime</label>
-                            <select class="form-select" id="taxRegime" required>
-                                <option value="New">New</option>
-                                <option value="Old">Old</option>
-                            </select>
+                        <div class="col-4">
+                            <div class="form-floating mb-2">
+                                <select class="form-select" id="taxRegime" required>
+                                    <option value="New">New</option>
+                                    <option value="Old">Old</option>
+                                </select>
+                                <label>Tax</label>
+                            </div>
                         </div>
                     </div>
 
-                    <hr>
-                    <strong class="text-muted">Earnings & Deductions</strong>
-                    <div class="row g-3 mb-3 mt-1">
-                        <div class="col-md-6">
-                            <label>Total Earnings (₹)</label>
-                            <input type="number" class="form-control" id="totalEarnings" required>
+                    <div class="section-title mt-4">Earnings & Deductions</div>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="form-floating mb-2">
+                                <input type="number" class="form-control" id="totalEarnings" placeholder="0" required>
+                                <label>Total Earnings (₹)</label>
+                            </div>
                         </div>
-                        <div class="col-md-6">
-                            <label>Total Deductions (₹)</label>
-                            <input type="number" class="form-control" id="totalDeductions" required>
+                        <div class="col-6">
+                            <div class="form-floating mb-2">
+                                <input type="number" class="form-control" id="totalDeductions" placeholder="0" required>
+                                <label>Total Deductions (₹)</label>
+                            </div>
                         </div>
-                        <div class="col-md-4">
-                            <label>Employee PF (₹)</label>
-                            <input type="number" class="form-control" id="employeePF" required>
+                        <div class="col-4">
+                            <div class="form-floating mb-2">
+                                <input type="number" class="form-control" id="employeePF" placeholder="0" required>
+                                <label>Emp. PF (₹)</label>
+                            </div>
                         </div>
-                        <div class="col-md-4">
-                            <label>Tax Deduction (₹)</label>
-                            <input type="number" class="form-control" id="taxDeduction" required>
+                        <div class="col-4">
+                            <div class="form-floating mb-2">
+                                <input type="number" class="form-control" id="taxDeduction" placeholder="0" required>
+                                <label>Tax Cut (₹)</label>
+                            </div>
                         </div>
-                        <div class="col-md-4">
-                            <label>Gratuity (₹)</label>
-                            <input type="number" class="form-control" id="gratuity" required>
+                        <div class="col-4">
+                            <div class="form-floating mb-2">
+                                <input type="number" class="form-control" id="gratuity" placeholder="0" required>
+                                <label>Gratuity (₹)</label>
+                            </div>
                         </div>
                     </div>
                     
-                    <button type="submit" class="btn btn-dark w-100 mt-4" id="submitBtn">Submit to Sheet</button>
+                    <button type="submit" class="btn btn-primary w-100 py-3 mt-3 shadow-sm" style="border-radius: 12px; font-weight: 600;" id="submitBtn">
+                        <span class="d-flex align-items-center justify-content-center">
+                            <span class="material-icons me-2">cloud_upload</span> Save Record
+                        </span>
+                    </button>
                 </form>
             </div>
+        </div>
 
-            <!-- Insights Tab -->
-            <div class="tab-pane fade" id="insights">
-                <div class="row mt-3">
-                    <div class="col-md-6 mb-3">
-                        <div class="card bg-primary text-white">
-                            <div class="card-body">
-                                <h5>Latest In-Hand Salary</h5>
-                                <h3 id="displayInHand">₹ 0</h3>
-                            </div>
-                        </div>
+        <!-- Insights Tab -->
+        <div class="tab-pane fade" id="insights" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 style="font-weight: 700; color: #202124; margin: 0;">Insights</h4>
+                <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="syncWithSheetQuietly()">
+                    <span class="material-icons" style="font-size: 16px; vertical-align: middle;">sync</span> Sync
+                </button>
+            </div>
+
+            <!-- In-Hand Card -->
+            <div class="md-card insight-card-primary mb-3">
+                <p class="mb-1 text-white-50" style="font-weight: 500;">Latest In-Hand Salary</p>
+                <h2 id="displayInHand" style="font-weight: 700;">₹ 0</h2>
+                <small id="displayMonthLabel" class="text-white-50">Pending sync...</small>
+            </div>
+
+            <!-- PF Card -->
+            <div class="md-card insight-card-success mb-3">
+                <p class="mb-1 text-white-50" style="font-weight: 500;">Total PF Accumulated</p>
+                <h2 id="displayTotalPF" style="font-weight: 700;">₹ 0</h2>
+                
+                <hr style="border-color: rgba(255,255,255,0.2);">
+                
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <small class="text-white-50 d-block">Employee</small>
+                        <strong id="displayEmpPF">₹0</strong>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <div class="card bg-success text-white">
-                            <div class="card-body">
-                                <h5>Total PF Accumulated</h5>
-                                <h3 id="displayTotalPF">₹ 0</h3>
-                                <small id="displayPFBreakdown">Employee: ₹0 | Employer: ₹0</small>
-                                <br>
-                                <small id="displayPension" class="text-light">Pension (EPS) Fund: ₹0</small>
-                            </div>
-                        </div>
+                    <div>
+                        <small class="text-white-50 d-block">Employer</small>
+                        <strong id="displayEmployerPF">₹0</strong>
+                    </div>
+                    <div class="text-end">
+                        <small class="text-white-50 d-block">EPS Pension</small>
+                        <strong id="displayPension">₹0</strong>
                     </div>
                 </div>
             </div>
         </div>
+
     </div>
 
+    <!-- Material Bottom Navigation -->
+    <ul class="nav nav-tabs bottom-nav" id="bottomNav" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="entry-tab" data-bs-toggle="tab" data-bs-target="#entry" type="button" role="tab">
+                <span class="material-icons">edit_document</span>
+                Entry
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="insights-tab" data-bs-toggle="tab" data-bs-target="#insights" type="button" role="tab" onclick="renderInsights()">
+                <span class="material-icons">insert_chart</span>
+                Insights
+            </button>
+        </li>
+    </ul>
+
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Paste your Apps Script Web App URL here
         const API_URL = "https://script.google.com/macros/s/AKfycbxw50bYSCs1TSMYGm5HaOsc-y0jf2mAtE8l56_2NhYgI4HxQmtRQhP-9O4cKLC3vYxgsw/exec";
+        
+        // Load data from local cache instantly
+        let cachedSalaryData = JSON.parse(localStorage.getItem("salaryData")) || [];
 
-        // Auto-populate static fields on page load
         window.onload = () => {
+            // Restore static user fields
             document.getElementById("bankName").value = localStorage.getItem("bankName") || "";
             document.getElementById("bankAccount").value = localStorage.getItem("bankAccount") || "";
             document.getElementById("empNumber").value = localStorage.getItem("empNumber") || "";
             document.getElementById("grade").value = localStorage.getItem("grade") || "";
             document.getElementById("uan").value = localStorage.getItem("uan") || "";
+
+            // Fetch fresh data in the background silently
+            syncWithSheetQuietly();
         };
 
-        // Form Submit Logic
+        // Background Sync Function
+        function syncWithSheetQuietly() {
+            fetch(API_URL)
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    cachedSalaryData = data;
+                    localStorage.setItem("salaryData", JSON.stringify(data));
+                    
+                    // If user is currently looking at Insights tab, update it live
+                    if(document.getElementById("insights-tab").classList.contains("active")) {
+                        renderInsights();
+                    }
+                }
+            })
+            .catch(err => console.error("Background sync failed: ", err));
+        }
+
+        // Render Insights completely offline using Cache
+        function renderInsights() {
+            if (cachedSalaryData.length === 0) {
+                document.getElementById("displayInHand").innerText = "₹ 0";
+                document.getElementById("displayTotalPF").innerText = "₹ 0";
+                return;
+            }
+
+            let totalEmployeePF = 0;
+            let totalEmployerPF = 0;
+            let totalPensionEPS = 0;
+
+            cachedSalaryData.forEach(row => {
+                let empPF = Number(row.employeePF) || 0;
+                totalEmployeePF += empPF;
+                
+                if (empPF > 0) {
+                    let epsCut = (empPF >= 1800) ? 1250 : Math.round(empPF * (8.33 / 12));
+                    totalPensionEPS += epsCut;
+                    totalEmployerPF += (empPF - epsCut);
+                }
+            });
+
+            // Get latest salary metrics
+            const lastRow = cachedSalaryData[cachedSalaryData.length - 1];
+            let latestInHand = (Number(lastRow.totalEarnings) || 0) - (Number(lastRow.totalDeductions) || 0);
+            let totalMainPF = totalEmployeePF + totalEmployerPF;
+
+            // Update UI Fast
+            document.getElementById("displayInHand").innerText = "₹ " + latestInHand.toLocaleString("en-IN");
+            document.getElementById("displayTotalPF").innerText = "₹ " + totalMainPF.toLocaleString("en-IN");
+            document.getElementById("displayEmpPF").innerText = "₹" + totalEmployeePF.toLocaleString("en-IN");
+            document.getElementById("displayEmployerPF").innerText = "₹" + totalEmployerPF.toLocaleString("en-IN");
+            document.getElementById("displayPension").innerText = "₹" + totalPensionEPS.toLocaleString("en-IN");
+            
+            // Note: Since API doesn't return monthYear yet, we label as Latest Record. 
+            // We can add monthYear to doGet in Code.gs later if needed.
+            document.getElementById("displayMonthLabel").innerText = "Latest Record";
+        }
+
+        // Form Submit - Optimistic UI Update
         document.getElementById("salaryForm").addEventListener("submit", function(e) {
             e.preventDefault();
             const btn = document.getElementById("submitBtn");
-            btn.innerText = "Submitting...";
+            const originalBtnHtml = btn.innerHTML;
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Saving...`;
 
+            // 1. Build Payload
             const payload = {
                 monthYear: document.getElementById("monthYear").value,
                 bankName: document.getElementById("bankName").value,
@@ -141,91 +336,55 @@
                 grade: document.getElementById("grade").value,
                 uan: document.getElementById("uan").value,
                 taxRegime: document.getElementById("taxRegime").value,
-                totalEarnings: document.getElementById("totalEarnings").value,
-                totalDeductions: document.getElementById("totalDeductions").value,
-                employeePF: document.getElementById("employeePF").value,
-                taxDeduction: document.getElementById("taxDeduction").value,
-                gratuity: document.getElementById("gratuity").value
+                totalEarnings: Number(document.getElementById("totalEarnings").value),
+                totalDeductions: Number(document.getElementById("totalDeductions").value),
+                employeePF: Number(document.getElementById("employeePF").value),
+                taxDeduction: Number(document.getElementById("taxDeduction").value),
+                gratuity: Number(document.getElementById("gratuity").value)
             };
 
-            // Save static fields to local storage for the next time
+            // 2. Save static fields to local storage for next time
             localStorage.setItem("bankName", payload.bankName);
             localStorage.setItem("bankAccount", payload.bankAccount);
             localStorage.setItem("empNumber", payload.empNumber);
             localStorage.setItem("grade", payload.grade);
             localStorage.setItem("uan", payload.uan);
 
+            // 3. Optimistic Local Update (Make UI feel instant)
+            cachedSalaryData.push({
+                totalEarnings: payload.totalEarnings,
+                totalDeductions: payload.totalDeductions,
+                employeePF: payload.employeePF
+            });
+            localStorage.setItem("salaryData", JSON.stringify(cachedSalaryData));
+
+            // 4. Send network request in the background
             fetch(API_URL, {
                 method: "POST",
                 body: JSON.stringify(payload)
             })
             .then(response => response.json())
             .then(data => {
-                alert("Salary Logged Successfully!");
-                btn.innerText = "Submit to Sheet";
-                // Clear only the variable fields, keep the static ones
-                document.getElementById("monthYear").value = "";
-                document.getElementById("totalEarnings").value = "";
-                document.getElementById("totalDeductions").value = "";
-                document.getElementById("employeePF").value = "";
-                document.getElementById("taxDeduction").value = "";
-                document.getElementById("gratuity").value = "";
+                btn.innerHTML = `<span class="material-icons me-2">check_circle</span> Saved!`;
+                btn.classList.replace("btn-primary", "btn-success");
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalBtnHtml;
+                    btn.classList.replace("btn-success", "btn-primary");
+                    // Clear only monetary fields
+                    document.getElementById("monthYear").value = "";
+                    document.getElementById("totalEarnings").value = "";
+                    document.getElementById("totalDeductions").value = "";
+                    document.getElementById("employeePF").value = "";
+                    document.getElementById("taxDeduction").value = "";
+                    document.getElementById("gratuity").value = "";
+                }, 2000);
             })
             .catch(error => {
-                alert("Error saving data.");
-                btn.innerText = "Submit to Sheet";
+                alert("Network error: Will sync when connection is restored.");
+                btn.innerHTML = originalBtnHtml;
             });
         });
-
-        // Insights Logic
-        function loadInsights() {
-            document.getElementById("displayInHand").innerText = "Loading...";
-            document.getElementById("displayTotalPF").innerText = "Loading...";
-
-            fetch(API_URL)
-            .then(response => response.json())
-            .then(data => {
-                if(data && data.length > 0) {
-                    let totalEmployeePF = 0;
-                    let totalEmployerPF = 0;
-                    let totalPensionEPS = 0;
-                    let latestInHand = 0;
-
-                    data.forEach(row => {
-                        let empPF = Number(row.employeePF) || 0;
-                        totalEmployeePF += empPF;
-                        
-                        // Employer PF Logic: Matches employee PF, but max ₹1,250 goes to Pension (EPS)
-                        if (empPF > 0) {
-                            let epsCut = (empPF >= 1800) ? 1250 : Math.round(empPF * (8.33 / 12));
-                            totalPensionEPS += epsCut;
-                            totalEmployerPF += (empPF - epsCut);
-                        }
-                    });
-
-                    // Get the very last row for the latest salary
-                    const lastRow = data[data.length - 1];
-                    latestInHand = (Number(lastRow.totalEarnings) || 0) - (Number(lastRow.totalDeductions) || 0);
-                    
-                    let totalMainPF = totalEmployeePF + totalEmployerPF;
-
-                    // Update the UI
-                    document.getElementById("displayInHand").innerText = "₹ " + latestInHand.toLocaleString("en-IN");
-                    document.getElementById("displayTotalPF").innerText = "₹ " + totalMainPF.toLocaleString("en-IN");
-                    document.getElementById("displayPFBreakdown").innerText = 
-                        `Employee: ₹${totalEmployeePF.toLocaleString("en-IN")} | Employer: ₹${totalEmployerPF.toLocaleString("en-IN")}`;
-                    document.getElementById("displayPension").innerText = 
-                        `Pension (EPS) Fund: ₹${totalPensionEPS.toLocaleString("en-IN")}`;
-                } else {
-                    document.getElementById("displayInHand").innerText = "₹ 0";
-                    document.getElementById("displayTotalPF").innerText = "₹ 0";
-                }
-            })
-            .catch(error => {
-                document.getElementById("displayInHand").innerText = "Error";
-                document.getElementById("displayTotalPF").innerText = "Error";
-            });
-        }
     </script>
 </body>
 </html>

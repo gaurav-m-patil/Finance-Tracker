@@ -102,7 +102,9 @@
                             <div class="card-body">
                                 <h5>Total PF Accumulated</h5>
                                 <h3 id="displayTotalPF">₹ 0</h3>
-                                <small>(Employee contribution only)</small>
+                                <small id="displayPFBreakdown">Employee: ₹0 | Employer: ₹0</small>
+                                <br>
+                                <small id="displayPension" class="text-light">Pension (EPS) Fund: ₹0</small>
                             </div>
                         </div>
                     </div>
@@ -113,6 +115,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Paste your Apps Script Web App URL here
         const API_URL = "https://script.google.com/macros/s/AKfycbxw50bYSCs1TSMYGm5HaOsc-y0jf2mAtE8l56_2NhYgI4HxQmtRQhP-9O4cKLC3vYxgsw/exec";
 
         // Auto-populate static fields on page load
@@ -183,19 +186,36 @@
             .then(response => response.json())
             .then(data => {
                 if(data && data.length > 0) {
-                    let totalPF = 0;
+                    let totalEmployeePF = 0;
+                    let totalEmployerPF = 0;
+                    let totalPensionEPS = 0;
                     let latestInHand = 0;
 
                     data.forEach(row => {
-                        totalPF += row.employeePF;
+                        let empPF = Number(row.employeePF) || 0;
+                        totalEmployeePF += empPF;
+                        
+                        // Employer PF Logic: Matches employee PF, but max ₹1,250 goes to Pension (EPS)
+                        if (empPF > 0) {
+                            let epsCut = (empPF >= 1800) ? 1250 : Math.round(empPF * (8.33 / 12));
+                            totalPensionEPS += epsCut;
+                            totalEmployerPF += (empPF - epsCut);
+                        }
                     });
 
                     // Get the very last row for the latest salary
                     const lastRow = data[data.length - 1];
-                    latestInHand = lastRow.totalEarnings - lastRow.totalDeductions;
+                    latestInHand = (Number(lastRow.totalEarnings) || 0) - (Number(lastRow.totalDeductions) || 0);
+                    
+                    let totalMainPF = totalEmployeePF + totalEmployerPF;
 
-                    document.getElementById("displayInHand").innerText = "₹ " + latestInHand.toLocaleString();
-                    document.getElementById("displayTotalPF").innerText = "₹ " + totalPF.toLocaleString();
+                    // Update the UI
+                    document.getElementById("displayInHand").innerText = "₹ " + latestInHand.toLocaleString("en-IN");
+                    document.getElementById("displayTotalPF").innerText = "₹ " + totalMainPF.toLocaleString("en-IN");
+                    document.getElementById("displayPFBreakdown").innerText = 
+                        `Employee: ₹${totalEmployeePF.toLocaleString("en-IN")} | Employer: ₹${totalEmployerPF.toLocaleString("en-IN")}`;
+                    document.getElementById("displayPension").innerText = 
+                        `Pension (EPS) Fund: ₹${totalPensionEPS.toLocaleString("en-IN")}`;
                 } else {
                     document.getElementById("displayInHand").innerText = "₹ 0";
                     document.getElementById("displayTotalPF").innerText = "₹ 0";

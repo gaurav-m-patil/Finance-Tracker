@@ -107,7 +107,7 @@
                             <div class="d-flex align-items-center dual-input-box bg-white px-2 mb-2">
                                 <input type="text" id="monthPart" class="form-control border-0 text-uppercase text-center p-0" placeholder="OCT" maxlength="3" required style="box-shadow: none; font-size: 16px;">
                                 <span class="mx-1 text-muted fw-bold">-</span>
-                                <input type="number" id="yearPart" class="form-control border-0 text-center p-0" placeholder="2026" inputmode="numeric" pattern="[0-9]*" required style="box-shadow: none; font-size: 16px;">
+                                <input type="number" id="yearPart" class="form-control border-0 text-center p-0" placeholder="2026" inputmode="numeric" pattern="[0-9]*" oninput="if(this.value.length > 4) this.value = this.value.slice(0, 4);" required style="box-shadow: none; font-size: 16px;">
                             </div>
                         </div>
                         <div class="col-6">
@@ -203,7 +203,6 @@
                 </button>
             </div>
 
-            <!-- In-Hand Card updated to Total Accumulated -->
             <div class="md-card insight-card-primary mb-3">
                 <p class="mb-1 text-white-50" style="font-weight: 500;">Total In-Hand Salary</p>
                 <h2 id="displayInHand" style="font-weight: 700;">₹ 0</h2>
@@ -259,7 +258,6 @@
 
         const monthMap = { "JAN":1, "FEB":2, "MAR":3, "APR":4, "MAY":5, "JUN":6, "JUL":7, "AUG":8, "SEP":9, "OCT":10, "NOV":11, "DEC":12 };
 
-        // Bulletproof numeric sorter for Month-Year strings
         function getSortValue(monthYearStr) {
             if (!monthYearStr) return 0;
             const p = monthYearStr.split('-');
@@ -267,14 +265,14 @@
             const m = monthMap[p[0].toUpperCase()];
             const y = parseInt(p[1]);
             if (m === undefined || isNaN(y)) return 0;
-            return (y * 100) + m; // Output format: 202610
+            return (y * 100) + m; 
         }
 
         window.onload = () => {
             syncWithSheetQuietly();
         };
 
-        function populateFields(record) {
+        function populateStaticFields(record) {
             if (!record) return;
             document.getElementById("empNumber").value = record.empNumber || "";
             document.getElementById("bankName").value = record.bankName || "";
@@ -283,23 +281,10 @@
             document.getElementById("uan").value = record.uan || "";
             if (record.taxRegime) document.getElementById("taxRegime").value = record.taxRegime;
             
-            document.getElementById("totalEarnings").value = record.totalEarnings || "";
-            document.getElementById("totalDeductions").value = record.totalDeductions || "";
-            document.getElementById("employeePF").value = record.employeePF || "";
-            document.getElementById("taxDeduction").value = record.taxDeduction || "";
-            document.getElementById("gratuity").value = record.gratuity || "";
+            // Note: totalEarnings, totalDeductions, etc., have been explicitly removed from here.
         }
 
-        function autoPopulateLatest() {
-            if (cachedSalaryData.length === 0) return;
-            // Only auto-fill if the user hasn't started typing earnings
-            if (document.getElementById("totalEarnings").value !== "") return;
-            
-            const sortedData = [...cachedSalaryData].sort((a, b) => getSortValue(a.monthYear) - getSortValue(b.monthYear));
-            populateFields(sortedData[sortedData.length - 1]);
-        }
-
-        // Dynamically find closest prior month when typing date
+        // Trigger dynamic auto-population only when month is 3 letters and year is exactly 4 digits
         function handleDateInput() {
             const m = document.getElementById("monthPart").value.toUpperCase();
             const y = document.getElementById("yearPart").value;
@@ -320,7 +305,7 @@
                 });
 
                 if (priorRecord) {
-                    populateFields(priorRecord);
+                    populateStaticFields(priorRecord);
                 }
             }
         }
@@ -335,10 +320,6 @@
                 if (data && data.length > 0) {
                     cachedSalaryData = data;
                     localStorage.setItem("salaryData", JSON.stringify(data));
-
-                    if(document.getElementById("entry-tab").classList.contains("active")) {
-                        autoPopulateLatest();
-                    }
 
                     if(document.getElementById("insights-tab").classList.contains("active") || forceUpdate) {
                         renderInsights();
@@ -366,11 +347,9 @@
             let sortedData = [...cachedSalaryData].sort((a, b) => getSortValue(a.monthYear) - getSortValue(b.monthYear));
 
             sortedData.forEach(row => {
-                // Total In-Hand Math
                 let inHand = (Number(row.totalEarnings) || 0) - (Number(row.totalDeductions) || 0);
                 totalInHandAllTime += inHand;
 
-                // PF Math
                 let empPF = Number(row.employeePF) || 0;
                 let monthStr = row.monthYear ? String(row.monthYear).substring(0, 3).toUpperCase() : "";
                 
@@ -450,6 +429,11 @@
                     btn.classList.replace("btn-success", "btn-primary");
                     document.getElementById("monthPart").value = "";
                     document.getElementById("yearPart").value = "";
+                    document.getElementById("totalEarnings").value = "";
+                    document.getElementById("totalDeductions").value = "";
+                    document.getElementById("employeePF").value = "";
+                    document.getElementById("taxDeduction").value = "";
+                    document.getElementById("gratuity").value = "";
                 }, 2000);
             })
             .catch(error => {

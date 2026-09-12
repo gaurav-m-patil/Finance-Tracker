@@ -80,7 +80,7 @@
             gap: 5px;
         }
 
-        /* Native App Segmented Control (Top Tabs) */
+        /* Segmented Control (Top Tabs) */
         .segmented-control {
             display: flex;
             background-color: var(--segmented-bg);
@@ -242,6 +242,9 @@
         .nav-link .material-icons { font-size: 24px; margin-bottom: 2px;}
 
         .tab-content { max-width: 600px; margin: auto; padding: 0 14px; }
+        
+        /* Spin Animation */
+        @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -254,16 +257,21 @@
             <div class="d-flex justify-content-between align-items-center mb-3 px-1 mt-2">
                 <h4 style="font-weight: 800; margin: 0; letter-spacing: -0.5px;">Command Center</h4>
                 <div>
-                    <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center me-2" onclick="syncWithSheetQuietly(true)" style="background: var(--primary-glow); color: var(--primary); width: 36px; height: 36px; border: none;">
+                    <!-- App Hard Update Button -->
+                    <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center me-2" id="updateAppBtn" onclick="forceAppUpdate()" style="background: var(--input-bg); color: var(--text-muted); width: 36px; height: 36px; border: 1px solid var(--input-border);" title="Fetch Latest App Update">
+                        <span class="material-icons" style="font-size: 20px;">system_update_alt</span>
+                    </button>
+                    <!-- Data Sync Button -->
+                    <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center me-2" onclick="syncWithSheetQuietly(true)" style="background: var(--primary-glow); color: var(--primary); width: 36px; height: 36px; border: none;" title="Sync Data">
                         <span class="material-icons" style="font-size: 20px;">sync</span>
                     </button>
+                    <!-- Theme Toggle -->
                     <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center" onclick="toggleTheme()" style="background: var(--input-bg); color: var(--text-main); width: 36px; height: 36px; border: 1px solid var(--input-border);">
                         <span class="material-icons" id="themeIcon" style="font-size: 20px;">dark_mode</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Nested Top Tabs (Segmented Control) -->
             <div class="segmented-control">
                 <input type="radio" name="salary-view" id="view-entry" checked onchange="toggleSalarySubTab('entry')">
                 <label for="view-entry">Salary Entry</label>
@@ -272,7 +280,6 @@
                 <label for="view-insights">Insights</label>
             </div>
             
-            <!-- Sub-Tab 1: Data Entry -->
             <div id="salary-entry-pane">
                 <div class="premium-card mb-2">
                     <form id="salaryForm">
@@ -431,7 +438,6 @@
                 </button>
             </div>
 
-            <!-- Expense Month Selector -->
             <div class="premium-card mb-4 d-flex align-items-center justify-content-between p-3">
                 <button class="btn btn-sm d-flex align-items-center p-0" style="color: var(--text-muted);">
                     <span class="material-icons">chevron_left</span>
@@ -442,7 +448,6 @@
                 </button>
             </div>
 
-            <!-- Expense Summary Card -->
             <div class="premium-card mb-3 text-center py-5 border-0" style="background: var(--input-bg);">
                 <span class="material-icons mb-2" style="font-size: 40px; color: var(--text-muted); opacity: 0.3;">receipt_long</span>
                 <p class="mb-1" style="color: var(--text-muted); font-weight: 600;">Total Spent This Month</p>
@@ -485,6 +490,24 @@
             });
         }
 
+        // --- HARD REFRESH FUNCTION ---
+        function forceAppUpdate() {
+            const btn = document.getElementById("updateAppBtn");
+            btn.innerHTML = `<span class="material-icons" style="font-size: 20px; animation: spin 1s linear infinite;">sync</span>`;
+            
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => caches.delete(name));
+                });
+            }
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    registrations.forEach(registration => registration.unregister());
+                });
+            }
+            setTimeout(() => { window.location.reload(true); }, 600);
+        }
+
         function initTheme() {
             const savedTheme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-bs-theme', savedTheme);
@@ -503,7 +526,6 @@
             document.getElementById('themeIconExp').innerText = iconName;
         }
 
-        // Toggle sub-tabs inside Salary Module
         function toggleSalarySubTab(view) {
             if(view === 'entry') {
                 document.getElementById('salary-entry-pane').style.display = 'block';

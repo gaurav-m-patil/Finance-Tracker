@@ -32,10 +32,10 @@
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
 
-        .premium-card { background-color: var(--card-bg); border-radius: 20px; box-shadow: var(--card-shadow); border: 1px solid rgba(128,128,128,0.05); padding: 18px; transition: all 0.3s ease; }
-        .section-header { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+        .premium-card { background-color: var(--card-bg); border-radius: 20px; box-shadow: var(--card-shadow); border: 1px solid rgba(128,128,128,0.05); padding: 14px 18px; transition: all 0.3s ease; }
+        .section-header { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
 
-        .segmented-control { display: flex; background-color: var(--segmented-bg); border-radius: 12px; padding: 4px; margin-bottom: 16px; }
+        .segmented-control { display: flex; background-color: var(--segmented-bg); border-radius: 12px; padding: 4px; margin-bottom: 12px; }
         .segmented-control input[type="radio"] { display: none; }
         .segmented-control label { flex: 1; text-align: center; padding: 8px 0; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); border-radius: 8px; cursor: pointer; transition: all 0.2s ease; margin: 0; white-space: nowrap; }
         .segmented-control input[type="radio"]:checked + label { background-color: var(--card-bg); color: var(--text-main); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
@@ -63,10 +63,10 @@
         .insight-card-red { background: linear-gradient(135deg, #991b1b 0%, #ef4444 100%); padding: 16px; }
         .insight-card .bg-icon { position: absolute; right: -5px; bottom: -15px; font-size: 100px; opacity: 0.1; transform: rotate(-15deg); }
 
-        .exp-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; transition: opacity 0.2s ease; }
+        .exp-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; transition: opacity 0.2s ease; }
         .exp-checkbox { width: 24px; height: 24px; flex-shrink: 0; border-radius: 50%; border: 2px solid var(--input-border); display: flex; align-items: center; justify-content: center; cursor: pointer; color: transparent; background-color: transparent; transition: all 0.2s ease; }
         .exp-row.is-done .exp-checkbox { background-color: var(--success-color); border-color: var(--success-color); color: white; }
-        .exp-input { border: none; background: transparent; border-bottom: 1px solid var(--input-border); border-radius: 0; color: var(--text-main); font-size: 0.85rem; font-weight: 500; height: 32px; padding: 0 4px; min-width: 0; transition: all 0.2s ease; }
+        .exp-input { border: none; background: transparent; border-bottom: 1px solid var(--input-border); border-radius: 0; color: var(--text-main); font-size: 0.85rem; font-weight: 500; height: 30px; padding: 0 4px; min-width: 0; transition: all 0.2s ease; }
         .exp-input:focus { border-bottom-color: var(--primary); outline: none; }
         .exp-input::placeholder { color: var(--text-muted); opacity: 0.5; }
         .exp-row.is-done .exp-input { text-decoration: line-through; color: var(--text-muted); opacity: 0.6; }
@@ -82,7 +82,7 @@
 </head>
 <body>
 
-    <div class="global-header d-flex justify-content-between align-items-center mb-3 mt-2">
+    <div class="global-header d-flex justify-content-between align-items-center mb-2 mt-2">
         <h4 id="appMainTitle" style="font-weight: 800; margin: 0; letter-spacing: -0.5px;">Command Center</h4>
         <div>
             <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center me-2" id="updateAppBtn" onclick="forceAppUpdate()" style="background: var(--input-bg); color: var(--text-muted); width: 36px; height: 36px; border: 1px solid var(--input-border);" title="Hard Refresh App">
@@ -137,7 +137,7 @@
                             </div>
                         </div>
 
-                        <div class="section-header mt-3 pt-2"><div class="d-flex align-items-center gap-1"><span class="material-icons" style="font-size: 16px;">account_balance_wallet</span> Finance</div></div>
+                        <div class="section-header mt-2 pt-1"><div class="d-flex align-items-center gap-1"><span class="material-icons" style="font-size: 16px;">account_balance_wallet</span> Finance</div></div>
                         <div class="row g-2">
                             <div class="col-6"><div class="form-floating"><input type="number" class="form-control" id="totalEarnings" placeholder=" " required><label>Earnings (₹)</label></div></div>
                             <div class="col-6"><div class="form-floating"><input type="number" class="form-control" id="totalDeductions" placeholder=" " required><label>Deductions (₹)</label></div></div>
@@ -206,47 +206,62 @@
             </div>
 
             <!-- GLOBAL TAB-WIDE MONTH NAVIGATOR -->
-            <div id="global-exp-month-nav" class="premium-card mb-3 d-flex align-items-center justify-content-between p-3 border-0" style="background: var(--input-bg);">
+            <div id="global-exp-month-nav" class="premium-card mb-2 d-flex align-items-center justify-content-between p-2 px-3 border-0" style="background: var(--input-bg);">
                 <button class="btn btn-sm d-flex align-items-center p-0" style="color: var(--text-main);" onclick="changeExpMonth(-1)"><span class="material-icons">chevron_left</span></button>
-                <h6 class="mb-0" id="expMonthLabel" style="font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Loading...</h6>
+                <h6 class="mb-0" id="expMonthLabel" style="font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.9rem;">Loading...</h6>
                 <button class="btn btn-sm d-flex align-items-center p-0" style="color: var(--text-main);" onclick="changeExpMonth(1)"><span class="material-icons">chevron_right</span></button>
             </div>
 
             <!-- Sub-Tab: Checklist with Categories -->
             <div id="expense-checklist-pane">
                 
-                <div class="premium-card mb-3 p-3" style="padding-bottom: 8px !important;">
-                    <div class="section-header text-primary mb-2"><span class="material-icons" style="font-size: 16px;">home</span> Home Expenses</div>
-                    <div class="d-flex gap-2 mb-2 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
+                <div class="premium-card mb-2 p-3" style="padding-bottom: 4px !important;">
+                    <div class="section-header text-primary mb-1"><span class="material-icons" style="font-size: 16px;">home</span> Home Expenses</div>
+                    <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
                         <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Component</div><div style="flex: 1.2;">Amount</div><div style="flex: 1.2;">Date</div>
                     </div>
                     <div id="expense-list-Home"></div>
                 </div>
 
-                <div class="premium-card mb-3 p-3" style="padding-bottom: 8px !important;">
-                    <div class="section-header text-danger mb-2"><span class="material-icons" style="font-size: 16px;">credit_card</span> EMI / Debt</div>
-                    <div class="d-flex gap-2 mb-2 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
+                <div class="premium-card mb-2 p-3" style="padding-bottom: 4px !important;">
+                    <div class="section-header text-danger mb-1"><span class="material-icons" style="font-size: 16px;">credit_card</span> EMI / Debt</div>
+                    <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
                         <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Component</div><div style="flex: 1.2;">Amount</div><div style="flex: 1.2;">Date</div>
                     </div>
                     <div id="expense-list-EMI"></div>
                 </div>
 
-                <div class="premium-card mb-3 p-3" style="padding-bottom: 8px !important;">
-                    <div class="section-header text-warning mb-2"><span class="material-icons" style="font-size: 16px;">category</span> Miscellaneous</div>
-                    <div class="d-flex gap-2 mb-2 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
+                <div class="premium-card mb-2 p-3" style="padding-bottom: 4px !important;">
+                    <div class="section-header text-warning mb-1"><span class="material-icons" style="font-size: 16px;">category</span> Miscellaneous</div>
+                    <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
                         <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Component</div><div style="flex: 1.2;">Amount</div><div style="flex: 1.2;">Date</div>
                     </div>
                     <div id="expense-list-Misc"></div>
                 </div>
 
-                <div class="premium-card border-0 d-flex justify-content-between align-items-center p-3 mb-3" style="background: var(--input-bg);">
-                    <div>
-                        <small class="d-block text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">Pending</small>
-                        <h5 class="mb-0" style="font-weight: 800; color: #ef4444;">₹ <span id="expPendingTotal">0</span></h5>
-                    </div>
-                    <div class="text-end">
-                        <small class="d-block text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">Total Tracked</small>
-                        <h5 class="mb-0" style="font-weight: 800; color: var(--text-main);">₹ <span id="expGrandTotal">0</span></h5>
+                <!-- CATEGORIZED TOTALS CARD -->
+                <div class="premium-card border-0 p-3 mb-2" style="background: var(--input-bg);">
+                    <div class="row g-2">
+                        <div class="col-7 border-end border-secondary border-opacity-25">
+                            <small class="d-block text-muted mb-1" style="font-size: 0.6rem; text-transform: uppercase; font-weight: 700;">Pending Breakdown</small>
+                            <div class="d-flex justify-content-between text-muted" style="font-size: 0.75rem; font-weight: 600;"><span>Home:</span><span>₹ <span id="pendingHome">0</span></span></div>
+                            <div class="d-flex justify-content-between text-muted" style="font-size: 0.75rem; font-weight: 600;"><span>EMI:</span><span>₹ <span id="pendingEMI">0</span></span></div>
+                            <div class="d-flex justify-content-between text-muted" style="font-size: 0.75rem; font-weight: 600;"><span>Misc:</span><span>₹ <span id="pendingMisc">0</span></span></div>
+                            <hr class="my-1 border-secondary opacity-25">
+                            <div class="d-flex justify-content-between text-danger fw-bold" style="font-size: 0.8rem;"><span>Total Pending:</span><span>₹ <span id="expPendingTotal">0</span></span></div>
+                        </div>
+                        <div class="col-5 ps-3 d-flex flex-column justify-content-between">
+                            <div>
+                                <small class="d-block text-muted mb-1" style="font-size: 0.6rem; text-transform: uppercase; font-weight: 700;">Tracked Breakdown</small>
+                                <div class="d-flex justify-content-between text-muted" style="font-size: 0.75rem; font-weight: 600;"><span>Home:</span><span>₹ <span id="trackedHome">0</span></span></div>
+                                <div class="d-flex justify-content-between text-muted" style="font-size: 0.75rem; font-weight: 600;"><span>EMI:</span><span>₹ <span id="trackedEMI">0</span></span></div>
+                                <div class="d-flex justify-content-between text-muted" style="font-size: 0.75rem; font-weight: 600;"><span>Misc:</span><span>₹ <span id="trackedMisc">0</span></span></div>
+                            </div>
+                            <div>
+                                <hr class="my-1 border-secondary opacity-25">
+                                <div class="d-flex justify-content-between text-main fw-bold" style="font-size: 0.8rem;"><span>Total Tracked:</span><span>₹ <span id="expGrandTotal">0</span></span></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -352,7 +367,6 @@
         function hapticSuccess() { if(navigator.vibrate) navigator.vibrate([50, 50, 50]); }
         function hapticError() { if(navigator.vibrate) navigator.vibrate([150, 50, 150]); }
 
-        // --- BULLETPROOF DATE PARSER & DIRECT MATH ENGINE ---
         const monthMap = { 
             "JAN":1, "FEB":2, "MAR":3, "APR":4, "MAY":5, "JUN":6, "JUL":7, "AUG":8, "SEP":9, "OCT":10, "NOV":11, "DEC":12,
             "JANUARY":1, "FEBRUARY":2, "MARCH":3, "APRIL":4, "JUNE":6, "JULY":7, "AUGUST":8, "SEPTEMBER":9, "OCTOBER":10, "NOVEMBER":11, "DECEMBER":12 
@@ -532,7 +546,6 @@
             }
         });
 
-        // --- OFFLINE QUEUE FLUSHER ---
         async function flushSyncQueue() {
             if (!navigator.onLine) return;
             const db = await dbPromise;
@@ -548,7 +561,6 @@
         }
         window.addEventListener('online', flushSyncQueue);
 
-        // --- GLOBAL BOOT ---
         window.onload = async () => {
             initTheme(); 
             document.getElementById('fuelMonth').value = `${currentExpYear}-${currentExpMonth}`;
@@ -701,6 +713,21 @@
             if(document.getElementById('view-exp-insights').checked) renderExpenseInsights();
         }
 
+        function handleDateAutoFormat(elem) {
+            let val = elem.value.replace(/[^0-9]/g, ''); 
+            if (val.length > 2) val = val.slice(0, 2); 
+
+            if (val.length === 2) {
+                const activeMonthShort = Object.keys(monthMap).find(key => monthMap[key] === currentExpMonth && key.length === 3) || "SEP";
+                elem.value = `${val}-${activeMonthShort}`;
+                handleExpenseAutoRow(elem);
+            } else {
+                elem.value = val;
+            }
+            smartUncheck(elem);
+            debouncedAutoSaveExpenses();
+        }
+
         function createExpenseRow(desc = "", amt = "", dateStr = "", isDone = false, category = "Misc") {
             const row = document.createElement('div'); 
             row.className = `exp-row ${isDone ? 'is-done' : ''}`;
@@ -709,7 +736,7 @@
                 <button class="exp-checkbox" onclick="toggleExpDone(this)" type="button"><span class="material-icons" style="font-size: 16px;">check</span></button>
                 <input type="text" class="exp-input exp-desc" placeholder="Item" style="flex: 2;" value="${desc}" onchange="checkExpenseDuplicate(this); debouncedAutoSaveExpenses()" oninput="smartUncheck(this); debouncedAutoSaveExpenses()">
                 <input type="number" class="exp-input exp-amt" placeholder="₹0" style="flex: 1.2;" value="${amt}" onchange="checkExpenseDuplicate(this); debouncedAutoSaveExpenses()" oninput="smartUncheck(this); calcExpenseTotal(); debouncedAutoSaveExpenses()" inputmode="numeric">
-                <input type="text" class="exp-input exp-date" placeholder="DD-MMM" style="flex: 1.2;" value="${dateStr}" oninput="smartUncheck(this); handleExpenseAutoRow(this); debouncedAutoSaveExpenses()">
+                <input type="text" class="exp-input exp-date" placeholder="DD-MMM" style="flex: 1.2;" value="${dateStr}" inputmode="numeric" oninput="handleDateAutoFormat(this)">
             `;
             return row;
         }
@@ -755,13 +782,36 @@
         }
 
         function calcExpenseTotal() {
+            let tracked = { Home: 0, EMI: 0, Misc: 0 };
+            let pending = { Home: 0, EMI: 0, Misc: 0 };
             let grandTotal = 0, pendingTotal = 0;
+
             document.querySelectorAll('.exp-row').forEach(row => {
                 const amt = parseFloat(row.querySelector('.exp-amt').value);
-                if (!isNaN(amt)) { grandTotal += amt; if (!row.classList.contains('is-done')) pendingTotal += amt; }
+                const category = row.getAttribute('data-category') || 'Misc';
+                const isDone = row.classList.contains('is-done');
+
+                if (!isNaN(amt) && amt > 0) {
+                    grandTotal += amt;
+                    tracked[category] = (tracked[category] || 0) + amt;
+
+                    if (!isDone) {
+                        pendingTotal += amt;
+                        pending[category] = (pending[category] || 0) + amt;
+                    }
+                }
             });
-            document.getElementById('expGrandTotal').innerText = grandTotal.toLocaleString("en-IN");
-            document.getElementById('expPendingTotal').innerText = pendingTotal.toLocaleString("en-IN");
+
+            document.getElementById('trackedHome').innerText = Math.round(tracked.Home).toLocaleString("en-IN");
+            document.getElementById('trackedEMI').innerText = Math.round(tracked.EMI).toLocaleString("en-IN");
+            document.getElementById('trackedMisc').innerText = Math.round(tracked.Misc).toLocaleString("en-IN");
+
+            document.getElementById('pendingHome').innerText = Math.round(pending.Home).toLocaleString("en-IN");
+            document.getElementById('pendingEMI').innerText = Math.round(pending.EMI).toLocaleString("en-IN");
+            document.getElementById('pendingMisc').innerText = Math.round(pending.Misc).toLocaleString("en-IN");
+
+            document.getElementById('expGrandTotal').innerText = Math.round(grandTotal).toLocaleString("en-IN");
+            document.getElementById('expPendingTotal').innerText = Math.round(pendingTotal).toLocaleString("en-IN");
         }
 
         function autoSaveExpenses() {

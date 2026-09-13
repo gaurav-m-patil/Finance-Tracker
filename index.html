@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-    
     <title>Financial Command Center</title>
     <meta name="theme-color" content="#f4f6f9">
     <link rel="manifest" href="manifest.json">
@@ -12,7 +11,6 @@
     <meta name="apple-mobile-web-app-title" content="FinCenter">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2933/2933116.png">
 
-    <!-- IndexedDB Library -->
     <script src="https://cdn.jsdelivr.net/npm/idb@7/build/umd.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -20,250 +18,77 @@
     
     <style>
         :root {
-            --app-bg: #f4f6f9;
-            --card-bg: #ffffff;
-            --input-bg: #f8fafc;
-            --input-border: #e2e8f0;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --primary: #2563eb;
-            --primary-glow: rgba(37, 99, 235, 0.15);
-            --card-shadow: 0 8px 24px rgba(0,0,0,0.04);
-            --nav-bg: rgba(255,255,255,0.85);
-            --segmented-bg: #e2e8f0;
+            --app-bg: #f4f6f9; --card-bg: #ffffff; --input-bg: #f8fafc; --input-border: #e2e8f0;
+            --text-main: #0f172a; --text-muted: #64748b; --primary: #2563eb; --primary-glow: rgba(37, 99, 235, 0.15);
+            --card-shadow: 0 8px 24px rgba(0,0,0,0.04); --nav-bg: rgba(255,255,255,0.85); --segmented-bg: #e2e8f0; --success-color: #10b981;
         }
-        
         [data-bs-theme="dark"] {
-            --app-bg: #0f172a;
-            --card-bg: #1e293b;
-            --input-bg: #0f172a;
-            --input-border: #334155;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --primary: #3b82f6;
-            --primary-glow: rgba(59, 130, 246, 0.15);
-            --card-shadow: 0 8px 24px rgba(0,0,0,0.4);
-            --nav-bg: rgba(30,41,59,0.85);
-            --segmented-bg: #334155;
+            --app-bg: #0f172a; --card-bg: #1e293b; --input-bg: #0f172a; --input-border: #334155;
+            --text-main: #f8fafc; --text-muted: #94a3b8; --primary: #3b82f6; --primary-glow: rgba(59, 130, 246, 0.15);
+            --card-shadow: 0 8px 24px rgba(0,0,0,0.4); --nav-bg: rgba(30,41,59,0.85); --segmented-bg: #334155;
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--app-bg);
-            color: var(--text-main);
-            padding-bottom: 75px; 
-            padding-top: env(safe-area-inset-top, 12px);
-            transition: background-color 0.3s ease, color 0.3s ease;
-            -webkit-font-smoothing: antialiased;
-            overflow-x: hidden;
-            overscroll-behavior-y: contain; 
-        }
-
+        body { font-family: 'Inter', sans-serif; background-color: var(--app-bg); color: var(--text-main); padding-bottom: 85px; padding-top: env(safe-area-inset-top, 12px); transition: background-color 0.3s ease, color 0.3s ease; -webkit-font-smoothing: antialiased; overscroll-behavior-y: contain; }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
 
-        .premium-card {
-            background-color: var(--card-bg);
-            border-radius: 20px;
-            box-shadow: var(--card-shadow);
-            border: 1px solid rgba(128,128,128,0.05);
-            padding: 18px;
-            transition: all 0.3s ease;
-        }
+        .premium-card { background-color: var(--card-bg); border-radius: 20px; box-shadow: var(--card-shadow); border: 1px solid rgba(128,128,128,0.05); padding: 18px; transition: all 0.3s ease; }
+        .section-header { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
 
-        .section-header {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            color: var(--text-muted);
-            font-weight: 700;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .segmented-control {
-            display: flex;
-            background-color: var(--segmented-bg);
-            border-radius: 12px;
-            padding: 4px;
-            margin-bottom: 16px;
-        }
+        .segmented-control { display: flex; background-color: var(--segmented-bg); border-radius: 12px; padding: 4px; margin-bottom: 16px; }
         .segmented-control input[type="radio"] { display: none; }
-        .segmented-control label {
-            flex: 1;
-            text-align: center;
-            padding: 8px 0;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            margin: 0;
-        }
-        .segmented-control input[type="radio"]:checked + label {
-            background-color: var(--card-bg);
-            color: var(--text-main);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
+        .segmented-control label { flex: 1; text-align: center; padding: 8px 0; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); border-radius: 8px; cursor: pointer; transition: all 0.2s ease; margin: 0; white-space: nowrap; }
+        .segmented-control input[type="radio"]:checked + label { background-color: var(--card-bg); color: var(--text-main); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 
-        .form-floating > .form-control, .form-floating > .form-select {
-            background-color: var(--input-bg);
-            border: 1.5px solid var(--input-border);
-            border-radius: 12px;
-            color: var(--text-main);
-            font-weight: 500;
-            height: 54px;
-            min-height: 54px;
-            padding-top: 1.2rem;
-            padding-bottom: 0.2rem;
-            font-size: 0.95rem;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, background-color 0.2s ease;
-        }
-        .form-floating > label {
-            padding: 0.8rem 0.75rem;
-            color: var(--text-muted);
-            font-weight: 500;
-            font-size: 0.85rem;
-        }
-        .form-floating > .form-control:focus ~ label,
-        .form-floating > .form-control:not(:placeholder-shown) ~ label,
-        .form-floating > .form-select ~ label {
-            opacity: 0.75;
-            transform: scale(0.85) translateY(-0.8rem) translateX(0.15rem);
-        }
-        .form-control:focus, .form-select:focus {
-            background-color: var(--card-bg);
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-glow);
-        }
+        .form-floating > .form-control, .form-floating > .form-select { background-color: var(--input-bg); border: 1.5px solid var(--input-border); border-radius: 12px; color: var(--text-main); font-weight: 500; height: 54px; min-height: 54px; padding-top: 1.2rem; padding-bottom: 0.2rem; font-size: 0.95rem; transition: all 0.2s ease; }
+        .form-floating > label { padding: 0.8rem 0.75rem; color: var(--text-muted); font-weight: 500; font-size: 0.85rem; }
+        .form-floating > .form-control:focus ~ label, .form-floating > .form-control:not(:placeholder-shown) ~ label, .form-floating > .form-select ~ label { opacity: 0.75; transform: scale(0.85) translateY(-0.8rem) translateX(0.15rem); }
+        .form-control:focus, .form-select:focus { background-color: var(--card-bg); border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+        .is-fetched { color: var(--text-muted) !important; background-color: rgba(128, 128, 128, 0.08) !important; border-color: transparent !important; }
 
-        .is-fetched {
-            color: var(--text-muted) !important;
-            background-color: rgba(128, 128, 128, 0.08) !important;
-            border-color: transparent !important;
-        }
+        .date-input-wrapper { background-color: var(--input-bg); border: 1.5px solid var(--input-border); border-radius: 12px; display: flex; align-items: center; height: 54px; position: relative; transition: all 0.2s ease; }
+        .date-input-wrapper:focus-within { background-color: var(--card-bg); border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+        .date-input-wrapper input { background: transparent; border: none; color: var(--text-main); font-weight: 600; font-size: 1rem; text-align: center; outline: none; width: 50%; height: 100%; padding-top: 12px; }
+        .date-floating-label { position: absolute; top: 4px; left: 12px; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
 
-        .date-input-wrapper {
-            background-color: var(--input-bg);
-            border: 1.5px solid var(--input-border);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            height: 54px;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-            position: relative;
-        }
-        .date-input-wrapper:focus-within {
-            background-color: var(--card-bg);
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-glow);
-        }
-        .date-input-wrapper input {
-            background: transparent;
-            border: none;
-            color: var(--text-main);
-            font-weight: 600;
-            font-size: 1rem;
-            text-align: center;
-            outline: none;
-            width: 50%;
-            height: 100%;
-            padding-top: 12px;
-        }
-        .date-input-divider { color: var(--text-muted); font-weight: 700; }
-        .date-floating-label {
-            position: absolute;
-            top: 4px;
-            left: 12px;
-            font-size: 0.65rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            font-weight: 600;
-        }
+        .btn-submit { background-color: var(--text-main); color: var(--card-bg); border: none; border-radius: 14px; height: 52px; font-weight: 600; font-size: 1rem; margin-top: 6px; }
+        .btn-reset { color: var(--text-muted); background: transparent; border: none; display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; transition: all 0.2s ease; }
+        .btn-reset:active { background: var(--input-border); }
 
-        .btn-submit {
-            background-color: var(--text-main);
-            color: var(--card-bg);
-            border: none;
-            border-radius: 14px;
-            height: 52px;
-            font-weight: 600;
-            font-size: 1rem;
-            margin-top: 6px;
-        }
-
-        .insight-card {
-            border-radius: 18px;
-            padding: 20px;
-            border: none;
-            position: relative;
-            overflow: hidden;
-            color: white;
-            height: 100%;
-        }
+        .insight-card { border-radius: 18px; padding: 20px; border: none; position: relative; overflow: hidden; color: white; height: 100%; }
         .insight-card-blue { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); }
         .insight-card-emerald { background: linear-gradient(135deg, #064e3b 0%, #10b981 100%); }
         .insight-card-purple { background: linear-gradient(135deg, #6b21a8 0%, #a855f7 100%); padding: 16px; }
         .insight-card-amber { background: linear-gradient(135deg, #b45309 0%, #f59e0b 100%); padding: 16px; }
-        
-        .insight-card .bg-icon {
-            position: absolute;
-            right: -5px;
-            bottom: -15px;
-            font-size: 100px;
-            opacity: 0.1;
-            transform: rotate(-15deg);
-        }
+        .insight-card-red { background: linear-gradient(135deg, #991b1b 0%, #ef4444 100%); padding: 16px; }
+        .insight-card .bg-icon { position: absolute; right: -5px; bottom: -15px; font-size: 100px; opacity: 0.1; transform: rotate(-15deg); }
 
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background-color: var(--nav-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-top: 1px solid rgba(128,128,128,0.1);
-            display: flex;
-            justify-content: space-around;
-            padding-bottom: env(safe-area-inset-bottom, 15px);
-            z-index: 1000;
-            height: 65px;
-        }
-        .nav-link {
-            color: var(--text-muted);
-            padding: 10px 0;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-            font-weight: 600;
-            border: none !important;
-            background: transparent;
-        }
+        .exp-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; transition: opacity 0.2s ease; }
+        .exp-checkbox { width: 24px; height: 24px; flex-shrink: 0; border-radius: 50%; border: 2px solid var(--input-border); display: flex; align-items: center; justify-content: center; cursor: pointer; color: transparent; background-color: transparent; transition: all 0.2s ease; }
+        .exp-row.is-done .exp-checkbox { background-color: var(--success-color); border-color: var(--success-color); color: white; }
+        .exp-input { border: none; background: transparent; border-bottom: 1px solid var(--input-border); border-radius: 0; color: var(--text-main); font-size: 0.85rem; font-weight: 500; height: 32px; padding: 0 4px; min-width: 0; transition: all 0.2s ease; }
+        .exp-input:focus { border-bottom-color: var(--primary); outline: none; }
+        .exp-input::placeholder { color: var(--text-muted); opacity: 0.5; }
+        .exp-row.is-done .exp-input { text-decoration: line-through; color: var(--text-muted); opacity: 0.6; }
+
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background-color: var(--nav-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid rgba(128,128,128,0.1); display: flex; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom, 15px); z-index: 1000; height: 65px; }
+        .nav-link { color: var(--text-muted); padding: 10px 0; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; border: none !important; background: transparent; }
         .nav-link.active { color: var(--primary) !important; background: transparent !important; }
-        .nav-link .material-icons { font-size: 24px; margin-bottom: 2px;}
-
-        .global-header { max-width: 600px; margin: auto; padding: 0 14px; }
-        .tab-content { max-width: 600px; margin: auto; padding: 0 14px; }
+        
+        .global-header, .tab-content { max-width: 600px; margin: auto; padding: 0 14px; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
+        .fuel-callout { background: var(--input-bg); border-radius: 12px; padding: 12px; text-align: center; border: 1px solid var(--input-border); }
     </style>
 </head>
 <body>
 
-    <!-- GLOBAL SITE-WIDE APP HEADER -->
     <div class="global-header d-flex justify-content-between align-items-center mb-3 mt-2">
         <h4 id="appMainTitle" style="font-weight: 800; margin: 0; letter-spacing: -0.5px;">Command Center</h4>
         <div>
-            <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center me-2" id="updateAppBtn" onclick="forceAppUpdate()" style="background: var(--input-bg); color: var(--text-muted); width: 36px; height: 36px; border: 1px solid var(--input-border);" title="Fetch Latest App Update">
+            <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center me-2" id="updateAppBtn" onclick="forceAppUpdate()" style="background: var(--input-bg); color: var(--text-muted); width: 36px; height: 36px; border: 1px solid var(--input-border);">
                 <span class="material-icons" style="font-size: 20px;">system_update_alt</span>
             </button>
-            <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center me-2" id="syncDataBtn" onclick="syncWithSheetQuietly(true)" style="background: var(--primary-glow); color: var(--primary); width: 36px; height: 36px; border: none;" title="Sync Data">
+            <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center me-2" id="syncDataBtn" onclick="syncWithSheetQuietly(true)" style="background: var(--primary-glow); color: var(--primary); width: 36px; height: 36px; border: none;">
                 <span class="material-icons" style="font-size: 20px;">sync</span>
             </button>
             <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center" onclick="toggleTheme()" style="background: var(--input-bg); color: var(--text-main); width: 36px; height: 36px; border: 1px solid var(--input-border);">
@@ -276,11 +101,9 @@
         
         <!-- SALARY MODULE -->
         <div class="tab-pane fade show active" id="salary-module" role="tabpanel">
-
             <div class="segmented-control">
                 <input type="radio" name="salary-view" id="view-entry" checked onchange="toggleSalarySubTab('entry')">
                 <label for="view-entry">Salary Entry</label>
-                
                 <input type="radio" name="salary-view" id="view-insights" onchange="toggleSalarySubTab('insights')">
                 <label for="view-insights">Insights</label>
             </div>
@@ -289,166 +112,83 @@
                 <div class="premium-card mb-2">
                     <form id="salaryForm">
                         <div class="section-header">
-                            <span class="material-icons" style="font-size: 16px;">badge</span> Identity & Bank
+                            <div class="d-flex align-items-center gap-1"><span class="material-icons" style="font-size: 16px;">badge</span> Identity & Bank</div>
+                            <button type="button" class="btn-reset" onclick="resetSalaryForm()" title="Clear Form"><span class="material-icons" style="font-size: 18px;">restart_alt</span></button>
                         </div>
-                        
                         <div class="row g-2">
                             <div class="col-12">
                                 <div class="date-input-wrapper">
                                     <span class="date-floating-label">Salary Month & Year</span>
                                     <input type="text" id="monthPart" placeholder="MMM" maxlength="3" autocomplete="off" required>
                                     <span class="date-input-divider">-</span>
-                                    <input type="number" id="yearPart" placeholder="YYYY" inputmode="numeric" pattern="[0-9]*" oninput="if(this.value.length > 4) this.value = this.value.slice(0, 4);" autocomplete="off" required>
+                                    <input type="number" id="yearPart" placeholder="YYYY" inputmode="numeric" pattern="[0-9]*" autocomplete="off" required>
                                 </div>
                             </div>
-                            
+                            <div class="col-6"><div class="form-floating"><input type="number" class="form-control static-field" id="empNumber" placeholder=" " required><label>Employee ID</label></div></div>
+                            <div class="col-6"><div class="form-floating"><input type="number" class="form-control static-field" id="uan" placeholder=" " required><label>UAN Number</label></div></div>
+                            <div class="col-6"><div class="form-floating"><input type="text" class="form-control static-field" id="bankName" placeholder=" " required><label>Bank Name</label></div></div>
+                            <div class="col-6"><div class="form-floating"><input type="number" class="form-control static-field" id="bankAccount" placeholder=" " required><label>Account No.</label></div></div>
+                            <div class="col-6"><div class="form-floating"><input type="text" class="form-control static-field" id="grade" placeholder=" " required><label>Grade</label></div></div>
                             <div class="col-6">
                                 <div class="form-floating">
-                                    <input type="number" class="form-control static-field" id="empNumber" placeholder=" " inputmode="numeric" pattern="[0-9]*" required>
-                                    <label>Employee ID</label>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="form-floating">
-                                    <input type="number" class="form-control static-field" id="uan" placeholder=" " inputmode="numeric" pattern="[0-9]*" required>
-                                    <label>UAN Number</label>
-                                </div>
-                            </div>
-
-                            <div class="col-6">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control static-field" id="bankName" placeholder=" " required>
-                                    <label>Bank Name</label>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="form-floating">
-                                    <input type="number" class="form-control static-field" id="bankAccount" placeholder=" " inputmode="numeric" pattern="[0-9]*" required>
-                                    <label>Account No.</label>
-                                </div>
-                            </div>
-
-                            <div class="col-6">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control static-field" id="grade" placeholder=" " required>
-                                    <label>Grade</label>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="form-floating">
-                                    <select class="form-select static-field" id="taxRegime" required>
-                                        <option value="New">New Regime</option>
-                                        <option value="Old">Old Regime</option>
-                                    </select>
+                                    <select class="form-select static-field" id="taxRegime" required><option value="New">New</option><option value="Old">Old</option></select>
                                     <label>Tax Regime</label>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="section-header mt-3 pt-2">
-                            <span class="material-icons" style="font-size: 16px;">account_balance_wallet</span> Finance
-                        </div>
-                        
+                        <div class="section-header mt-3 pt-2"><div class="d-flex align-items-center gap-1"><span class="material-icons" style="font-size: 16px;">account_balance_wallet</span> Finance</div></div>
                         <div class="row g-2">
-                            <div class="col-6">
-                                <div class="form-floating">
-                                    <input type="number" class="form-control" id="totalEarnings" placeholder=" " inputmode="numeric" pattern="[0-9]*" required>
-                                    <label>Total Earnings (₹)</label>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="form-floating">
-                                    <input type="number" class="form-control" id="totalDeductions" placeholder=" " inputmode="numeric" pattern="[0-9]*" required>
-                                    <label>Total Deductions (₹)</label>
-                                </div>
-                            </div>
-                            
-                            <div class="col-4">
-                                <div class="form-floating">
-                                    <input type="number" class="form-control" id="employeePF" placeholder=" " inputmode="numeric" pattern="[0-9]*" required>
-                                    <label>Emp. PF (₹)</label>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="form-floating">
-                                    <input type="number" class="form-control" id="taxDeduction" placeholder=" " inputmode="numeric" pattern="[0-9]*" required>
-                                    <label>Tax Cut (₹)</label>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="form-floating">
-                                    <input type="number" class="form-control" id="gratuity" placeholder=" " inputmode="numeric" pattern="[0-9]*" required>
-                                    <label>Gratuity (₹)</label>
-                                </div>
-                            </div>
+                            <div class="col-6"><div class="form-floating"><input type="number" class="form-control" id="totalEarnings" placeholder=" " required><label>Earnings (₹)</label></div></div>
+                            <div class="col-6"><div class="form-floating"><input type="number" class="form-control" id="totalDeductions" placeholder=" " required><label>Deductions (₹)</label></div></div>
+                            <div class="col-4"><div class="form-floating"><input type="number" class="form-control" id="employeePF" placeholder=" " required><label>Emp. PF (₹)</label></div></div>
+                            <div class="col-4"><div class="form-floating"><input type="number" class="form-control" id="taxDeduction" placeholder=" " required><label>Tax Cut (₹)</label></div></div>
+                            <div class="col-4"><div class="form-floating"><input type="number" class="form-control" id="gratuity" placeholder=" " required><label>Gratuity (₹)</label></div></div>
                         </div>
-                        
-                        <button type="submit" class="btn btn-submit w-100 d-flex align-items-center justify-content-center" id="submitBtn">
-                            <span class="material-icons me-2" style="font-size: 20px;">cloud_sync</span> Securely Save
-                        </button>
+                        <button type="submit" class="btn btn-submit w-100 d-flex align-items-center justify-content-center" id="submitBtn"><span class="material-icons me-2">cloud_sync</span> Securely Save</button>
                     </form>
                 </div>
             </div>
 
+            <!-- Insights Pane -->
             <div id="salary-insights-pane" style="display: none;">
-                <!-- Main Salary Card -->
                 <div class="insight-card insight-card-blue mb-3 shadow-sm">
                     <span class="material-icons bg-icon">account_balance</span>
                     <div class="d-flex justify-content-between align-items-start mb-1">
-                        <p class="mb-0" style="color: rgba(255,255,255,0.8); font-weight: 600; font-size: 0.85rem;">Total In-Hand Salary</p>
-                        <span class="badge bg-white text-dark rounded-pill px-2 py-1 shadow-sm" id="displayRecordRange" style="font-size: 0.7rem; font-weight: 700;">
-                            SYNCING...
-                        </span>
+                        <p class="mb-0" style="color: rgba(255,255,255,0.8); font-weight: 600; font-size: 0.85rem;">Total In-Hand</p>
+                        <span class="badge bg-white text-dark rounded-pill px-2 py-1 shadow-sm" id="displayRecordRange">SYNCING...</span>
                     </div>
                     <h1 id="displayInHand" style="font-weight: 800; font-size: 2.2rem; letter-spacing: -1px; margin-bottom: 0;">₹ 0</h1>
                     <small id="displayMonthCount" style="color: rgba(255,255,255,0.7); font-weight: 500; font-size: 0.8rem;">0 Months Tracked</small>
                 </div>
 
-                <!-- EPF Card -->
                 <div class="insight-card insight-card-emerald mb-3 shadow-sm">
                     <span class="material-icons bg-icon">savings</span>
-                    <p class="mb-0" style="color: rgba(255,255,255,0.8); font-weight: 600; font-size: 0.85rem;">EPF Retirement Corpus</p>
+                    <p class="mb-0" style="color: rgba(255,255,255,0.8); font-weight: 600; font-size: 0.85rem;">EPF Corpus</p>
                     <h2 id="displayTotalPF" style="font-weight: 800; font-size: 1.9rem; letter-spacing: -0.5px; margin-bottom: 2px;">₹ 0</h2>
-                    <small style="color: rgba(255,255,255,0.7); font-weight: 500; font-size: 0.8rem;">Includes accrued compound interest</small>
-                    
+                    <small style="color: rgba(255,255,255,0.7); font-weight: 500; font-size: 0.8rem;">With compound interest</small>
                     <hr style="border-color: rgba(255,255,255,0.2); margin: 16px 0;">
-                    
                     <div class="row g-2 text-start">
-                        <div class="col-6">
-                            <small style="color: rgba(255,255,255,0.7); font-weight: 600; font-size: 0.7rem; display: block; text-transform: uppercase;">Employee</small>
-                            <strong id="displayEmpPF" style="font-size: 1.05rem;">₹0</strong>
-                        </div>
-                        <div class="col-6">
-                            <small style="color: rgba(255,255,255,0.7); font-weight: 600; font-size: 0.7rem; display: block; text-transform: uppercase;">Employer</small>
-                            <strong id="displayEmployerPF" style="font-size: 1.05rem;">₹0</strong>
-                        </div>
-                        <div class="col-6 mt-2">
-                            <small style="color: rgba(255,255,255,0.7); font-weight: 600; font-size: 0.7rem; display: block; text-transform: uppercase;">Interest Gained</small>
-                            <strong id="displayInterestEarned" style="font-size: 1.05rem;">₹0</strong>
-                        </div>
-                        <div class="col-6 mt-2">
-                            <small style="color: rgba(255,255,255,0.7); font-weight: 600; font-size: 0.7rem; display: block; text-transform: uppercase;">EPS Pension</small>
-                            <strong id="displayPension" style="font-size: 1.05rem;">₹0</strong>
-                        </div>
+                        <div class="col-6"><small style="color: rgba(255,255,255,0.7); font-weight: 600; font-size: 0.7rem; text-transform: uppercase;">Employee</small><strong id="displayEmpPF" style="font-size: 1.05rem; display:block;">₹0</strong></div>
+                        <div class="col-6"><small style="color: rgba(255,255,255,0.7); font-weight: 600; font-size: 0.7rem; text-transform: uppercase;">Employer</small><strong id="displayEmployerPF" style="font-size: 1.05rem; display:block;">₹0</strong></div>
+                        <div class="col-6 mt-2"><small style="color: rgba(255,255,255,0.7); font-weight: 600; font-size: 0.7rem; text-transform: uppercase;">Interest</small><strong id="displayInterestEarned" style="font-size: 1.05rem; display:block;">₹0</strong></div>
+                        <div class="col-6 mt-2"><small style="color: rgba(255,255,255,0.7); font-weight: 600; font-size: 0.7rem; text-transform: uppercase;">EPS Pension</small><strong id="displayPension" style="font-size: 1.05rem; display:block;">₹0</strong></div>
                     </div>
                 </div>
 
-                <!-- Tax & Gratuity Grid -->
                 <div class="row g-3 mb-3">
                     <div class="col-6">
                         <div class="insight-card insight-card-purple shadow-sm">
                             <span class="material-icons bg-icon" style="font-size: 80px; right: -5px; bottom: -5px;">request_quote</span>
-                            <p class="mb-0" style="color: rgba(255,255,255,0.8); font-weight: 600; font-size: 0.75rem;">Total Tax Paid</p>
+                            <p class="mb-0" style="color: rgba(255,255,255,0.8); font-weight: 600; font-size: 0.75rem;">Total Tax</p>
                             <h3 id="displayTotalTax" style="font-weight: 800; margin-bottom: 2px;">₹ 0</h3>
-                            <small id="displayTaxRange" style="color: rgba(255,255,255,0.7); font-weight: 500; font-size: 0.65rem;">N/A</small>
                         </div>
                     </div>
                     <div class="col-6">
                         <div class="insight-card insight-card-amber shadow-sm">
                             <span class="material-icons bg-icon" style="font-size: 80px; right: -5px; bottom: -5px;">military_tech</span>
-                            <p class="mb-0" style="color: rgba(255,255,255,0.8); font-weight: 600; font-size: 0.75rem;">Total Gratuity</p>
+                            <p class="mb-0" style="color: rgba(255,255,255,0.8); font-weight: 600; font-size: 0.75rem;">Gratuity</p>
                             <h3 id="displayGratuity" style="font-weight: 800; margin-bottom: 2px;">₹ 0</h3>
-                            <small style="color: rgba(255,255,255,0.7); font-weight: 500; font-size: 0.65rem;">Latest recorded</small>
                         </div>
                     </div>
                 </div>
@@ -457,55 +197,312 @@
 
         <!-- EXPENSE MODULE -->
         <div class="tab-pane fade" id="expense-module" role="tabpanel">
+            <div class="segmented-control">
+                <input type="radio" name="expense-view" id="view-checklist" checked onchange="toggleExpenseSubTab('checklist')">
+                <label for="view-checklist">Checklist</label>
+                <input type="radio" name="expense-view" id="view-fuel" onchange="toggleExpenseSubTab('fuel')">
+                <label for="view-fuel">Jupiter ZX</label>
+                <input type="radio" name="expense-view" id="view-exp-insights" onchange="toggleExpenseSubTab('insights')">
+                <label for="view-exp-insights">Insights</label>
+            </div>
 
-            <div class="premium-card mb-4 d-flex align-items-center justify-content-between p-3 mt-4">
-                <button class="btn btn-sm d-flex align-items-center p-0" style="color: var(--text-muted);">
-                    <span class="material-icons">chevron_left</span>
-                </button>
-                <h6 class="mb-0" style="font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">September 2026</h6>
-                <button class="btn btn-sm d-flex align-items-center p-0" style="color: var(--text-muted);">
-                    <span class="material-icons">chevron_right</span>
+            <!-- GLOBAL TAB-WIDE MONTH NAVIGATOR -->
+            <div id="global-exp-month-nav" class="premium-card mb-3 d-flex align-items-center justify-content-between p-3 border-0" style="background: var(--input-bg);">
+                <button class="btn btn-sm d-flex align-items-center p-0" style="color: var(--text-main);" onclick="changeExpMonth(-1)"><span class="material-icons">chevron_left</span></button>
+                <h6 class="mb-0" id="expMonthLabel" style="font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Loading...</h6>
+                <button class="btn btn-sm d-flex align-items-center p-0" style="color: var(--text-main);" onclick="changeExpMonth(1)"><span class="material-icons">chevron_right</span></button>
+            </div>
+
+            <!-- Sub-Tab: Checklist with Categories -->
+            <div id="expense-checklist-pane">
+                
+                <!-- Category: Home Expenses -->
+                <div class="premium-card mb-3 p-3" style="padding-bottom: 8px !important;">
+                    <div class="section-header text-primary mb-2"><span class="material-icons" style="font-size: 16px;">home</span> Home Expenses</div>
+                    <div class="d-flex gap-2 mb-2 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
+                        <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Component</div><div style="flex: 1.2;">Amount</div><div style="flex: 1.2;">Date</div>
+                    </div>
+                    <div id="expense-list-Home"></div>
+                </div>
+
+                <!-- Category: EMI / Debt -->
+                <div class="premium-card mb-3 p-3" style="padding-bottom: 8px !important;">
+                    <div class="section-header text-danger mb-2"><span class="material-icons" style="font-size: 16px;">credit_card</span> EMI / Debt</div>
+                    <div class="d-flex gap-2 mb-2 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
+                        <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Component</div><div style="flex: 1.2;">Amount</div><div style="flex: 1.2;">Date</div>
+                    </div>
+                    <div id="expense-list-EMI"></div>
+                </div>
+
+                <!-- Category: Miscellaneous -->
+                <div class="premium-card mb-3 p-3" style="padding-bottom: 8px !important;">
+                    <div class="section-header text-warning mb-2"><span class="material-icons" style="font-size: 16px;">category</span> Miscellaneous</div>
+                    <div class="d-flex gap-2 mb-2 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
+                        <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Component</div><div style="flex: 1.2;">Amount</div><div style="flex: 1.2;">Date</div>
+                    </div>
+                    <div id="expense-list-Misc"></div>
+                </div>
+
+                <div class="premium-card border-0 d-flex justify-content-between align-items-center p-3 mb-3" style="background: var(--input-bg);">
+                    <div>
+                        <small class="d-block text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">Pending</small>
+                        <h5 class="mb-0" style="font-weight: 800; color: #ef4444;">₹ <span id="expPendingTotal">0</span></h5>
+                    </div>
+                    <div class="text-end">
+                        <small class="d-block text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">Total Tracked</small>
+                        <h5 class="mb-0" style="font-weight: 800; color: var(--text-main);">₹ <span id="expGrandTotal">0</span></h5>
+                    </div>
+                </div>
+
+                <button id="saveExpensesBtn" onclick="syncExpensesToCloud()" class="btn btn-submit w-100 d-flex align-items-center justify-content-center" style="background-color: var(--primary); color: white;">
+                    <span class="material-icons me-2" style="font-size: 20px;">cloud_sync</span> Save List
                 </button>
             </div>
 
-            <div class="premium-card mb-3 text-center py-5 border-0" style="background: var(--input-bg);">
-                <span class="material-icons mb-2" style="font-size: 40px; color: var(--text-muted); opacity: 0.3;">receipt_long</span>
-                <p class="mb-1" style="color: var(--text-muted); font-weight: 600;">Total Spent This Month</p>
-                <h2 style="font-weight: 800; margin-bottom: 0;">₹ 0</h2>
+            <!-- Sub-Tab: Fuel Log -->
+            <div id="expense-fuel-pane" style="display: none;">
+                <div class="premium-card mb-3">
+                    <form id="fuelForm">
+                        <div class="section-header">
+                            <div class="d-flex align-items-center gap-1"><span class="material-icons" style="font-size: 16px;">local_gas_station</span> Jupiter ZX Full Tank</div>
+                            <button type="button" class="btn-reset" onclick="resetFuelForm()" title="Clear Form"><span class="material-icons" style="font-size: 18px;">restart_alt</span></button>
+                        </div>
+                        <div class="form-floating mb-3"><input type="text" class="form-control static-field" id="fuelMonth" required readonly><label>Active Month & Year</label></div>
+                        <div class="form-floating mb-3"><input type="number" class="form-control" id="fuelOdo" required oninput="debouncedCalcFuelLive()"><label>Current Odometer (km)</label></div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6"><div class="form-floating"><input type="number" class="form-control" id="fuelAmount" required oninput="debouncedCalcFuelLive()"><label>Amount (₹)</label></div></div>
+                            <div class="col-6"><div class="form-floating"><input type="number" class="form-control" id="fuelRate" required oninput="debouncedCalcFuelLive()"><label>Rate (₹/L)</label></div></div>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-4"><div class="fuel-callout"><small class="text-muted d-block" style="font-size: 0.6rem; font-weight: 700; text-transform: uppercase;">Volume</small><strong id="fuelLiveLiters" style="font-size: 1.1rem; color: var(--text-main);">0.0 L</strong></div></div>
+                            <div class="col-4"><div class="fuel-callout"><small class="text-muted d-block" style="font-size: 0.6rem; font-weight: 700; text-transform: uppercase;">Last Odo</small><strong id="fuelLastOdo" style="font-size: 1.1rem; color: var(--text-main);">----</strong></div></div>
+                            <div class="col-4"><div class="fuel-callout" style="background: var(--primary-glow); border-color: transparent;"><small class="d-block" style="font-size: 0.6rem; font-weight: 700; text-transform: uppercase; color: var(--primary);">Mileage</small><strong id="fuelLiveMileage" style="font-size: 1.1rem; color: var(--primary);">-- km/l</strong></div></div>
+                        </div>
+                        <button type="submit" class="btn btn-submit w-100 d-flex align-items-center justify-content-center" id="saveFuelBtn"><span class="material-icons me-2">cloud_sync</span> Log Fuel</button>
+                    </form>
+                </div>
             </div>
 
-            <button class="btn btn-submit w-100 d-flex align-items-center justify-content-center" style="background-color: var(--primary); color: white;">
-                <span class="material-icons me-2" style="font-size: 20px;">add</span> Add Expense
-            </button>
+            <!-- Sub-Tab: Expense Insights (Now with Categories) -->
+            <div id="expense-insights-pane" style="display: none;">
+                <div class="premium-card mb-3 p-2 border-0 d-flex justify-content-end align-items-center" style="background: var(--input-bg);">
+                    <select id="insightsFilter" class="form-select form-select-sm border-0 bg-transparent fw-bold" style="box-shadow: none; color: var(--text-main); width: auto;" onchange="handleInsightsFilterChange()">
+                        <option value="current">Current Month</option>
+                        <option value="all">All-Time Filter</option>
+                    </select>
+                </div>
+
+                <div class="insight-card insight-card-red mb-3 shadow-sm">
+                    <span class="material-icons bg-icon">data_usage</span>
+                    <p class="mb-0" id="insExpTitle" style="color: rgba(255,255,255,0.8); font-weight: 600; font-size: 0.85rem;">Month Expenses</p>
+                    <h1 id="insTotalExp" style="font-weight: 800; font-size: 2.2rem; letter-spacing: -1px; margin-bottom: 12px;">₹ 0</h1>
+                    
+                    <!-- Category Breakdown -->
+                    <div class="d-flex gap-1 mb-1" style="height: 6px; border-radius: 3px; overflow: hidden; background: rgba(0,0,0,0.2);">
+                        <div id="barHome" style="width: 33%; background: #60a5fa;"></div>
+                        <div id="barEMI" style="width: 33%; background: #f87171;"></div>
+                        <div id="barMisc" style="width: 34%; background: #fbbf24;"></div>
+                    </div>
+                    <div class="d-flex justify-content-between text-white" style="font-size: 0.65rem; font-weight: 600; opacity: 0.9;">
+                        <span>Home: ₹<span id="insCatHome">0</span></span>
+                        <span>EMI: ₹<span id="insCatEMI">0</span></span>
+                        <span>Misc: ₹<span id="insCatMisc">0</span></span>
+                    </div>
+                </div>
+
+                <div class="insight-card insight-card-amber mb-3 shadow-sm">
+                    <span class="material-icons bg-icon">two_wheeler</span>
+                    <p class="mb-0" id="insFuelTitle" style="color: rgba(255,255,255,0.8); font-weight: 600; font-size: 0.85rem;">Month Fuel Spent</p>
+                    <h1 id="insTotalFuel" style="font-weight: 800; font-size: 2.2rem; letter-spacing: -1px; margin-bottom: 0;">₹ 0</h1>
+                    <small id="insAvgMileage" style="color: rgba(255,255,255,0.8); font-weight: 600;">Avg Month Mileage: -- km/l</small>
+                </div>
+            </div>
+
         </div>
-
     </div>
 
-    <!-- Main Bottom Navigation -->
+    <!-- Bottom Nav -->
     <ul class="nav nav-tabs bottom-nav" id="bottomNav" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="salary-tab-btn" data-bs-toggle="tab" data-bs-target="#salary-module" type="button" role="tab" onclick="document.getElementById('appMainTitle').innerText='Command Center';">
-                <span class="material-icons">account_balance_wallet</span>
-                Salary
+            <button class="nav-link active" id="salary-tab-btn" data-bs-toggle="tab" data-bs-target="#salary-module" type="button" role="tab" onclick="document.getElementById('appMainTitle').innerText='Command Center'; hapticTap();">
+                <span class="material-icons">account_balance_wallet</span> Salary
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="expense-tab-btn" data-bs-toggle="tab" data-bs-target="#expense-module" type="button" role="tab" onclick="document.getElementById('appMainTitle').innerText='Expenses';">
-                <span class="material-icons">receipt_long</span>
-                Expenses
+            <button class="nav-link" id="expense-tab-btn" data-bs-toggle="tab" data-bs-target="#expense-module" type="button" role="tab" onclick="document.getElementById('appMainTitle').innerText='Expense Tracker'; hapticTap();">
+                <span class="material-icons">receipt_long</span> Expenses
             </button>
         </li>
     </ul>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const API_URL = "https://script.google.com/macros/s/AKfycbxw50bYSCs1TSMYGm5HaOsc-y0jf2mAtE8l56_2NhYgI4HxQmtRQhP-9O4cKLC3vYxgsw/exec";
+        const API_URL = "https://script.google.com/macros/s/AKfycbxw50bYSCs1TSMYGm5HaOsc-y0jf2mAtE8l56_2NhYgI4HxQmtRQhP-9O4cKLC3vYxgsw/exec"; 
+        
+        // --- SITEWIDE DEBOUNCE ENGINE ---
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        // --- HAPTIC ENGINE ---
+        function hapticTap() { if(navigator.vibrate) navigator.vibrate(30); }
+        function hapticSuccess() { if(navigator.vibrate) navigator.vibrate([50, 50, 50]); }
+        function hapticError() { if(navigator.vibrate) navigator.vibrate([150, 50, 150]); }
+
+        // --- WEB WORKER (Off-Thread Math Engine) ---
+        const workerCode = `
+            const monthMap = { "JAN":1, "FEB":2, "MAR":3, "APR":4, "MAY":5, "JUN":6, "JUL":7, "AUG":8, "SEP":9, "OCT":10, "NOV":11, "DEC":12 };
+            function parseDateInfo(str) {
+                if (!str) return { m: 0, y: 0 };
+                let s = String(str).trim().toUpperCase(); let parts = s.split('-');
+                if (parts.length === 2 && monthMap[parts[0]]) return { m: monthMap[parts[0]], y: parseInt(parts[1]) };
+                let d = new Date(str); if (!isNaN(d.getTime())) return { m: d.getMonth() + 1, y: d.getFullYear() }; return { m: 0, y: 0 }; 
+            }
+            function getSortValue(str) { let { m, y } = parseDateInfo(str); return m === 0 ? 0 : (y * 100) + m; }
+            function formatShortDate(str) {
+                let { m, y } = parseDateInfo(str); if (m === 0) return "N/A";
+                let mName = Object.keys(monthMap).find(key => monthMap[key] === m); return \`\${mName} '\${String(y).slice(-2)}\`;
+            }
+            function getAnnualInterestRate(str) {
+                let { m, y } = parseDateInfo(str); if (m === 0 || isNaN(y)) return 0.0825;
+                let fyStartYear = (m >= 4) ? y : y - 1;
+                if (fyStartYear >= 2023) return 0.0825; if (fyStartYear === 2022) return 0.0815;
+                if (fyStartYear === 2021) return 0.0810; if (fyStartYear === 2020) return 0.0850; return 0.0825;
+            }
+
+            self.onmessage = function(e) {
+                const { type, salaryData, fuelData, rawExpData, filter, targetMonth } = e.data;
+                
+                if(type === 'salary') {
+                    if (salaryData.length === 0) { self.postMessage({ type: 'salary', empty: true }); return; }
+                    let sortedData = [...salaryData].sort((a, b) => getSortValue(a.monthYear) - getSortValue(b.monthYear));
+                    
+                    let totalInHandAllTime = 0, totalEmployeePF = 0, totalEmployerPF = 0, totalPensionEPS = 0;
+                    let runningBalance = 0, accumulatedInterest = 0, totalLifetimeInterest = 0, totalTaxAllTime = 0;
+                    
+                    sortedData.forEach(row => {
+                        totalInHandAllTime += ((Number(row.totalEarnings) || 0) - (Number(row.totalDeductions) || 0));
+                        totalTaxAllTime += (Number(row.taxDeduction) || 0);
+                        let empPF = Number(row.employeePF) || 0; let { m, y } = parseDateInfo(row.monthYear);
+                        accumulatedInterest += runningBalance * (getAnnualInterestRate(row.monthYear) / 12);
+                        
+                        if (empPF > 0) {
+                            let epsCut = (empPF >= 1800) ? 1250 : Math.round(empPF * (8.33 / 12));
+                            let employerPF = empPF - epsCut;
+                            totalEmployeePF += empPF; totalEmployerPF += employerPF; totalPensionEPS += epsCut;
+                            runningBalance += (empPF + employerPF);
+                        }
+                        if (m === 3) { runningBalance += accumulatedInterest; totalLifetimeInterest += accumulatedInterest; accumulatedInterest = 0; }
+                    });
+                    
+                    self.postMessage({
+                        type: 'salary', empty: false, startRecord: formatShortDate(sortedData[0].monthYear), endRecord: formatShortDate(sortedData[sortedData.length - 1].monthYear), monthCount: sortedData.length,
+                        inHand: totalInHandAllTime, totalPF: Math.round(runningBalance + accumulatedInterest), empPF: totalEmployeePF, employerPF: totalEmployerPF, interest: Math.round(totalLifetimeInterest + accumulatedInterest),
+                        pension: totalPensionEPS, totalTax: totalTaxAllTime, gratuity: Number(sortedData[sortedData.length - 1].gratuity) || 0
+                    });
+                }
+                
+                if (type === 'expense') {
+                    let totalExp = 0;
+                    let catTotals = { "Home": 0, "EMI": 0, "Misc": 0 };
+                    
+                    rawExpData.forEach(item => {
+                        const amt = parseFloat(item.amt) || 0;
+                        totalExp += amt;
+                        if(item.category === "Home") catTotals.Home += amt;
+                        else if(item.category === "EMI") catTotals.EMI += amt;
+                        else catTotals.Misc += amt;
+                    });
+
+                    let totalFuel = 0, avgMileage = 0;
+
+                    if (filter === 'all') {
+                        let minOdo = 9999999, maxOdo = 0, totalLiters = 0;
+                        fuelData.forEach(f => {
+                            totalFuel += f.amount;
+                            if (f.odo < minOdo) minOdo = f.odo;
+                            if (f.odo > maxOdo) maxOdo = f.odo;
+                            if (f.rate > 0) totalLiters += (f.amount / f.rate);
+                        });
+                        if (totalLiters > 0 && maxOdo > minOdo) { avgMileage = (maxOdo - minOdo) / totalLiters; }
+                    } else {
+                        const monthFuel = fuelData.filter(f => f.monthYear === targetMonth);
+                        monthFuel.forEach(f => { totalFuel += f.amount; });
+                        let sortedFuel = [...fuelData].sort((a,b) => a.odo - b.odo);
+                        let monthLiters = 0, monthDistance = 0;
+
+                        monthFuel.forEach(mf => {
+                            const idx = sortedFuel.findIndex(f => f.odo === mf.odo);
+                            if (idx > 0) {
+                                const prev = sortedFuel[idx - 1];
+                                const dist = mf.odo - prev.odo;
+                                const liters = mf.amount / mf.rate;
+                                if (liters > 0) { monthDistance += dist; monthLiters += liters; }
+                            }
+                        });
+                        if (monthLiters > 0) avgMileage = monthDistance / monthLiters;
+                    }
+
+                    self.postMessage({ type: 'expense', totalExp, catTotals, totalFuel, avgMileage, filter });
+                }
+            };
+        `;
+        const workerBlob = new Blob([workerCode], { type: 'application/javascript' });
+        const mathWorker = new Worker(URL.createObjectURL(workerBlob));
+
+        mathWorker.onmessage = function(e) {
+            const data = e.data;
+            if(data.type === 'salary') {
+                if(data.empty) {
+                    document.getElementById("displayInHand").innerText = "₹ 0"; document.getElementById("displayTotalPF").innerText = "₹ 0";
+                    document.getElementById("displayRecordRange").innerText = "NO DATA"; document.getElementById("displayMonthCount").innerText = "0 Months Tracked";
+                    document.getElementById("displayTotalTax").innerText = "₹ 0"; document.getElementById("displayGratuity").innerText = "₹ 0"; return;
+                }
+                document.getElementById("displayRecordRange").innerText = `${data.startRecord} to ${data.endRecord}`;
+                document.getElementById("displayTaxRange").innerText = `${data.startRecord} to ${data.endRecord}`;
+                document.getElementById("displayMonthCount").innerText = `${data.monthCount} Months Tracked`;
+                document.getElementById("displayInHand").innerText = "₹ " + data.inHand.toLocaleString("en-IN");
+                document.getElementById("displayTotalPF").innerText = "₹ " + data.totalPF.toLocaleString("en-IN");
+                document.getElementById("displayEmpPF").innerText = "₹" + data.empPF.toLocaleString("en-IN");
+                document.getElementById("displayEmployerPF").innerText = "₹" + data.employerPF.toLocaleString("en-IN");
+                document.getElementById("displayInterestEarned").innerText = "₹" + data.interest.toLocaleString("en-IN");
+                document.getElementById("displayPension").innerText = "₹" + data.pension.toLocaleString("en-IN");
+                document.getElementById("displayTotalTax").innerText = "₹ " + data.totalTax.toLocaleString("en-IN");
+                document.getElementById("displayGratuity").innerText = "₹ " + data.gratuity.toLocaleString("en-IN");
+            }
+            if(data.type === 'expense') {
+                document.getElementById('insExpTitle').innerText = data.filter === 'all' ? "All-Time Expenses" : "Month Expenses";
+                document.getElementById('insFuelTitle').innerText = data.filter === 'all' ? "All-Time Fuel Spent" : "Month Fuel Spent";
+                const milTitle = data.filter === 'all' ? "Avg Lifetime Mileage: " : "Avg Month Mileage: ";
+                
+                document.getElementById('insTotalExp').innerText = "₹ " + data.totalExp.toLocaleString("en-IN");
+                document.getElementById('insTotalFuel').innerText = "₹ " + data.totalFuel.toLocaleString("en-IN");
+                
+                document.getElementById('insCatHome').innerText = data.catTotals.Home.toLocaleString("en-IN");
+                document.getElementById('insCatEMI').innerText = data.catTotals.EMI.toLocaleString("en-IN");
+                document.getElementById('insCatMisc').innerText = data.catTotals.Misc.toLocaleString("en-IN");
+
+                const tot = data.totalExp || 1; 
+                document.getElementById('barHome').style.width = (data.catTotals.Home / tot * 100) + "%";
+                document.getElementById('barEMI').style.width = (data.catTotals.EMI / tot * 100) + "%";
+                document.getElementById('barMisc').style.width = (data.catTotals.Misc / tot * 100) + "%";
+                
+                if (data.avgMileage > 0) document.getElementById('insAvgMileage').innerText = `${milTitle}${data.avgMileage.toFixed(1)} km/l`;
+                else document.getElementById('insAvgMileage').innerText = `${milTitle}-- km/l`;
+            }
+        };
+
         const monthMap = { "JAN":1, "FEB":2, "MAR":3, "APR":4, "MAY":5, "JUN":6, "JUL":7, "AUG":8, "SEP":9, "OCT":10, "NOV":11, "DEC":12 };
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-        let cachedSalaryData = [];
-        let insightsMemoHash = ""; // Prevents unnecessary insights recalculation
+        let cachedSalaryData = []; let cachedFuelData = [];
+        let currentExpMonth = new Date().getMonth() + 1; let currentExpYear = new Date().getFullYear();
 
-        // --- 1. INDEXEDDB SETUP & OFFLINE QUEUE ---
         const dbPromise = idb.openDB('FinCenterDB', 1, {
             upgrade(db) {
                 if (!db.objectStoreNames.contains('salary')) db.createObjectStore('salary', { keyPath: 'monthYear' });
@@ -513,355 +510,405 @@
             }
         });
 
-        // Flush offline queue when internet returns
-        async function flushSyncQueue() {
-            if (!navigator.onLine) return;
-            const db = await dbPromise;
-            const queue = await db.transaction('syncQueue', 'readonly').objectStore('syncQueue').getAll();
-            if (queue.length === 0) return;
-
-            const payloads = queue.map(q => q.payload);
-            try {
-                // Batch upload via updated Code.gs
-                const response = await fetch(API_URL, { method: "POST", body: JSON.stringify(payloads) });
-                if (response.ok) {
-                    await db.transaction('syncQueue', 'readwrite').objectStore('syncQueue').clear();
-                    console.log("Offline records successfully synced.");
-                    syncWithSheetQuietly(); // Refresh fresh data
-                }
-            } catch (e) {
-                console.log("Sync queue failed, will retry later.");
-            }
-        }
-        window.addEventListener('online', flushSyncQueue);
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW setup pending', err));
-            });
-        }
-
-        // --- 2. UI CONTROLS ---
-        function forceAppUpdate() {
-            const btn = document.getElementById("updateAppBtn");
-            btn.innerHTML = `<span class="material-icons" style="font-size: 20px; animation: spin 1s linear infinite;">sync</span>`;
-            if ('caches' in window) {
-                caches.keys().then(names => { names.forEach(name => caches.delete(name)); });
-            }
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(registrations => {
-                    registrations.forEach(registration => registration.unregister());
-                });
-            }
-            setTimeout(() => { window.location.reload(true); }, 600);
-        }
-
-        function initTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-bs-theme', savedTheme);
-            document.getElementById('themeIcon').innerText = savedTheme === 'dark' ? 'light_mode' : 'dark_mode';
-        }
-        
-        function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute('data-bs-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-bs-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            document.getElementById('themeIcon').innerText = newTheme === 'dark' ? 'light_mode' : 'dark_mode';
-        }
-
-        function toggleSalarySubTab(view) {
-            if(view === 'entry') {
-                document.getElementById('salary-entry-pane').style.display = 'block';
-                document.getElementById('salary-insights-pane').style.display = 'none';
-            } else {
-                document.getElementById('salary-entry-pane').style.display = 'none';
-                document.getElementById('salary-insights-pane').style.display = 'block';
-                renderInsights();
-            }
-        }
-
-        // Revert grey 'fetched' visual state on focus
-        document.querySelectorAll('.static-field').forEach(input => {
-            input.addEventListener('focus', function() { this.classList.remove('is-fetched'); });
-            input.addEventListener('input', function() { this.classList.remove('is-fetched'); });
-        });
-
-        function applyFetchedValue(id, val) {
-            const el = document.getElementById(id);
-            if (val) {
-                el.value = val;
-                el.classList.add('is-fetched');
-            } else {
-                el.value = "";
-                el.classList.remove('is-fetched');
-            }
-        }
-
-        // --- 3. MATH & PARSING ---
-        function parseDateInfo(str) {
-            if (!str) return { m: 0, y: 0 };
-            let s = String(str).trim().toUpperCase();
-            let parts = s.split('-');
-            if (parts.length === 2 && monthMap[parts[0]]) return { m: monthMap[parts[0]], y: parseInt(parts[1]) };
-            let d = new Date(str);
-            if (!isNaN(d.getTime())) return { m: d.getMonth() + 1, y: d.getFullYear() };
-            return { m: 0, y: 0 }; 
-        }
-
-        function getSortValue(str) {
-            let { m, y } = parseDateInfo(str);
-            if (m === 0) return 0;
-            return (y * 100) + m;
-        }
-
-        function formatShortDate(str) {
-            let { m, y } = parseDateInfo(str);
-            if (m === 0) return "N/A";
-            let mName = Object.keys(monthMap).find(key => monthMap[key] === m);
-            let yShort = String(y).slice(-2);
-            return `${mName} '${yShort}`;
-        }
-
-        function getAnnualInterestRate(str) {
-            let { m, y } = parseDateInfo(str);
-            if (m === 0 || isNaN(y)) return 0.0825;
-            let fyStartYear = (m >= 4) ? y : y - 1;
-            if (fyStartYear >= 2023) return 0.0825;
-            if (fyStartYear === 2022) return 0.0815;
-            if (fyStartYear === 2021) return 0.0810;
-            if (fyStartYear === 2020) return 0.0850;
-            return 0.0825;
-        }
-
-        // --- 4. CORE INITIALIZATION ---
+        // --- GLOBAL BOOT ---
         window.onload = async () => {
-            initTheme();
-            
-            // Fast Boot: Load from IndexedDB instantly
-            const db = await dbPromise;
-            cachedSalaryData = await db.transaction('salary').objectStore('salary').getAll();
-            
-            // Background Sync
-            syncWithSheetQuietly(true);
-            flushSyncQueue();
+            initTheme(); document.getElementById('fuelMonth').value = `${currentExpYear}-${currentExpMonth}`;
+            const db = await dbPromise; cachedSalaryData = await db.transaction('salary').objectStore('salary').getAll();
+            syncWithSheetQuietly(true); fetchCloudExpenses(); fetchCloudFuel(); loadExpenses();
+            if(navigator.serviceWorker) navigator.serviceWorker.register('sw.js');
         };
 
-        document.getElementById("monthPart").addEventListener("input", function() {
-            if(this.value.length === 3) document.getElementById("yearPart").focus();
-        });
+        // --- FORM RESETS ---
+        function resetSalaryForm() {
+            hapticTap();
+            document.getElementById("salaryForm").reset();
+            document.querySelectorAll('.is-fetched').forEach(el => el.classList.remove('is-fetched'));
+            document.getElementById('monthPart').focus();
+        }
 
-        function handleDateInput() {
-            const m = document.getElementById("monthPart").value.toUpperCase();
-            const y = document.getElementById("yearPart").value;
+        function resetFuelForm() {
+            hapticTap();
+            document.getElementById("fuelForm").reset();
+            document.getElementById('fuelMonth').value = `${currentExpYear}-${currentExpMonth}`;
+            document.getElementById('fuelLiveLiters').innerText = "0.0 L";
+            document.getElementById('fuelLiveMileage').innerText = "-- km/l";
+        }
+
+        // --- TAB ROUTING & INSIGHTS FILTER ---
+        function toggleExpenseSubTab(view) {
+            hapticTap();
+            document.getElementById('expense-checklist-pane').style.display = view === 'checklist' ? 'block' : 'none';
+            document.getElementById('expense-fuel-pane').style.display = view === 'fuel' ? 'block' : 'none';
+            document.getElementById('expense-insights-pane').style.display = view === 'insights' ? 'block' : 'none';
             
-            if (m.length === 3 && y.length === 4) {
-                const targetVal = getSortValue(`${m}-${y}`);
-                if (targetVal === 0) return;
-
-                let priorRecord = null;
-                let maxPriorVal = 0;
-
-                cachedSalaryData.forEach(row => {
-                    const rowVal = getSortValue(row.monthYear);
-                    if (rowVal < targetVal && rowVal > maxPriorVal) {
-                        maxPriorVal = rowVal;
-                        priorRecord = row;
-                    }
-                });
-
-                if (!priorRecord && cachedSalaryData.length > 0) {
-                    let sorted = [...cachedSalaryData].sort((a,b) => getSortValue(a.monthYear) - getSortValue(b.monthYear));
-                    priorRecord = sorted[sorted.length - 1];
-                }
-
-                applyFetchedValue("empNumber", (priorRecord && priorRecord.empNumber) || localStorage.getItem("empNumber"));
-                applyFetchedValue("bankName", (priorRecord && priorRecord.bankName) || localStorage.getItem("bankName"));
-                applyFetchedValue("bankAccount", (priorRecord && priorRecord.bankAccount) || localStorage.getItem("bankAccount"));
-                applyFetchedValue("grade", (priorRecord && priorRecord.grade) || localStorage.getItem("grade"));
-                applyFetchedValue("uan", (priorRecord && priorRecord.uan) || localStorage.getItem("uan"));
-                applyFetchedValue("taxRegime", (priorRecord && priorRecord.taxRegime) || localStorage.getItem("taxRegime") || "New");
+            const monthNav = document.getElementById('global-exp-month-nav');
+            if (view === 'insights') {
+                const filter = document.getElementById('insightsFilter').value;
+                monthNav.style.display = filter === 'all' ? 'none' : 'flex';
+                renderExpenseInsights();
+            } else {
+                monthNav.style.display = 'flex'; 
+                if(view === 'fuel') prepareFuelUI();
             }
         }
-        document.getElementById("yearPart").addEventListener("input", handleDateInput);
 
-        // --- 5. NETWORK SYNC ---
-        async function syncWithSheetQuietly(forceUpdate = false) {
-            const syncBtn = document.getElementById("syncDataBtn");
-            const originalIcon = syncBtn.innerHTML;
-            syncBtn.innerHTML = `<span class="material-icons" style="font-size: 20px; animation: spin 1s linear infinite;">sync</span>`;
+        function handleInsightsFilterChange() {
+            hapticTap();
+            const filter = document.getElementById('insightsFilter').value;
+            document.getElementById('global-exp-month-nav').style.display = (filter === 'all') ? 'none' : 'flex';
+            renderExpenseInsights();
+        }
+
+        // --- SMART UNCHECK & DUPLICATE BLOCKER ---
+        function smartUncheck(elem) {
+            const row = elem.closest('.exp-row');
+            if (row.classList.contains('is-done')) {
+                row.classList.remove('is-done');
+                hapticTap(); 
+                calcExpenseTotal();
+            }
+        }
+
+        function checkExpenseDuplicate(elem) {
+            const row = elem.closest('.exp-row');
+            const desc = row.querySelector('.exp-desc').value.trim().toLowerCase();
+            const amt = parseFloat(row.querySelector('.exp-amt').value);
+            const isDone = row.classList.contains('is-done');
+
+            if (!desc || isNaN(amt) || isDone) return;
+            const allRows = Array.from(document.querySelectorAll('.exp-row'));
+            let duplicateFound = false;
+
+            for (let r of allRows) {
+                if (r === row) continue;
+                const rDesc = r.querySelector('.exp-desc').value.trim().toLowerCase();
+                const rAmt = parseFloat(r.querySelector('.exp-amt').value);
+                const rIsDone = r.classList.contains('is-done');
+                if (rDesc === desc && rAmt === amt && !rIsDone) { duplicateFound = true; break; }
+            }
+
+            if (duplicateFound) {
+                hapticError();
+                alert(`Duplicate Blocked: A pending expense for "${desc}" of ₹${amt} already exists!`);
+                row.querySelector('.exp-amt').value = ""; 
+                calcExpenseTotal(); debouncedAutoSaveExpenses();
+            }
+        }
+
+        async function fetchCloudFuel() {
+            const lastSync = localStorage.getItem('lastFuelSync') || '0';
+            try {
+                const response = await fetch(`${API_URL}?type=fuel&since=${lastSync}`);
+                const res = await response.json();
+                if(res.status === "not_modified") {
+                    cachedFuelData = JSON.parse(localStorage.getItem('fuelData')) || [];
+                } else if (res.data) {
+                    cachedFuelData = res.data; localStorage.setItem('fuelData', JSON.stringify(cachedFuelData)); localStorage.setItem('lastFuelSync', res.timestamp);
+                }
+            } catch(e) { cachedFuelData = JSON.parse(localStorage.getItem('fuelData')) || []; }
+        }
+
+        function prepareFuelUI() {
+            if(cachedFuelData.length > 0) {
+                const sorted = [...cachedFuelData].sort((a,b) => a.odo - b.odo); document.getElementById('fuelLastOdo').innerText = sorted[sorted.length - 1].odo;
+            }
+        }
+
+        function calcFuelLive() {
+            const amt = parseFloat(document.getElementById('fuelAmount').value) || 0; const rate = parseFloat(document.getElementById('fuelRate').value) || 0;
+            const currentOdo = parseFloat(document.getElementById('fuelOdo').value) || 0; const lastOdo = parseFloat(document.getElementById('fuelLastOdo').innerText) || 0;
+            let liters = 0; if (amt > 0 && rate > 0) liters = amt / rate; document.getElementById('fuelLiveLiters').innerText = liters.toFixed(2) + " L";
+            if (lastOdo > 0 && currentOdo > lastOdo && liters > 0) { const dist = currentOdo - lastOdo; document.getElementById('fuelLiveMileage').innerText = (dist / liters).toFixed(1) + " km/l";
+            } else { document.getElementById('fuelLiveMileage').innerText = "-- km/l"; }
+        }
+
+        const debouncedCalcFuelLive = debounce(calcFuelLive, 150);
+
+        document.getElementById("fuelForm").addEventListener("submit", async function(e) {
+            e.preventDefault(); const btn = document.getElementById("saveFuelBtn"); const originalHtml = btn.innerHTML;
+            const payloadMonth = document.getElementById('fuelMonth').value;
+
+            if (cachedFuelData.some(f => f.monthYear === payloadMonth)) { hapticError(); alert(`Duplicate Blocked: Fuel entry for ${payloadMonth} already exists!`); return; }
+
+            btn.innerHTML = `<span class="material-icons me-2" style="font-size: 20px; animation: spin 1s linear infinite;">sync</span> Saving...`;
+            const payload = { type: "fuel", monthYear: payloadMonth, odo: parseFloat(document.getElementById('fuelOdo').value), amount: parseFloat(document.getElementById('fuelAmount').value), rate: parseFloat(document.getElementById('fuelRate').value) };
+            cachedFuelData.push(payload); localStorage.setItem('fuelData', JSON.stringify(cachedFuelData));
 
             try {
-                const response = await fetch(API_URL);
-                const data = await response.json();
-                
-                if (data && data.length > 0) {
-                    cachedSalaryData = data;
-                    
-                    // Bulk update IndexedDB
-                    const db = await dbPromise;
-                    const tx = db.transaction('salary', 'readwrite');
-                    await tx.objectStore('salary').clear();
-                    for (let record of data) { await tx.objectStore('salary').put(record); }
-                    
-                    if (document.getElementById('view-insights').checked || forceUpdate) {
-                        renderInsights();
+                await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+                hapticSuccess(); btn.innerHTML = `<span class="material-icons me-2">check_circle</span> Logged!`; btn.style.backgroundColor = "#10b981";
+                setTimeout(() => { btn.innerHTML = originalHtml; btn.style.backgroundColor = ""; resetFuelForm(); prepareFuelUI(); calcFuelLive(); }, 1500);
+            } catch(err) {
+                hapticError(); btn.innerHTML = `<span class="material-icons me-2">cloud_off</span> Saved Locally`; btn.style.backgroundColor = "#f59e0b";
+                setTimeout(() => { btn.innerHTML = originalHtml; btn.style.backgroundColor = ""; }, 2000);
+            }
+        });
+
+        function renderExpenseInsights() {
+            const filter = document.getElementById('insightsFilter').value;
+            let rawExpData = [];
+
+            if (filter === 'all') {
+                for(let i=0; i<localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if(key.startsWith('exp_')) { 
+                        const arr = JSON.parse(localStorage.getItem(key)) || []; 
+                        rawExpData = rawExpData.concat(arr);
                     }
                 }
-            } catch (err) {
-                console.error("Background sync failed: Offline Mode Active");
-                if (document.getElementById('view-insights').checked || forceUpdate) renderInsights();
-            } finally {
-                setTimeout(() => { syncBtn.innerHTML = originalIcon; }, 500);
+            } else {
+                const key = `exp_${currentExpYear}_${currentExpMonth}`;
+                rawExpData = JSON.parse(localStorage.getItem(key)) || []; 
             }
+
+            mathWorker.postMessage({ type: 'expense', rawExpData: rawExpData, fuelData: cachedFuelData, filter: filter, targetMonth: `${currentExpYear}-${currentExpMonth}` });
         }
 
-        // --- 6. MEMOIZED INSIGHTS ---
-        function renderInsights() {
-            if (cachedSalaryData.length === 0) {
-                document.getElementById("displayInHand").innerText = "₹ 0";
-                document.getElementById("displayTotalPF").innerText = "₹ 0";
-                document.getElementById("displayRecordRange").innerText = "NO DATA";
-                document.getElementById("displayMonthCount").innerText = "0 Months Tracked";
-                document.getElementById("displayTotalTax").innerText = "₹ 0";
-                document.getElementById("displayTaxRange").innerText = "N/A";
-                document.getElementById("displayGratuity").innerText = "₹ 0";
-                return;
-            }
+        function getExpStorageKey() { return `exp_${currentExpYear}_${currentExpMonth}`; }
 
-            let sortedData = [...cachedSalaryData].sort((a, b) => getSortValue(a.monthYear) - getSortValue(b.monthYear));
+        function changeExpMonth(offset) {
+            hapticTap(); currentExpMonth += offset;
+            if (currentExpMonth > 12) { currentExpMonth = 1; currentExpYear++; } else if (currentExpMonth < 1) { currentExpMonth = 12; currentExpYear--; }
             
-            // Create a hash based on the dataset length and the newest record. 
-            // If it hasn't changed since the last calculation, abort math block to save CPU.
-            let currentHash = `${sortedData.length}-${sortedData[sortedData.length - 1].monthYear}`;
-            if (insightsMemoHash === currentHash) return; 
+            document.getElementById('expMonthLabel').innerText = `${monthNames[currentExpMonth - 1]} ${currentExpYear}`;
+            document.getElementById('fuelMonth').value = `${currentExpYear}-${currentExpMonth}`;
+            
+            loadExpenses();
+            if(document.getElementById('view-exp-insights').checked) renderExpenseInsights();
+        }
 
-            let totalInHandAllTime = 0;
-            let totalEmployeePF = 0;
-            let totalEmployerPF = 0;
-            let totalPensionEPS = 0;
-            let runningBalance = 0;
-            let accumulatedInterest = 0;
-            let totalLifetimeInterest = 0;
-            let totalTaxAllTime = 0;
+        // Now accepts category parameter
+        function createExpenseRow(desc = "", amt = "", dateStr = "", isDone = false, category = "Misc") {
+            const row = document.createElement('div'); 
+            row.className = `exp-row ${isDone ? 'is-done' : ''}`;
+            row.setAttribute('data-category', category);
+            row.innerHTML = `
+                <button class="exp-checkbox" onclick="toggleExpDone(this)" type="button"><span class="material-icons" style="font-size: 16px;">check</span></button>
+                <input type="text" class="exp-input exp-desc" placeholder="Item" style="flex: 2;" value="${desc}" onchange="checkExpenseDuplicate(this); debouncedAutoSaveExpenses()" oninput="smartUncheck(this); debouncedAutoSaveExpenses()">
+                <input type="number" class="exp-input exp-amt" placeholder="₹0" style="flex: 1.2;" value="${amt}" onchange="checkExpenseDuplicate(this); debouncedAutoSaveExpenses()" oninput="smartUncheck(this); calcExpenseTotal(); debouncedAutoSaveExpenses()" inputmode="numeric">
+                <input type="text" class="exp-input exp-date" placeholder="DD-MMM" style="flex: 1.2;" value="${dateStr}" oninput="smartUncheck(this); handleExpenseAutoRow(this); debouncedAutoSaveExpenses()">
+            `;
+            return row;
+        }
 
-            let startRecord = formatShortDate(sortedData[0].monthYear);
-            let endRecord = formatShortDate(sortedData[sortedData.length - 1].monthYear);
-            document.getElementById("displayRecordRange").innerText = `${startRecord} to ${endRecord}`;
-            document.getElementById("displayTaxRange").innerText = `${startRecord} to ${endRecord}`;
-            document.getElementById("displayMonthCount").innerText = `${sortedData.length} Months Tracked`;
-
-            sortedData.forEach(row => {
-                let inHand = (Number(row.totalEarnings) || 0) - (Number(row.totalDeductions) || 0);
-                totalInHandAllTime += inHand;
-                totalTaxAllTime += (Number(row.taxDeduction) || 0);
-
-                let empPF = Number(row.employeePF) || 0;
-                let { m, y } = parseDateInfo(row.monthYear);
+        function loadExpenses() {
+            document.getElementById('expMonthLabel').innerText = `${monthNames[currentExpMonth - 1]} ${currentExpYear}`;
+            
+            const cats = ['Home', 'EMI', 'Misc'];
+            const data = JSON.parse(localStorage.getItem(getExpStorageKey())) || [];
+            
+            cats.forEach(cat => {
+                const container = document.getElementById(`expense-list-${cat}`);
+                container.innerHTML = '';
+                // Fallback to Misc if old data has no category
+                const catData = data.filter(item => (item.category || 'Misc') === cat);
                 
-                let annualInterestRate = getAnnualInterestRate(row.monthYear);
-                let monthlyInterest = runningBalance * (annualInterestRate / 12);
-                accumulatedInterest += monthlyInterest;
-                
-                if (empPF > 0) {
-                    let epsCut = (empPF >= 1800) ? 1250 : Math.round(empPF * (8.33 / 12));
-                    let employerPF = empPF - epsCut;
-                    
-                    totalEmployeePF += empPF;
-                    totalEmployerPF += employerPF;
-                    totalPensionEPS += epsCut;
-                    
-                    runningBalance += (empPF + employerPF);
-                }
-                
-                if (m === 3) { 
-                    runningBalance += accumulatedInterest;
-                    totalLifetimeInterest += accumulatedInterest;
-                    accumulatedInterest = 0; 
+                if (catData.length === 0) {
+                    container.appendChild(createExpenseRow("", "", "", false, cat));
+                } else {
+                    catData.forEach(item => container.appendChild(createExpenseRow(item.desc, item.amt, item.date, item.isDone, cat)));
+                    const last = catData[catData.length - 1];
+                    if (last.desc || last.amt || last.date) container.appendChild(createExpenseRow("", "", "", false, cat));
                 }
             });
 
-            let totalDisplayedInterest = totalLifetimeInterest + accumulatedInterest;
-            let totalMainPF = runningBalance + accumulatedInterest;
-            let latestGratuity = Number(sortedData[sortedData.length - 1].gratuity) || 0;
-
-            document.getElementById("displayInHand").innerText = "₹ " + totalInHandAllTime.toLocaleString("en-IN");
-            document.getElementById("displayTotalPF").innerText = "₹ " + Math.round(totalMainPF).toLocaleString("en-IN");
-            document.getElementById("displayEmpPF").innerText = "₹" + totalEmployeePF.toLocaleString("en-IN");
-            document.getElementById("displayEmployerPF").innerText = "₹" + totalEmployerPF.toLocaleString("en-IN");
-            document.getElementById("displayInterestEarned").innerText = "₹" + Math.round(totalDisplayedInterest).toLocaleString("en-IN");
-            document.getElementById("displayPension").innerText = "₹" + totalPensionEPS.toLocaleString("en-IN");
-            document.getElementById("displayTotalTax").innerText = "₹ " + totalTaxAllTime.toLocaleString("en-IN");
-            document.getElementById("displayGratuity").innerText = "₹ " + latestGratuity.toLocaleString("en-IN");
-
-            insightsMemoHash = currentHash; // Lock the cache
+            calcExpenseTotal();
         }
 
-        // --- 7. OFFLINE CAPABLE SUBMIT ---
+        function handleExpenseAutoRow(elem) {
+            const val = elem.value.trim(); const row = elem.closest('.exp-row'); const nextRow = row.nextElementSibling;
+            const category = row.getAttribute('data-category');
+            
+            if (val.length >= 5 && !nextRow) { 
+                row.parentNode.appendChild(createExpenseRow("", "", "", false, category)); 
+            } 
+            else if (val.length < 5 && nextRow) {
+                const d = nextRow.querySelector('.exp-desc').value; const a = nextRow.querySelector('.exp-amt').value; const dt = nextRow.querySelector('.exp-date').value;
+                if (!d && !a && !dt) nextRow.remove();
+            }
+        }
+
+        function toggleExpDone(btn) {
+            hapticTap(); btn.closest('.exp-row').classList.toggle('is-done'); calcExpenseTotal(); autoSaveExpenses(); 
+        }
+
+        function calcExpenseTotal() {
+            let grandTotal = 0, pendingTotal = 0;
+            document.querySelectorAll('.exp-row').forEach(row => {
+                const amt = parseFloat(row.querySelector('.exp-amt').value);
+                if (!isNaN(amt)) { grandTotal += amt; if (!row.classList.contains('is-done')) pendingTotal += amt; }
+            });
+            document.getElementById('expGrandTotal').innerText = grandTotal.toLocaleString("en-IN");
+            document.getElementById('expPendingTotal').innerText = pendingTotal.toLocaleString("en-IN");
+        }
+
+        function autoSaveExpenses() {
+            const data = [];
+            document.querySelectorAll('.exp-row').forEach(row => {
+                const desc = row.querySelector('.exp-desc').value; const amt = row.querySelector('.exp-amt').value; 
+                const date = row.querySelector('.exp-date').value; const isDone = row.classList.contains('is-done');
+                const category = row.getAttribute('data-category');
+                if (desc || amt || date) data.push({ desc, amt, date, isDone, category });
+            });
+            localStorage.setItem(getExpStorageKey(), JSON.stringify(data));
+        }
+
+        const debouncedAutoSaveExpenses = debounce(autoSaveExpenses, 500);
+
+        async function syncExpensesToCloud() {
+            const btn = document.getElementById("saveExpensesBtn"); const originalHtml = btn.innerHTML;
+            btn.innerHTML = `<span class="material-icons me-2" style="font-size: 20px; animation: spin 1s linear infinite;">sync</span> Saving...`;
+            
+            autoSaveExpenses(); 
+            const data = JSON.parse(localStorage.getItem(getExpStorageKey())) || [];
+            const payload = { type: "expense", monthYear: `${currentExpYear}-${currentExpMonth}`, items: data };
+            try {
+                const response = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+                if (!response.ok) throw new Error("Network error");
+                hapticSuccess(); btn.innerHTML = `<span class="material-icons me-2">check_circle</span> Synced!`; btn.style.backgroundColor = "#10b981";
+            } catch (error) {
+                hapticError(); btn.innerHTML = `<span class="material-icons me-2">cloud_off</span> Saved Locally`; btn.style.backgroundColor = "#f59e0b";
+            }
+            setTimeout(() => { btn.innerHTML = originalHtml; btn.style.backgroundColor = "var(--primary)"; }, 2500);
+        }
+
+        async function fetchCloudExpenses() {
+            const lastSync = localStorage.getItem('lastExpSync') || '0';
+            try {
+                const response = await fetch(`${API_URL}?type=expense&since=${lastSync}`);
+                const res = await response.json();
+                if(res.status === "not_modified") return;
+                
+                if (res.data) {
+                    for(let i = localStorage.length - 1; i >= 0; i--) {
+                        const key = localStorage.key(i);
+                        if(key.startsWith('exp_')) localStorage.removeItem(key);
+                    }
+
+                    const grouped = {};
+                    res.data.forEach(row => {
+                        if (!grouped[row.monthYear]) grouped[row.monthYear] = [];
+                        // Save category with fallback
+                        grouped[row.monthYear].push({ desc: row.desc, amt: row.amt, date: row.date, isDone: row.isDone, category: row.category || 'Misc' });
+                    });
+                    
+                    for (const [monthKey, items] of Object.entries(grouped)) {
+                        const [y, m] = monthKey.split('-'); localStorage.setItem(`exp_${y}_${m}`, JSON.stringify(items));
+                    }
+                    
+                    localStorage.setItem('lastExpSync', res.timestamp); 
+                    loadExpenses();
+                    
+                    if (document.getElementById('view-exp-insights').checked) renderExpenseInsights();
+                }
+            } catch(err) {}
+        }
+
+        function forceAppUpdate() {
+            hapticTap(); document.getElementById("updateAppBtn").innerHTML = `<span class="material-icons" style="animation: spin 1s linear infinite;">sync</span>`;
+            if ('caches' in window) caches.keys().then(names => names.forEach(name => caches.delete(name)));
+            if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
+            
+            for(let i = localStorage.length - 1; i >= 0; i--) {
+                const key = localStorage.key(i);
+                if(key.startsWith('exp_') || key.includes('Sync') || key === 'fuelData') localStorage.removeItem(key);
+            }
+            setTimeout(() => window.location.reload(true), 600);
+        }
+        
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light'; document.documentElement.setAttribute('data-bs-theme', savedTheme); document.getElementById('themeIcon').innerText = savedTheme === 'dark' ? 'light_mode' : 'dark_mode';
+        }
+        function toggleTheme() {
+            hapticTap(); const newTheme = document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-bs-theme', newTheme); localStorage.setItem('theme', newTheme); document.getElementById('themeIcon').innerText = newTheme === 'dark' ? 'light_mode' : 'dark_mode';
+        }
+        function toggleSalarySubTab(view) {
+            hapticTap();
+            document.getElementById('salary-entry-pane').style.display = view === 'entry' ? 'block' : 'none';
+            document.getElementById('salary-insights-pane').style.display = view === 'insights' ? 'block' : 'none';
+            if(view === 'insights') renderInsights();
+        }
+        document.querySelectorAll('.static-field').forEach(input => { input.addEventListener('focus', function() { this.classList.remove('is-fetched'); }); input.addEventListener('input', function() { this.classList.remove('is-fetched'); }); });
+        function applyFetchedValue(id, val) { const el = document.getElementById(id); if (val) { el.value = val; el.classList.add('is-fetched'); } else { el.value = ""; el.classList.remove('is-fetched'); } }
+        function parseDateInfo(str) {
+            if (!str) return { m: 0, y: 0 }; let s = String(str).trim().toUpperCase(); let parts = s.split('-');
+            if (parts.length === 2 && monthMap[parts[0]]) return { m: monthMap[parts[0]], y: parseInt(parts[1]) };
+            let d = new Date(str); if (!isNaN(d.getTime())) return { m: d.getMonth() + 1, y: d.getFullYear() }; return { m: 0, y: 0 }; 
+        }
+        function getSortValue(str) { let { m, y } = parseDateInfo(str); return m === 0 ? 0 : (y * 100) + m; }
+
+        function handleDateInput() {
+            const m = document.getElementById("monthPart").value.toUpperCase(); const y = document.getElementById("yearPart").value;
+            if (m.length === 3 && y.length === 4) {
+                const targetVal = getSortValue(`${m}-${y}`); if (targetVal === 0) return;
+                let priorRecord = null; let maxPriorVal = 0;
+                cachedSalaryData.forEach(row => { const rowVal = getSortValue(row.monthYear); if (rowVal < targetVal && rowVal > maxPriorVal) { maxPriorVal = rowVal; priorRecord = row; } });
+                if (!priorRecord && cachedSalaryData.length > 0) { let sorted = [...cachedSalaryData].sort((a,b) => getSortValue(a.monthYear) - getSortValue(b.monthYear)); priorRecord = sorted[sorted.length - 1]; }
+                applyFetchedValue("empNumber", (priorRecord && priorRecord.empNumber) || localStorage.getItem("empNumber")); applyFetchedValue("bankName", (priorRecord && priorRecord.bankName) || localStorage.getItem("bankName"));
+                applyFetchedValue("bankAccount", (priorRecord && priorRecord.bankAccount) || localStorage.getItem("bankAccount")); applyFetchedValue("grade", (priorRecord && priorRecord.grade) || localStorage.getItem("grade"));
+                applyFetchedValue("uan", (priorRecord && priorRecord.uan) || localStorage.getItem("uan")); applyFetchedValue("taxRegime", (priorRecord && priorRecord.taxRegime) || localStorage.getItem("taxRegime") || "New");
+            }
+        }
+        
+        const debouncedHandleDateInput = debounce(handleDateInput, 400);
+
+        document.getElementById("monthPart").addEventListener("input", function() { if(this.value.length === 3) document.getElementById("yearPart").focus(); });
+        document.getElementById("yearPart").addEventListener("input", debouncedHandleDateInput);
+
+        async function syncWithSheetQuietly(forceUpdate = false) {
+            hapticTap();
+            const syncBtn = document.getElementById("syncDataBtn"); const originalIcon = syncBtn.innerHTML;
+            syncBtn.innerHTML = `<span class="material-icons" style="font-size: 20px; animation: spin 1s linear infinite;">sync</span>`;
+            const lastSync = localStorage.getItem('lastSalarySync') || '0';
+            try {
+                const response = await fetch(`${API_URL}?since=${lastSync}`);
+                const res = await response.json();
+                if(res.status === "not_modified") {
+                    if (document.getElementById('view-insights').checked || forceUpdate) renderInsights();
+                } else if (res.data) {
+                    cachedSalaryData = res.data;
+                    const db = await dbPromise; const tx = db.transaction('salary', 'readwrite'); await tx.objectStore('salary').clear();
+                    for (let record of res.data) { await tx.objectStore('salary').put(record); }
+                    localStorage.setItem('lastSalarySync', res.timestamp);
+                    if (document.getElementById('view-insights').checked || forceUpdate) renderInsights();
+                }
+            } catch (err) { if (document.getElementById('view-insights').checked || forceUpdate) renderInsights(); } 
+            finally { setTimeout(() => { syncBtn.innerHTML = originalIcon; }, 500); }
+        }
+
+        function renderInsights() { mathWorker.postMessage({ type: 'salary', salaryData: cachedSalaryData }); }
+
         document.getElementById("salaryForm").addEventListener("submit", async function(e) {
             e.preventDefault();
-            const btn = document.getElementById("submitBtn");
-            const originalBtnHtml = btn.innerHTML;
-            
             const combinedMonthYear = document.getElementById("monthPart").value.toUpperCase() + "-" + document.getElementById("yearPart").value;
-
-            const isDuplicate = cachedSalaryData.some(row => row.monthYear && getSortValue(row.monthYear) === getSortValue(combinedMonthYear));
-            if (isDuplicate) {
-                alert(`A record for ${combinedMonthYear} already exists! Please update it via Google Sheets.`);
-                return;
+            if (cachedSalaryData.some(row => row.monthYear && getSortValue(row.monthYear) === getSortValue(combinedMonthYear))) {
+                hapticError(); alert(`Record for ${combinedMonthYear} already exists!`); return;
             }
 
+            const btn = document.getElementById("submitBtn"); const originalBtnHtml = btn.innerHTML;
             btn.innerHTML = `<span class="material-icons me-2" style="font-size: 20px; animation: spin 1s linear infinite;">sync</span> Saving...`;
 
             const payload = {
-                monthYear: combinedMonthYear,
-                bankName: document.getElementById("bankName").value,
-                bankAccount: document.getElementById("bankAccount").value,
-                empNumber: document.getElementById("empNumber").value,
-                grade: document.getElementById("grade").value,
-                uan: document.getElementById("uan").value,
-                taxRegime: document.getElementById("taxRegime").value,
-                totalEarnings: Number(document.getElementById("totalEarnings").value),
-                totalDeductions: Number(document.getElementById("totalDeductions").value),
-                employeePF: Number(document.getElementById("employeePF").value),
-                taxDeduction: Number(document.getElementById("taxDeduction").value),
-                gratuity: Number(document.getElementById("gratuity").value)
+                monthYear: combinedMonthYear, bankName: document.getElementById("bankName").value, bankAccount: document.getElementById("bankAccount").value,
+                empNumber: document.getElementById("empNumber").value, grade: document.getElementById("grade").value, uan: document.getElementById("uan").value,
+                taxRegime: document.getElementById("taxRegime").value, totalEarnings: Number(document.getElementById("totalEarnings").value),
+                totalDeductions: Number(document.getElementById("totalDeductions").value), employeePF: Number(document.getElementById("employeePF").value),
+                taxDeduction: Number(document.getElementById("taxDeduction").value), gratuity: Number(document.getElementById("gratuity").value)
             };
 
-            // Local RAM + IndexedDB Save
-            cachedSalaryData.push(payload);
-            const db = await dbPromise;
-            await db.transaction('salary', 'readwrite').objectStore('salary').put(payload);
-            insightsMemoHash = ""; // Invalidate math cache
+            cachedSalaryData.push(payload); const db = await dbPromise; await db.transaction('salary', 'readwrite').objectStore('salary').put(payload);
             
-            // Backup static details to LocalStorage for fallback
-            localStorage.setItem("empNumber", payload.empNumber);
-            localStorage.setItem("bankName", payload.bankName);
-            localStorage.setItem("bankAccount", payload.bankAccount);
-            localStorage.setItem("grade", payload.grade);
-            localStorage.setItem("uan", payload.uan);
-            localStorage.setItem("taxRegime", payload.taxRegime);
+            localStorage.setItem("empNumber", payload.empNumber); localStorage.setItem("bankName", payload.bankName); localStorage.setItem("bankAccount", payload.bankAccount);
+            localStorage.setItem("grade", payload.grade); localStorage.setItem("uan", payload.uan); localStorage.setItem("taxRegime", payload.taxRegime);
 
-            try {
-                // Try live network sync
-                await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
-            } catch (error) {
-                // Fail silently, add to Offline Queue
-                await db.transaction('syncQueue', 'readwrite').objectStore('syncQueue').add({ payload });
-            }
+            try { await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) }); hapticSuccess(); } 
+            catch (error) { hapticError(); await db.transaction('syncQueue', 'readwrite').objectStore('syncQueue').add({ payload }); }
 
-            // Always succeed in UI immediately (Optimistic rendering)
-            btn.innerHTML = `<span class="material-icons me-2">check_circle</span> Saved!`;
-            btn.style.backgroundColor = "#10b981";
-            
+            btn.innerHTML = `<span class="material-icons me-2">check_circle</span> Saved!`; btn.style.backgroundColor = "#10b981";
             if (document.getElementById('view-insights').checked) renderInsights();
-            
             setTimeout(() => {
-                btn.innerHTML = originalBtnHtml;
-                btn.style.backgroundColor = "";
-                document.getElementById("salaryForm").reset();
-                document.querySelectorAll('.is-fetched').forEach(el => el.classList.remove('is-fetched'));
-                document.getElementById('monthPart').focus();
+                btn.innerHTML = originalBtnHtml; btn.style.backgroundColor = ""; resetSalaryForm();
             }, 1500);
         });
     </script>

@@ -12,9 +12,12 @@
     <meta name="apple-mobile-web-app-title" content="FinCenter">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2933/2933116.png">
 
+    <!-- IndexedDB Library -->
+    <script src="https://cdn.jsdelivr.net/npm/idb@7/build/umd.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
         :root {
             --app-bg: #f4f6f9;
@@ -117,7 +120,7 @@
             padding-top: 1.2rem;
             padding-bottom: 0.2rem;
             font-size: 0.95rem;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, background-color 0.2s ease;
         }
         .form-floating > label {
             padding: 0.8rem 0.75rem;
@@ -137,7 +140,6 @@
             box-shadow: 0 0 0 3px var(--primary-glow);
         }
 
-        /* Fetched Data Visual State */
         .is-fetched {
             color: var(--text-muted) !important;
             background-color: rgba(128, 128, 128, 0.08) !important;
@@ -261,7 +263,7 @@
             <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center me-2" id="updateAppBtn" onclick="forceAppUpdate()" style="background: var(--input-bg); color: var(--text-muted); width: 36px; height: 36px; border: 1px solid var(--input-border);" title="Fetch Latest App Update">
                 <span class="material-icons" style="font-size: 20px;">system_update_alt</span>
             </button>
-            <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center me-2" onclick="syncWithSheetQuietly(true)" style="background: var(--primary-glow); color: var(--primary); width: 36px; height: 36px; border: none;" title="Sync Data">
+            <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center me-2" id="syncDataBtn" onclick="syncWithSheetQuietly(true)" style="background: var(--primary-glow); color: var(--primary); width: 36px; height: 36px; border: none;" title="Sync Data">
                 <span class="material-icons" style="font-size: 20px;">sync</span>
             </button>
             <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center" onclick="toggleTheme()" style="background: var(--input-bg); color: var(--text-main); width: 36px; height: 36px; border: 1px solid var(--input-border);">
@@ -456,7 +458,7 @@
         <!-- EXPENSE MODULE -->
         <div class="tab-pane fade" id="expense-module" role="tabpanel">
 
-            <div class="premium-card mb-4 d-flex align-items-center justify-content-between p-3">
+            <div class="premium-card mb-4 d-flex align-items-center justify-content-between p-3 mt-4">
                 <button class="btn btn-sm d-flex align-items-center p-0" style="color: var(--text-muted);">
                     <span class="material-icons">chevron_left</span>
                 </button>
@@ -498,9 +500,40 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbxw50bYSCs1TSMYGm5HaOsc-y0jf2mAtE8l56_2NhYgI4HxQmtRQhP-9O4cKLC3vYxgsw/exec";
-        
-        let cachedSalaryData = JSON.parse(localStorage.getItem("salaryData")) || [];
         const monthMap = { "JAN":1, "FEB":2, "MAR":3, "APR":4, "MAY":5, "JUN":6, "JUL":7, "AUG":8, "SEP":9, "OCT":10, "NOV":11, "DEC":12 };
+
+        let cachedSalaryData = [];
+        let insightsMemoHash = ""; // Prevents unnecessary insights recalculation
+
+        // --- 1. INDEXEDDB SETUP & OFFLINE QUEUE ---
+        const dbPromise = idb.openDB('FinCenterDB', 1, {
+            upgrade(db) {
+                if (!db.objectStoreNames.contains('salary')) db.createObjectStore('salary', { keyPath: 'monthYear' });
+                if (!db.objectStoreNames.contains('syncQueue')) db.createObjectStore('syncQueue', { keyPath: 'id', autoIncrement: true });
+            }
+        });
+
+        // Flush offline queue when internet returns
+        async function flushSyncQueue() {
+            if (!navigator.onLine) return;
+            const db = await dbPromise;
+            const queue = await db.transaction('syncQueue', 'readonly').objectStore('syncQueue').getAll();
+            if (queue.length === 0) return;
+
+            const payloads = queue.map(q => q.payload);
+            try {
+                // Batch upload via updated Code.gs
+                const response = await fetch(API_URL, { method: "POST", body: JSON.stringify(payloads) });
+                if (response.ok) {
+                    await db.transaction('syncQueue', 'readwrite').objectStore('syncQueue').clear();
+                    console.log("Offline records successfully synced.");
+                    syncWithSheetQuietly(); // Refresh fresh data
+                }
+            } catch (e) {
+                console.log("Sync queue failed, will retry later.");
+            }
+        }
+        window.addEventListener('online', flushSyncQueue);
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -508,10 +541,10 @@
             });
         }
 
+        // --- 2. UI CONTROLS ---
         function forceAppUpdate() {
             const btn = document.getElementById("updateAppBtn");
             btn.innerHTML = `<span class="material-icons" style="font-size: 20px; animation: spin 1s linear infinite;">sync</span>`;
-            
             if ('caches' in window) {
                 caches.keys().then(names => { names.forEach(name => caches.delete(name)); });
             }
@@ -548,13 +581,12 @@
             }
         }
 
-        // Remove the grey "fetched" state when user interacts with field
+        // Revert grey 'fetched' visual state on focus
         document.querySelectorAll('.static-field').forEach(input => {
             input.addEventListener('focus', function() { this.classList.remove('is-fetched'); });
             input.addEventListener('input', function() { this.classList.remove('is-fetched'); });
         });
 
-        // Smart populate with visual "fetched" state
         function applyFetchedValue(id, val) {
             const el = document.getElementById(id);
             if (val) {
@@ -566,6 +598,7 @@
             }
         }
 
+        // --- 3. MATH & PARSING ---
         function parseDateInfo(str) {
             if (!str) return { m: 0, y: 0 };
             let s = String(str).trim().toUpperCase();
@@ -601,9 +634,17 @@
             return 0.0825;
         }
 
-        window.onload = () => {
+        // --- 4. CORE INITIALIZATION ---
+        window.onload = async () => {
             initTheme();
+            
+            // Fast Boot: Load from IndexedDB instantly
+            const db = await dbPromise;
+            cachedSalaryData = await db.transaction('salary').objectStore('salary').getAll();
+            
+            // Background Sync
             syncWithSheetQuietly(true);
+            flushSyncQueue();
         };
 
         document.getElementById("monthPart").addEventListener("input", function() {
@@ -642,29 +683,40 @@
                 applyFetchedValue("taxRegime", (priorRecord && priorRecord.taxRegime) || localStorage.getItem("taxRegime") || "New");
             }
         }
-
         document.getElementById("yearPart").addEventListener("input", handleDateInput);
 
-        function syncWithSheetQuietly(forceUpdate = false) {
-            fetch(API_URL)
-            .then(response => response.json())
-            .then(data => {
+        // --- 5. NETWORK SYNC ---
+        async function syncWithSheetQuietly(forceUpdate = false) {
+            const syncBtn = document.getElementById("syncDataBtn");
+            const originalIcon = syncBtn.innerHTML;
+            syncBtn.innerHTML = `<span class="material-icons" style="font-size: 20px; animation: spin 1s linear infinite;">sync</span>`;
+
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                
                 if (data && data.length > 0) {
                     cachedSalaryData = data;
-                    localStorage.setItem("salaryData", JSON.stringify(data));
+                    
+                    // Bulk update IndexedDB
+                    const db = await dbPromise;
+                    const tx = db.transaction('salary', 'readwrite');
+                    await tx.objectStore('salary').clear();
+                    for (let record of data) { await tx.objectStore('salary').put(record); }
+                    
                     if (document.getElementById('view-insights').checked || forceUpdate) {
                         renderInsights();
                     }
                 }
-            })
-            .catch(err => {
-                console.error("Background sync failed: ", err);
-                if (document.getElementById('view-insights').checked || forceUpdate) {
-                    renderInsights();
-                }
-            });
+            } catch (err) {
+                console.error("Background sync failed: Offline Mode Active");
+                if (document.getElementById('view-insights').checked || forceUpdate) renderInsights();
+            } finally {
+                setTimeout(() => { syncBtn.innerHTML = originalIcon; }, 500);
+            }
         }
 
+        // --- 6. MEMOIZED INSIGHTS ---
         function renderInsights() {
             if (cachedSalaryData.length === 0) {
                 document.getElementById("displayInHand").innerText = "₹ 0";
@@ -677,6 +729,13 @@
                 return;
             }
 
+            let sortedData = [...cachedSalaryData].sort((a, b) => getSortValue(a.monthYear) - getSortValue(b.monthYear));
+            
+            // Create a hash based on the dataset length and the newest record. 
+            // If it hasn't changed since the last calculation, abort math block to save CPU.
+            let currentHash = `${sortedData.length}-${sortedData[sortedData.length - 1].monthYear}`;
+            if (insightsMemoHash === currentHash) return; 
+
             let totalInHandAllTime = 0;
             let totalEmployeePF = 0;
             let totalEmployerPF = 0;
@@ -685,8 +744,6 @@
             let accumulatedInterest = 0;
             let totalLifetimeInterest = 0;
             let totalTaxAllTime = 0;
-
-            let sortedData = [...cachedSalaryData].sort((a, b) => getSortValue(a.monthYear) - getSortValue(b.monthYear));
 
             let startRecord = formatShortDate(sortedData[0].monthYear);
             let endRecord = formatShortDate(sortedData[sortedData.length - 1].monthYear);
@@ -697,7 +754,6 @@
             sortedData.forEach(row => {
                 let inHand = (Number(row.totalEarnings) || 0) - (Number(row.totalDeductions) || 0);
                 totalInHandAllTime += inHand;
-                
                 totalTaxAllTime += (Number(row.taxDeduction) || 0);
 
                 let empPF = Number(row.employeePF) || 0;
@@ -735,12 +791,14 @@
             document.getElementById("displayEmployerPF").innerText = "₹" + totalEmployerPF.toLocaleString("en-IN");
             document.getElementById("displayInterestEarned").innerText = "₹" + Math.round(totalDisplayedInterest).toLocaleString("en-IN");
             document.getElementById("displayPension").innerText = "₹" + totalPensionEPS.toLocaleString("en-IN");
-            
             document.getElementById("displayTotalTax").innerText = "₹ " + totalTaxAllTime.toLocaleString("en-IN");
             document.getElementById("displayGratuity").innerText = "₹ " + latestGratuity.toLocaleString("en-IN");
+
+            insightsMemoHash = currentHash; // Lock the cache
         }
 
-        document.getElementById("salaryForm").addEventListener("submit", function(e) {
+        // --- 7. OFFLINE CAPABLE SUBMIT ---
+        document.getElementById("salaryForm").addEventListener("submit", async function(e) {
             e.preventDefault();
             const btn = document.getElementById("submitBtn");
             const originalBtnHtml = btn.innerHTML;
@@ -770,6 +828,13 @@
                 gratuity: Number(document.getElementById("gratuity").value)
             };
 
+            // Local RAM + IndexedDB Save
+            cachedSalaryData.push(payload);
+            const db = await dbPromise;
+            await db.transaction('salary', 'readwrite').objectStore('salary').put(payload);
+            insightsMemoHash = ""; // Invalidate math cache
+            
+            // Backup static details to LocalStorage for fallback
             localStorage.setItem("empNumber", payload.empNumber);
             localStorage.setItem("bankName", payload.bankName);
             localStorage.setItem("bankAccount", payload.bankAccount);
@@ -777,29 +842,27 @@
             localStorage.setItem("uan", payload.uan);
             localStorage.setItem("taxRegime", payload.taxRegime);
 
-            cachedSalaryData.push(payload);
-            localStorage.setItem("salaryData", JSON.stringify(cachedSalaryData));
-            if (document.getElementById('view-insights').checked) renderInsights();
+            try {
+                // Try live network sync
+                await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+            } catch (error) {
+                // Fail silently, add to Offline Queue
+                await db.transaction('syncQueue', 'readwrite').objectStore('syncQueue').add({ payload });
+            }
 
-            fetch(API_URL, { method: "POST", body: JSON.stringify(payload) })
-            .then(response => response.json())
-            .then(data => {
-                btn.innerHTML = `<span class="material-icons me-2">check_circle</span> Saved!`;
-                btn.style.backgroundColor = "#10b981";
-                
-                // Complete Form Reset
-                setTimeout(() => {
-                    btn.innerHTML = originalBtnHtml;
-                    btn.style.backgroundColor = "";
-                    document.getElementById("salaryForm").reset();
-                    // Clear the grey fetched visual states
-                    document.querySelectorAll('.is-fetched').forEach(el => el.classList.remove('is-fetched'));
-                }, 2000);
-            })
-            .catch(error => {
-                alert("Network error: Will sync when connection is restored.");
+            // Always succeed in UI immediately (Optimistic rendering)
+            btn.innerHTML = `<span class="material-icons me-2">check_circle</span> Saved!`;
+            btn.style.backgroundColor = "#10b981";
+            
+            if (document.getElementById('view-insights').checked) renderInsights();
+            
+            setTimeout(() => {
                 btn.innerHTML = originalBtnHtml;
-            });
+                btn.style.backgroundColor = "";
+                document.getElementById("salaryForm").reset();
+                document.querySelectorAll('.is-fetched').forEach(el => el.classList.remove('is-fetched'));
+                document.getElementById('monthPart').focus();
+            }, 1500);
         });
     </script>
 </body>

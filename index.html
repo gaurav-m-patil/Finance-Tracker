@@ -80,7 +80,6 @@
             gap: 5px;
         }
 
-        /* Segmented Control (Top Tabs) */
         .segmented-control {
             display: flex;
             background-color: var(--segmented-bg);
@@ -107,7 +106,6 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        /* Input Styles */
         .form-floating > .form-control, .form-floating > .form-select {
             background-color: var(--input-bg);
             border: 1.5px solid var(--input-border);
@@ -119,7 +117,7 @@
             padding-top: 1.2rem;
             padding-bottom: 0.2rem;
             font-size: 0.95rem;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
         }
         .form-floating > label {
             padding: 0.8rem 0.75rem;
@@ -137,6 +135,13 @@
             background-color: var(--card-bg);
             border-color: var(--primary);
             box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        /* Fetched Data Visual State */
+        .is-fetched {
+            color: var(--text-muted) !important;
+            background-color: rgba(128, 128, 128, 0.08) !important;
+            border-color: transparent !important;
         }
 
         .date-input-wrapper {
@@ -188,7 +193,6 @@
             margin-top: 6px;
         }
 
-        /* Insight Cards */
         .insight-card {
             border-radius: 18px;
             padding: 20px;
@@ -200,6 +204,9 @@
         }
         .insight-card-blue { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); }
         .insight-card-emerald { background: linear-gradient(135deg, #064e3b 0%, #10b981 100%); }
+        .insight-card-purple { background: linear-gradient(135deg, #6b21a8 0%, #a855f7 100%); padding: 16px; }
+        .insight-card-amber { background: linear-gradient(135deg, #b45309 0%, #f59e0b 100%); padding: 16px; }
+        
         .insight-card .bg-icon {
             position: absolute;
             right: -5px;
@@ -209,7 +216,6 @@
             transform: rotate(-15deg);
         }
 
-        /* Bottom Nav */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -241,36 +247,33 @@
         .nav-link.active { color: var(--primary) !important; background: transparent !important; }
         .nav-link .material-icons { font-size: 24px; margin-bottom: 2px;}
 
+        .global-header { max-width: 600px; margin: auto; padding: 0 14px; }
         .tab-content { max-width: 600px; margin: auto; padding: 0 14px; }
-        
-        /* Spin Animation */
         @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
+    <!-- GLOBAL SITE-WIDE APP HEADER -->
+    <div class="global-header d-flex justify-content-between align-items-center mb-3 mt-2">
+        <h4 id="appMainTitle" style="font-weight: 800; margin: 0; letter-spacing: -0.5px;">Command Center</h4>
+        <div>
+            <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center me-2" id="updateAppBtn" onclick="forceAppUpdate()" style="background: var(--input-bg); color: var(--text-muted); width: 36px; height: 36px; border: 1px solid var(--input-border);" title="Fetch Latest App Update">
+                <span class="material-icons" style="font-size: 20px;">system_update_alt</span>
+            </button>
+            <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center me-2" onclick="syncWithSheetQuietly(true)" style="background: var(--primary-glow); color: var(--primary); width: 36px; height: 36px; border: none;" title="Sync Data">
+                <span class="material-icons" style="font-size: 20px;">sync</span>
+            </button>
+            <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center" onclick="toggleTheme()" style="background: var(--input-bg); color: var(--text-main); width: 36px; height: 36px; border: 1px solid var(--input-border);">
+                <span class="material-icons" id="themeIcon" style="font-size: 20px;">dark_mode</span>
+            </button>
+        </div>
+    </div>
+
     <div class="tab-content" id="appTabsContent">
         
         <!-- SALARY MODULE -->
         <div class="tab-pane fade show active" id="salary-module" role="tabpanel">
-            
-            <div class="d-flex justify-content-between align-items-center mb-3 px-1 mt-2">
-                <h4 style="font-weight: 800; margin: 0; letter-spacing: -0.5px;">Command Center</h4>
-                <div>
-                    <!-- App Hard Update Button -->
-                    <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center me-2" id="updateAppBtn" onclick="forceAppUpdate()" style="background: var(--input-bg); color: var(--text-muted); width: 36px; height: 36px; border: 1px solid var(--input-border);" title="Fetch Latest App Update">
-                        <span class="material-icons" style="font-size: 20px;">system_update_alt</span>
-                    </button>
-                    <!-- Data Sync Button -->
-                    <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center me-2" onclick="syncWithSheetQuietly(true)" style="background: var(--primary-glow); color: var(--primary); width: 36px; height: 36px; border: none;" title="Sync Data">
-                        <span class="material-icons" style="font-size: 20px;">sync</span>
-                    </button>
-                    <!-- Theme Toggle -->
-                    <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center" onclick="toggleTheme()" style="background: var(--input-bg); color: var(--text-main); width: 36px; height: 36px; border: 1px solid var(--input-border);">
-                        <span class="material-icons" id="themeIcon" style="font-size: 20px;">dark_mode</span>
-                    </button>
-                </div>
-            </div>
 
             <div class="segmented-control">
                 <input type="radio" name="salary-view" id="view-entry" checked onchange="toggleSalarySubTab('entry')">
@@ -299,39 +302,39 @@
                             
                             <div class="col-6">
                                 <div class="form-floating">
-                                    <input type="number" class="form-control" id="empNumber" placeholder=" " inputmode="numeric" pattern="[0-9]*" required>
+                                    <input type="number" class="form-control static-field" id="empNumber" placeholder=" " inputmode="numeric" pattern="[0-9]*" required>
                                     <label>Employee ID</label>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="form-floating">
-                                    <input type="number" class="form-control" id="uan" placeholder=" " inputmode="numeric" pattern="[0-9]*" required>
+                                    <input type="number" class="form-control static-field" id="uan" placeholder=" " inputmode="numeric" pattern="[0-9]*" required>
                                     <label>UAN Number</label>
                                 </div>
                             </div>
 
                             <div class="col-6">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="bankName" placeholder=" " required>
+                                    <input type="text" class="form-control static-field" id="bankName" placeholder=" " required>
                                     <label>Bank Name</label>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="form-floating">
-                                    <input type="number" class="form-control" id="bankAccount" placeholder=" " inputmode="numeric" pattern="[0-9]*" required>
+                                    <input type="number" class="form-control static-field" id="bankAccount" placeholder=" " inputmode="numeric" pattern="[0-9]*" required>
                                     <label>Account No.</label>
                                 </div>
                             </div>
 
                             <div class="col-6">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="grade" placeholder=" " required>
+                                    <input type="text" class="form-control static-field" id="grade" placeholder=" " required>
                                     <label>Grade</label>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="form-floating">
-                                    <select class="form-select" id="taxRegime" required>
+                                    <select class="form-select static-field" id="taxRegime" required>
                                         <option value="New">New Regime</option>
                                         <option value="Old">Old Regime</option>
                                     </select>
@@ -385,8 +388,8 @@
                 </div>
             </div>
 
-            <!-- Sub-Tab 2: Insights -->
             <div id="salary-insights-pane" style="display: none;">
+                <!-- Main Salary Card -->
                 <div class="insight-card insight-card-blue mb-3 shadow-sm">
                     <span class="material-icons bg-icon">account_balance</span>
                     <div class="d-flex justify-content-between align-items-start mb-1">
@@ -399,6 +402,7 @@
                     <small id="displayMonthCount" style="color: rgba(255,255,255,0.7); font-weight: 500; font-size: 0.8rem;">0 Months Tracked</small>
                 </div>
 
+                <!-- EPF Card -->
                 <div class="insight-card insight-card-emerald mb-3 shadow-sm">
                     <span class="material-icons bg-icon">savings</span>
                     <p class="mb-0" style="color: rgba(255,255,255,0.8); font-weight: 600; font-size: 0.85rem;">EPF Retirement Corpus</p>
@@ -426,17 +430,31 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Tax & Gratuity Grid -->
+                <div class="row g-3 mb-3">
+                    <div class="col-6">
+                        <div class="insight-card insight-card-purple shadow-sm">
+                            <span class="material-icons bg-icon" style="font-size: 80px; right: -5px; bottom: -5px;">request_quote</span>
+                            <p class="mb-0" style="color: rgba(255,255,255,0.8); font-weight: 600; font-size: 0.75rem;">Total Tax Paid</p>
+                            <h3 id="displayTotalTax" style="font-weight: 800; margin-bottom: 2px;">₹ 0</h3>
+                            <small id="displayTaxRange" style="color: rgba(255,255,255,0.7); font-weight: 500; font-size: 0.65rem;">N/A</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="insight-card insight-card-amber shadow-sm">
+                            <span class="material-icons bg-icon" style="font-size: 80px; right: -5px; bottom: -5px;">military_tech</span>
+                            <p class="mb-0" style="color: rgba(255,255,255,0.8); font-weight: 600; font-size: 0.75rem;">Total Gratuity</p>
+                            <h3 id="displayGratuity" style="font-weight: 800; margin-bottom: 2px;">₹ 0</h3>
+                            <small style="color: rgba(255,255,255,0.7); font-weight: 500; font-size: 0.65rem;">Latest recorded</small>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- EXPENSE MODULE -->
         <div class="tab-pane fade" id="expense-module" role="tabpanel">
-            <div class="d-flex justify-content-between align-items-center mb-4 px-1 mt-2">
-                <h4 style="font-weight: 800; margin: 0; letter-spacing: -0.5px;">Expense Tracker</h4>
-                <button class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center" onclick="toggleTheme()" style="background: var(--input-bg); color: var(--text-main); width: 36px; height: 36px; border: 1px solid var(--input-border);">
-                    <span class="material-icons" id="themeIconExp" style="font-size: 20px;">dark_mode</span>
-                </button>
-            </div>
 
             <div class="premium-card mb-4 d-flex align-items-center justify-content-between p-3">
                 <button class="btn btn-sm d-flex align-items-center p-0" style="color: var(--text-muted);">
@@ -464,13 +482,13 @@
     <!-- Main Bottom Navigation -->
     <ul class="nav nav-tabs bottom-nav" id="bottomNav" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="salary-tab-btn" data-bs-toggle="tab" data-bs-target="#salary-module" type="button" role="tab">
+            <button class="nav-link active" id="salary-tab-btn" data-bs-toggle="tab" data-bs-target="#salary-module" type="button" role="tab" onclick="document.getElementById('appMainTitle').innerText='Command Center';">
                 <span class="material-icons">account_balance_wallet</span>
                 Salary
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="expense-tab-btn" data-bs-toggle="tab" data-bs-target="#expense-module" type="button" role="tab">
+            <button class="nav-link" id="expense-tab-btn" data-bs-toggle="tab" data-bs-target="#expense-module" type="button" role="tab" onclick="document.getElementById('appMainTitle').innerText='Expenses';">
                 <span class="material-icons">receipt_long</span>
                 Expenses
             </button>
@@ -490,15 +508,12 @@
             });
         }
 
-        // --- HARD REFRESH FUNCTION ---
         function forceAppUpdate() {
             const btn = document.getElementById("updateAppBtn");
             btn.innerHTML = `<span class="material-icons" style="font-size: 20px; animation: spin 1s linear infinite;">sync</span>`;
             
             if ('caches' in window) {
-                caches.keys().then(names => {
-                    names.forEach(name => caches.delete(name));
-                });
+                caches.keys().then(names => { names.forEach(name => caches.delete(name)); });
             }
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.getRegistrations().then(registrations => {
@@ -511,9 +526,7 @@
         function initTheme() {
             const savedTheme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-bs-theme', savedTheme);
-            const iconName = savedTheme === 'dark' ? 'light_mode' : 'dark_mode';
-            document.getElementById('themeIcon').innerText = iconName;
-            document.getElementById('themeIconExp').innerText = iconName;
+            document.getElementById('themeIcon').innerText = savedTheme === 'dark' ? 'light_mode' : 'dark_mode';
         }
         
         function toggleTheme() {
@@ -521,9 +534,7 @@
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-bs-theme', newTheme);
             localStorage.setItem('theme', newTheme);
-            const iconName = newTheme === 'dark' ? 'light_mode' : 'dark_mode';
-            document.getElementById('themeIcon').innerText = iconName;
-            document.getElementById('themeIconExp').innerText = iconName;
+            document.getElementById('themeIcon').innerText = newTheme === 'dark' ? 'light_mode' : 'dark_mode';
         }
 
         function toggleSalarySubTab(view) {
@@ -534,6 +545,24 @@
                 document.getElementById('salary-entry-pane').style.display = 'none';
                 document.getElementById('salary-insights-pane').style.display = 'block';
                 renderInsights();
+            }
+        }
+
+        // Remove the grey "fetched" state when user interacts with field
+        document.querySelectorAll('.static-field').forEach(input => {
+            input.addEventListener('focus', function() { this.classList.remove('is-fetched'); });
+            input.addEventListener('input', function() { this.classList.remove('is-fetched'); });
+        });
+
+        // Smart populate with visual "fetched" state
+        function applyFetchedValue(id, val) {
+            const el = document.getElementById(id);
+            if (val) {
+                el.value = val;
+                el.classList.add('is-fetched');
+            } else {
+                el.value = "";
+                el.classList.remove('is-fetched');
             }
         }
 
@@ -577,19 +606,6 @@
             syncWithSheetQuietly(true);
         };
 
-        function populateStaticFields(record) {
-            document.getElementById("empNumber").value = (record && record.empNumber) || localStorage.getItem("empNumber") || "";
-            document.getElementById("bankName").value = (record && record.bankName) || localStorage.getItem("bankName") || "";
-            document.getElementById("bankAccount").value = (record && record.bankAccount) || localStorage.getItem("bankAccount") || "";
-            document.getElementById("grade").value = (record && record.grade) || localStorage.getItem("grade") || "";
-            document.getElementById("uan").value = (record && record.uan) || localStorage.getItem("uan") || "";
-            if (record && record.taxRegime) {
-                document.getElementById("taxRegime").value = record.taxRegime;
-            } else if (localStorage.getItem("taxRegime")) {
-                document.getElementById("taxRegime").value = localStorage.getItem("taxRegime");
-            }
-        }
-
         document.getElementById("monthPart").addEventListener("input", function() {
             if(this.value.length === 3) document.getElementById("yearPart").focus();
         });
@@ -617,7 +633,13 @@
                     let sorted = [...cachedSalaryData].sort((a,b) => getSortValue(a.monthYear) - getSortValue(b.monthYear));
                     priorRecord = sorted[sorted.length - 1];
                 }
-                populateStaticFields(priorRecord);
+
+                applyFetchedValue("empNumber", (priorRecord && priorRecord.empNumber) || localStorage.getItem("empNumber"));
+                applyFetchedValue("bankName", (priorRecord && priorRecord.bankName) || localStorage.getItem("bankName"));
+                applyFetchedValue("bankAccount", (priorRecord && priorRecord.bankAccount) || localStorage.getItem("bankAccount"));
+                applyFetchedValue("grade", (priorRecord && priorRecord.grade) || localStorage.getItem("grade"));
+                applyFetchedValue("uan", (priorRecord && priorRecord.uan) || localStorage.getItem("uan"));
+                applyFetchedValue("taxRegime", (priorRecord && priorRecord.taxRegime) || localStorage.getItem("taxRegime") || "New");
             }
         }
 
@@ -649,6 +671,9 @@
                 document.getElementById("displayTotalPF").innerText = "₹ 0";
                 document.getElementById("displayRecordRange").innerText = "NO DATA";
                 document.getElementById("displayMonthCount").innerText = "0 Months Tracked";
+                document.getElementById("displayTotalTax").innerText = "₹ 0";
+                document.getElementById("displayTaxRange").innerText = "N/A";
+                document.getElementById("displayGratuity").innerText = "₹ 0";
                 return;
             }
 
@@ -659,17 +684,21 @@
             let runningBalance = 0;
             let accumulatedInterest = 0;
             let totalLifetimeInterest = 0;
+            let totalTaxAllTime = 0;
 
             let sortedData = [...cachedSalaryData].sort((a, b) => getSortValue(a.monthYear) - getSortValue(b.monthYear));
 
             let startRecord = formatShortDate(sortedData[0].monthYear);
             let endRecord = formatShortDate(sortedData[sortedData.length - 1].monthYear);
             document.getElementById("displayRecordRange").innerText = `${startRecord} to ${endRecord}`;
+            document.getElementById("displayTaxRange").innerText = `${startRecord} to ${endRecord}`;
             document.getElementById("displayMonthCount").innerText = `${sortedData.length} Months Tracked`;
 
             sortedData.forEach(row => {
                 let inHand = (Number(row.totalEarnings) || 0) - (Number(row.totalDeductions) || 0);
                 totalInHandAllTime += inHand;
+                
+                totalTaxAllTime += (Number(row.taxDeduction) || 0);
 
                 let empPF = Number(row.employeePF) || 0;
                 let { m, y } = parseDateInfo(row.monthYear);
@@ -698,6 +727,7 @@
 
             let totalDisplayedInterest = totalLifetimeInterest + accumulatedInterest;
             let totalMainPF = runningBalance + accumulatedInterest;
+            let latestGratuity = Number(sortedData[sortedData.length - 1].gratuity) || 0;
 
             document.getElementById("displayInHand").innerText = "₹ " + totalInHandAllTime.toLocaleString("en-IN");
             document.getElementById("displayTotalPF").innerText = "₹ " + Math.round(totalMainPF).toLocaleString("en-IN");
@@ -705,6 +735,9 @@
             document.getElementById("displayEmployerPF").innerText = "₹" + totalEmployerPF.toLocaleString("en-IN");
             document.getElementById("displayInterestEarned").innerText = "₹" + Math.round(totalDisplayedInterest).toLocaleString("en-IN");
             document.getElementById("displayPension").innerText = "₹" + totalPensionEPS.toLocaleString("en-IN");
+            
+            document.getElementById("displayTotalTax").innerText = "₹ " + totalTaxAllTime.toLocaleString("en-IN");
+            document.getElementById("displayGratuity").innerText = "₹ " + latestGratuity.toLocaleString("en-IN");
         }
 
         document.getElementById("salaryForm").addEventListener("submit", function(e) {
@@ -754,16 +787,13 @@
                 btn.innerHTML = `<span class="material-icons me-2">check_circle</span> Saved!`;
                 btn.style.backgroundColor = "#10b981";
                 
+                // Complete Form Reset
                 setTimeout(() => {
                     btn.innerHTML = originalBtnHtml;
                     btn.style.backgroundColor = "";
-                    document.getElementById("monthPart").value = "";
-                    document.getElementById("yearPart").value = "";
-                    document.getElementById("totalEarnings").value = "";
-                    document.getElementById("totalDeductions").value = "";
-                    document.getElementById("employeePF").value = "";
-                    document.getElementById("taxDeduction").value = "";
-                    document.getElementById("gratuity").value = "";
+                    document.getElementById("salaryForm").reset();
+                    // Clear the grey fetched visual states
+                    document.querySelectorAll('.is-fetched').forEach(el => el.classList.remove('is-fetched'));
                 }, 2000);
             })
             .catch(error => {

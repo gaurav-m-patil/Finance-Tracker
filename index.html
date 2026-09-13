@@ -85,10 +85,10 @@
     <div class="global-header d-flex justify-content-between align-items-center mb-3 mt-2">
         <h4 id="appMainTitle" style="font-weight: 800; margin: 0; letter-spacing: -0.5px;">Command Center</h4>
         <div>
-            <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center me-2" id="updateAppBtn" onclick="forceAppUpdate()" style="background: var(--input-bg); color: var(--text-muted); width: 36px; height: 36px; border: 1px solid var(--input-border);">
+            <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center me-2" id="updateAppBtn" onclick="forceAppUpdate()" style="background: var(--input-bg); color: var(--text-muted); width: 36px; height: 36px; border: 1px solid var(--input-border);" title="Hard Refresh App">
                 <span class="material-icons" style="font-size: 20px;">system_update_alt</span>
             </button>
-            <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center me-2" id="syncDataBtn" onclick="syncWithSheetQuietly(true)" style="background: var(--primary-glow); color: var(--primary); width: 36px; height: 36px; border: none;">
+            <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center me-2" id="syncDataBtn" onclick="syncWithSheetQuietly(true); fetchCloudExpenses(true); fetchCloudFuel(true);" style="background: var(--primary-glow); color: var(--primary); width: 36px; height: 36px; border: none;" title="Force Cloud Sync">
                 <span class="material-icons" style="font-size: 20px;">sync</span>
             </button>
             <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center" onclick="toggleTheme()" style="background: var(--input-bg); color: var(--text-main); width: 36px; height: 36px; border: 1px solid var(--input-border);">
@@ -150,7 +150,6 @@
                 </div>
             </div>
 
-            <!-- Insights Pane -->
             <div id="salary-insights-pane" style="display: none;">
                 <div class="insight-card insight-card-blue mb-3 shadow-sm">
                     <span class="material-icons bg-icon">account_balance</span>
@@ -216,7 +215,6 @@
             <!-- Sub-Tab: Checklist with Categories -->
             <div id="expense-checklist-pane">
                 
-                <!-- Category: Home Expenses -->
                 <div class="premium-card mb-3 p-3" style="padding-bottom: 8px !important;">
                     <div class="section-header text-primary mb-2"><span class="material-icons" style="font-size: 16px;">home</span> Home Expenses</div>
                     <div class="d-flex gap-2 mb-2 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
@@ -225,7 +223,6 @@
                     <div id="expense-list-Home"></div>
                 </div>
 
-                <!-- Category: EMI / Debt -->
                 <div class="premium-card mb-3 p-3" style="padding-bottom: 8px !important;">
                     <div class="section-header text-danger mb-2"><span class="material-icons" style="font-size: 16px;">credit_card</span> EMI / Debt</div>
                     <div class="d-flex gap-2 mb-2 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
@@ -234,7 +231,6 @@
                     <div id="expense-list-EMI"></div>
                 </div>
 
-                <!-- Category: Miscellaneous -->
                 <div class="premium-card mb-3 p-3" style="padding-bottom: 8px !important;">
                     <div class="section-header text-warning mb-2"><span class="material-icons" style="font-size: 16px;">category</span> Miscellaneous</div>
                     <div class="d-flex gap-2 mb-2 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
@@ -284,7 +280,7 @@
                 </div>
             </div>
 
-            <!-- Sub-Tab: Expense Insights (Now with Categories) -->
+            <!-- Sub-Tab: Expense Insights -->
             <div id="expense-insights-pane" style="display: none;">
                 <div class="premium-card mb-3 p-2 border-0 d-flex justify-content-end align-items-center" style="background: var(--input-bg);">
                     <select id="insightsFilter" class="form-select form-select-sm border-0 bg-transparent fw-bold" style="box-shadow: none; color: var(--text-main); width: auto;" onchange="handleInsightsFilterChange()">
@@ -298,7 +294,6 @@
                     <p class="mb-0" id="insExpTitle" style="color: rgba(255,255,255,0.8); font-weight: 600; font-size: 0.85rem;">Month Expenses</p>
                     <h1 id="insTotalExp" style="font-weight: 800; font-size: 2.2rem; letter-spacing: -1px; margin-bottom: 12px;">₹ 0</h1>
                     
-                    <!-- Category Breakdown -->
                     <div class="d-flex gap-1 mb-1" style="height: 6px; border-radius: 3px; overflow: hidden; background: rgba(0,0,0,0.2);">
                         <div id="barHome" style="width: 33%; background: #60a5fa;"></div>
                         <div id="barEMI" style="width: 33%; background: #f87171;"></div>
@@ -340,7 +335,11 @@
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbxw50bYSCs1TSMYGm5HaOsc-y0jf2mAtE8l56_2NhYgI4HxQmtRQhP-9O4cKLC3vYxgsw/exec"; 
         
-        // --- SITEWIDE DEBOUNCE ENGINE ---
+        let cachedSalaryData = []; 
+        let cachedFuelData = [];
+        let currentExpMonth = new Date().getMonth() + 1; 
+        let currentExpYear = new Date().getFullYear();
+
         function debounce(func, wait) {
             let timeout;
             return function(...args) {
@@ -349,159 +348,182 @@
             };
         }
 
-        // --- HAPTIC ENGINE ---
         function hapticTap() { if(navigator.vibrate) navigator.vibrate(30); }
         function hapticSuccess() { if(navigator.vibrate) navigator.vibrate([50, 50, 50]); }
         function hapticError() { if(navigator.vibrate) navigator.vibrate([150, 50, 150]); }
 
-        // --- WEB WORKER (Off-Thread Math Engine) ---
-        const workerCode = `
-            const monthMap = { "JAN":1, "FEB":2, "MAR":3, "APR":4, "MAY":5, "JUN":6, "JUL":7, "AUG":8, "SEP":9, "OCT":10, "NOV":11, "DEC":12 };
-            function parseDateInfo(str) {
-                if (!str) return { m: 0, y: 0 };
-                let s = String(str).trim().toUpperCase(); let parts = s.split('-');
-                if (parts.length === 2 && monthMap[parts[0]]) return { m: monthMap[parts[0]], y: parseInt(parts[1]) };
-                let d = new Date(str); if (!isNaN(d.getTime())) return { m: d.getMonth() + 1, y: d.getFullYear() }; return { m: 0, y: 0 }; 
-            }
-            function getSortValue(str) { let { m, y } = parseDateInfo(str); return m === 0 ? 0 : (y * 100) + m; }
-            function formatShortDate(str) {
-                let { m, y } = parseDateInfo(str); if (m === 0) return "N/A";
-                let mName = Object.keys(monthMap).find(key => monthMap[key] === m); return \`\${mName} '\${String(y).slice(-2)}\`;
-            }
-            function getAnnualInterestRate(str) {
-                let { m, y } = parseDateInfo(str); if (m === 0 || isNaN(y)) return 0.0825;
-                let fyStartYear = (m >= 4) ? y : y - 1;
-                if (fyStartYear >= 2023) return 0.0825; if (fyStartYear === 2022) return 0.0815;
-                if (fyStartYear === 2021) return 0.0810; if (fyStartYear === 2020) return 0.0850; return 0.0825;
-            }
-
-            self.onmessage = function(e) {
-                const { type, salaryData, fuelData, rawExpData, filter, targetMonth } = e.data;
-                
-                if(type === 'salary') {
-                    if (salaryData.length === 0) { self.postMessage({ type: 'salary', empty: true }); return; }
-                    let sortedData = [...salaryData].sort((a, b) => getSortValue(a.monthYear) - getSortValue(b.monthYear));
-                    
-                    let totalInHandAllTime = 0, totalEmployeePF = 0, totalEmployerPF = 0, totalPensionEPS = 0;
-                    let runningBalance = 0, accumulatedInterest = 0, totalLifetimeInterest = 0, totalTaxAllTime = 0;
-                    
-                    sortedData.forEach(row => {
-                        totalInHandAllTime += ((Number(row.totalEarnings) || 0) - (Number(row.totalDeductions) || 0));
-                        totalTaxAllTime += (Number(row.taxDeduction) || 0);
-                        let empPF = Number(row.employeePF) || 0; let { m, y } = parseDateInfo(row.monthYear);
-                        accumulatedInterest += runningBalance * (getAnnualInterestRate(row.monthYear) / 12);
-                        
-                        if (empPF > 0) {
-                            let epsCut = (empPF >= 1800) ? 1250 : Math.round(empPF * (8.33 / 12));
-                            let employerPF = empPF - epsCut;
-                            totalEmployeePF += empPF; totalEmployerPF += employerPF; totalPensionEPS += epsCut;
-                            runningBalance += (empPF + employerPF);
-                        }
-                        if (m === 3) { runningBalance += accumulatedInterest; totalLifetimeInterest += accumulatedInterest; accumulatedInterest = 0; }
-                    });
-                    
-                    self.postMessage({
-                        type: 'salary', empty: false, startRecord: formatShortDate(sortedData[0].monthYear), endRecord: formatShortDate(sortedData[sortedData.length - 1].monthYear), monthCount: sortedData.length,
-                        inHand: totalInHandAllTime, totalPF: Math.round(runningBalance + accumulatedInterest), empPF: totalEmployeePF, employerPF: totalEmployerPF, interest: Math.round(totalLifetimeInterest + accumulatedInterest),
-                        pension: totalPensionEPS, totalTax: totalTaxAllTime, gratuity: Number(sortedData[sortedData.length - 1].gratuity) || 0
-                    });
-                }
-                
-                if (type === 'expense') {
-                    let totalExp = 0;
-                    let catTotals = { "Home": 0, "EMI": 0, "Misc": 0 };
-                    
-                    rawExpData.forEach(item => {
-                        const amt = parseFloat(item.amt) || 0;
-                        totalExp += amt;
-                        if(item.category === "Home") catTotals.Home += amt;
-                        else if(item.category === "EMI") catTotals.EMI += amt;
-                        else catTotals.Misc += amt;
-                    });
-
-                    let totalFuel = 0, avgMileage = 0;
-
-                    if (filter === 'all') {
-                        let minOdo = 9999999, maxOdo = 0, totalLiters = 0;
-                        fuelData.forEach(f => {
-                            totalFuel += f.amount;
-                            if (f.odo < minOdo) minOdo = f.odo;
-                            if (f.odo > maxOdo) maxOdo = f.odo;
-                            if (f.rate > 0) totalLiters += (f.amount / f.rate);
-                        });
-                        if (totalLiters > 0 && maxOdo > minOdo) { avgMileage = (maxOdo - minOdo) / totalLiters; }
-                    } else {
-                        const monthFuel = fuelData.filter(f => f.monthYear === targetMonth);
-                        monthFuel.forEach(f => { totalFuel += f.amount; });
-                        let sortedFuel = [...fuelData].sort((a,b) => a.odo - b.odo);
-                        let monthLiters = 0, monthDistance = 0;
-
-                        monthFuel.forEach(mf => {
-                            const idx = sortedFuel.findIndex(f => f.odo === mf.odo);
-                            if (idx > 0) {
-                                const prev = sortedFuel[idx - 1];
-                                const dist = mf.odo - prev.odo;
-                                const liters = mf.amount / mf.rate;
-                                if (liters > 0) { monthDistance += dist; monthLiters += liters; }
-                            }
-                        });
-                        if (monthLiters > 0) avgMileage = monthDistance / monthLiters;
-                    }
-
-                    self.postMessage({ type: 'expense', totalExp, catTotals, totalFuel, avgMileage, filter });
-                }
-            };
-        `;
-        const workerBlob = new Blob([workerCode], { type: 'application/javascript' });
-        const mathWorker = new Worker(URL.createObjectURL(workerBlob));
-
-        mathWorker.onmessage = function(e) {
-            const data = e.data;
-            if(data.type === 'salary') {
-                if(data.empty) {
-                    document.getElementById("displayInHand").innerText = "₹ 0"; document.getElementById("displayTotalPF").innerText = "₹ 0";
-                    document.getElementById("displayRecordRange").innerText = "NO DATA"; document.getElementById("displayMonthCount").innerText = "0 Months Tracked";
-                    document.getElementById("displayTotalTax").innerText = "₹ 0"; document.getElementById("displayGratuity").innerText = "₹ 0"; return;
-                }
-                document.getElementById("displayRecordRange").innerText = `${data.startRecord} to ${data.endRecord}`;
-                document.getElementById("displayTaxRange").innerText = `${data.startRecord} to ${data.endRecord}`;
-                document.getElementById("displayMonthCount").innerText = `${data.monthCount} Months Tracked`;
-                document.getElementById("displayInHand").innerText = "₹ " + data.inHand.toLocaleString("en-IN");
-                document.getElementById("displayTotalPF").innerText = "₹ " + data.totalPF.toLocaleString("en-IN");
-                document.getElementById("displayEmpPF").innerText = "₹" + data.empPF.toLocaleString("en-IN");
-                document.getElementById("displayEmployerPF").innerText = "₹" + data.employerPF.toLocaleString("en-IN");
-                document.getElementById("displayInterestEarned").innerText = "₹" + data.interest.toLocaleString("en-IN");
-                document.getElementById("displayPension").innerText = "₹" + data.pension.toLocaleString("en-IN");
-                document.getElementById("displayTotalTax").innerText = "₹ " + data.totalTax.toLocaleString("en-IN");
-                document.getElementById("displayGratuity").innerText = "₹ " + data.gratuity.toLocaleString("en-IN");
-            }
-            if(data.type === 'expense') {
-                document.getElementById('insExpTitle').innerText = data.filter === 'all' ? "All-Time Expenses" : "Month Expenses";
-                document.getElementById('insFuelTitle').innerText = data.filter === 'all' ? "All-Time Fuel Spent" : "Month Fuel Spent";
-                const milTitle = data.filter === 'all' ? "Avg Lifetime Mileage: " : "Avg Month Mileage: ";
-                
-                document.getElementById('insTotalExp').innerText = "₹ " + data.totalExp.toLocaleString("en-IN");
-                document.getElementById('insTotalFuel').innerText = "₹ " + data.totalFuel.toLocaleString("en-IN");
-                
-                document.getElementById('insCatHome').innerText = data.catTotals.Home.toLocaleString("en-IN");
-                document.getElementById('insCatEMI').innerText = data.catTotals.EMI.toLocaleString("en-IN");
-                document.getElementById('insCatMisc').innerText = data.catTotals.Misc.toLocaleString("en-IN");
-
-                const tot = data.totalExp || 1; 
-                document.getElementById('barHome').style.width = (data.catTotals.Home / tot * 100) + "%";
-                document.getElementById('barEMI').style.width = (data.catTotals.EMI / tot * 100) + "%";
-                document.getElementById('barMisc').style.width = (data.catTotals.Misc / tot * 100) + "%";
-                
-                if (data.avgMileage > 0) document.getElementById('insAvgMileage').innerText = `${milTitle}${data.avgMileage.toFixed(1)} km/l`;
-                else document.getElementById('insAvgMileage').innerText = `${milTitle}-- km/l`;
-            }
+        // --- BULLETPROOF DATE PARSER & DIRECT MATH ENGINE ---
+        const monthMap = { 
+            "JAN":1, "FEB":2, "MAR":3, "APR":4, "MAY":5, "JUN":6, "JUL":7, "AUG":8, "SEP":9, "OCT":10, "NOV":11, "DEC":12,
+            "JANUARY":1, "FEBRUARY":2, "MARCH":3, "APRIL":4, "JUNE":6, "JULY":7, "AUGUST":8, "SEPTEMBER":9, "OCTOBER":10, "NOVEMBER":11, "DECEMBER":12 
         };
-
-        const monthMap = { "JAN":1, "FEB":2, "MAR":3, "APR":4, "MAY":5, "JUN":6, "JUL":7, "AUG":8, "SEP":9, "OCT":10, "NOV":11, "DEC":12 };
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-        let cachedSalaryData = []; let cachedFuelData = [];
-        let currentExpMonth = new Date().getMonth() + 1; let currentExpYear = new Date().getFullYear();
+        function parseDateInfo(str) {
+            if (!str) return { m: 0, y: 0 };
+            let s = String(str).trim().toUpperCase().replace(/['"]/g, '');
+            let parts = s.split(/[-/\s]+/);
+            
+            let m = 0, y = 0;
+            for (let p of parts) {
+                if (monthMap[p]) {
+                    m = monthMap[p];
+                } else if (!isNaN(p) && p.length === 4) {
+                    y = parseInt(p);
+                } else if (!isNaN(p) && p.length === 2) {
+                    y = 2000 + parseInt(p);
+                }
+            }
+            if (m === 0 || y === 0) {
+                for (let key in monthMap) {
+                    if (s.includes(key)) { m = monthMap[key]; break; }
+                }
+                let yearMatch = s.match(/\d{2,4}/g);
+                if (yearMatch) {
+                    let yr = yearMatch[yearMatch.length - 1];
+                    y = yr.length === 2 ? 2000 + parseInt(yr) : parseInt(yr);
+                }
+            }
+            return { m, y };
+        }
+
+        function getSortValue(str) { let { m, y } = parseDateInfo(str); return m === 0 ? 0 : (y * 100) + m; }
+        
+        function formatShortDate(str) {
+            let { m, y } = parseDateInfo(str); if (m === 0) return "N/A";
+            let mName = Object.keys(monthMap).find(key => monthMap[key] === m && key.length === 3) || "MON";
+            return `${mName} '${String(y).slice(-2)}`;
+        }
+
+        function getAnnualInterestRate(str) {
+            let { m, y } = parseDateInfo(str); if (m === 0 || isNaN(y)) return 0.0825;
+            let fyStartYear = (m >= 4) ? y : y - 1;
+            if (fyStartYear >= 2023) return 0.0825; if (fyStartYear === 2022) return 0.0815;
+            if (fyStartYear === 2021) return 0.0810; if (fyStartYear === 2020) return 0.0850; return 0.0825;
+        }
+
+        function renderInsights() {
+            if (!cachedSalaryData || cachedSalaryData.length === 0) {
+                document.getElementById("displayInHand").innerText = "₹ 0"; 
+                document.getElementById("displayTotalPF").innerText = "₹ 0";
+                document.getElementById("displayRecordRange").innerText = "NO DATA"; 
+                document.getElementById("displayMonthCount").innerText = "0 Months Tracked";
+                document.getElementById("displayTotalTax").innerText = "₹ 0"; 
+                document.getElementById("displayGratuity").innerText = "₹ 0"; 
+                return;
+            }
+            
+            let sortedData = [...cachedSalaryData].sort((a, b) => getSortValue(a.monthYear) - getSortValue(b.monthYear));
+            let totalInHandAllTime = 0, totalEmployeePF = 0, totalEmployerPF = 0, totalPensionEPS = 0;
+            let runningBalance = 0, accumulatedInterest = 0, totalLifetimeInterest = 0, totalTaxAllTime = 0;
+
+            let startRecord = formatShortDate(sortedData[0].monthYear); 
+            let endRecord = formatShortDate(sortedData[sortedData.length - 1].monthYear);
+            document.getElementById("displayRecordRange").innerText = `${startRecord} to ${endRecord}`;
+            document.getElementById("displayMonthCount").innerText = `${sortedData.length} Months Tracked`;
+
+            sortedData.forEach(row => {
+                totalInHandAllTime += ((Number(row.totalEarnings) || 0) - (Number(row.totalDeductions) || 0));
+                totalTaxAllTime += (Number(row.taxDeduction) || 0);
+                let empPF = Number(row.employeePF) || 0; let { m, y } = parseDateInfo(row.monthYear);
+                accumulatedInterest += runningBalance * (getAnnualInterestRate(row.monthYear) / 12);
+                
+                if (empPF > 0) {
+                    let epsCut = (empPF >= 1800) ? 1250 : Math.round(empPF * (8.33 / 12));
+                    let employerPF = empPF - epsCut;
+                    totalEmployeePF += empPF; totalEmployerPF += employerPF; totalPensionEPS += epsCut;
+                    runningBalance += (empPF + employerPF);
+                }
+                if (m === 3) { runningBalance += accumulatedInterest; totalLifetimeInterest += accumulatedInterest; accumulatedInterest = 0; }
+            });
+
+            document.getElementById("displayInHand").innerText = "₹ " + Math.round(totalInHandAllTime).toLocaleString("en-IN");
+            document.getElementById("displayTotalPF").innerText = "₹ " + Math.round(runningBalance + accumulatedInterest).toLocaleString("en-IN");
+            document.getElementById("displayEmpPF").innerText = "₹" + Math.round(totalEmployeePF).toLocaleString("en-IN");
+            document.getElementById("displayEmployerPF").innerText = "₹" + Math.round(totalEmployerPF).toLocaleString("en-IN");
+            document.getElementById("displayInterestEarned").innerText = "₹" + Math.round(totalLifetimeInterest + accumulatedInterest).toLocaleString("en-IN");
+            document.getElementById("displayPension").innerText = "₹" + Math.round(totalPensionEPS).toLocaleString("en-IN");
+            document.getElementById("displayTotalTax").innerText = "₹ " + Math.round(totalTaxAllTime).toLocaleString("en-IN");
+            document.getElementById("displayGratuity").innerText = "₹ " + Math.round(Number(sortedData[sortedData.length - 1].gratuity) || 0).toLocaleString("en-IN");
+        }
+
+        function renderExpenseInsights() {
+            const filter = document.getElementById('insightsFilter').value;
+            let rawExpData = [];
+
+            if (filter === 'all') {
+                for(let i=0; i<localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if(key.startsWith('exp_')) { 
+                        const arr = JSON.parse(localStorage.getItem(key)) || []; 
+                        rawExpData = rawExpData.concat(arr);
+                    }
+                }
+            } else {
+                const key = `exp_${currentExpYear}_${currentExpMonth}`;
+                rawExpData = JSON.parse(localStorage.getItem(key)) || []; 
+            }
+
+            let totalExp = 0;
+            let catTotals = { "Home": 0, "EMI": 0, "Misc": 0 };
+            
+            rawExpData.forEach(item => {
+                const amt = parseFloat(item.amt) || 0;
+                totalExp += amt;
+                if(item.category === "Home") catTotals.Home += amt;
+                else if(item.category === "EMI") catTotals.EMI += amt;
+                else catTotals.Misc += amt;
+            });
+
+            let totalFuel = 0, avgMileage = 0;
+            const targetMonthStr = `${currentExpYear}-${currentExpMonth}`;
+
+            if (filter === 'all') {
+                let minOdo = 9999999, maxOdo = 0, totalLiters = 0;
+                cachedFuelData.forEach(f => {
+                    totalFuel += f.amount;
+                    if (f.odo < minOdo) minOdo = f.odo;
+                    if (f.odo > maxOdo) maxOdo = f.odo;
+                    if (f.rate > 0) totalLiters += (f.amount / f.rate);
+                });
+                if (totalLiters > 0 && maxOdo > minOdo) { avgMileage = (maxOdo - minOdo) / totalLiters; }
+            } else {
+                const monthFuel = cachedFuelData.filter(f => f.monthYear === targetMonthStr);
+                monthFuel.forEach(f => { totalFuel += f.amount; });
+                let sortedFuel = [...cachedFuelData].sort((a,b) => a.odo - b.odo);
+                let monthLiters = 0, monthDistance = 0;
+
+                monthFuel.forEach(mf => {
+                    const idx = sortedFuel.findIndex(f => f.odo === mf.odo);
+                    if (idx > 0) {
+                        const prev = sortedFuel[idx - 1];
+                        const dist = mf.odo - prev.odo;
+                        const liters = mf.amount / mf.rate;
+                        if (liters > 0) { monthDistance += dist; monthLiters += liters; }
+                    }
+                });
+                if (monthLiters > 0) avgMileage = monthDistance / monthLiters;
+            }
+
+            document.getElementById('insExpTitle').innerText = filter === 'all' ? "All-Time Expenses" : "Month Expenses";
+            document.getElementById('insFuelTitle').innerText = filter === 'all' ? "All-Time Fuel Spent" : "Month Fuel Spent";
+            const milTitle = filter === 'all' ? "Avg Lifetime Mileage: " : "Avg Month Mileage: ";
+            
+            document.getElementById('insTotalExp').innerText = "₹ " + Math.round(totalExp).toLocaleString("en-IN");
+            document.getElementById('insTotalFuel').innerText = "₹ " + Math.round(totalFuel).toLocaleString("en-IN");
+            
+            document.getElementById('insCatHome').innerText = Math.round(catTotals.Home).toLocaleString("en-IN");
+            document.getElementById('insCatEMI').innerText = Math.round(catTotals.EMI).toLocaleString("en-IN");
+            document.getElementById('insCatMisc').innerText = Math.round(catTotals.Misc).toLocaleString("en-IN");
+
+            const tot = totalExp || 1; 
+            document.getElementById('barHome').style.width = (catTotals.Home / tot * 100) + "%";
+            document.getElementById('barEMI').style.width = (catTotals.EMI / tot * 100) + "%";
+            document.getElementById('barMisc').style.width = (catTotals.Misc / tot * 100) + "%";
+            
+            if (avgMileage > 0) document.getElementById('insAvgMileage').innerText = `${milTitle}${avgMileage.toFixed(1)} km/l`;
+            else document.getElementById('insAvgMileage').innerText = `${milTitle}-- km/l`;
+        }
 
         const dbPromise = idb.openDB('FinCenterDB', 1, {
             upgrade(db) {
@@ -510,15 +532,38 @@
             }
         });
 
+        // --- OFFLINE QUEUE FLUSHER ---
+        async function flushSyncQueue() {
+            if (!navigator.onLine) return;
+            const db = await dbPromise;
+            const queue = await db.transaction('syncQueue', 'readonly').objectStore('syncQueue').getAll();
+            if (queue.length === 0) return;
+
+            for (let q of queue) {
+                try {
+                    await fetch(API_URL, { method: "POST", body: JSON.stringify(q.payload) });
+                } catch(e) { return; }
+            }
+            await db.transaction('syncQueue', 'readwrite').objectStore('syncQueue').clear();
+        }
+        window.addEventListener('online', flushSyncQueue);
+
         // --- GLOBAL BOOT ---
         window.onload = async () => {
-            initTheme(); document.getElementById('fuelMonth').value = `${currentExpYear}-${currentExpMonth}`;
-            const db = await dbPromise; cachedSalaryData = await db.transaction('salary').objectStore('salary').getAll();
-            syncWithSheetQuietly(true); fetchCloudExpenses(); fetchCloudFuel(); loadExpenses();
+            initTheme(); 
+            document.getElementById('fuelMonth').value = `${currentExpYear}-${currentExpMonth}`;
+            const db = await dbPromise; 
+            cachedSalaryData = await db.transaction('salary').objectStore('salary').getAll();
+            
+            renderInsights(); 
+            syncWithSheetQuietly(false); 
+            fetchCloudExpenses(false); 
+            fetchCloudFuel(false); 
+            loadExpenses();
+            flushSyncQueue();
             if(navigator.serviceWorker) navigator.serviceWorker.register('sw.js');
         };
 
-        // --- FORM RESETS ---
         function resetSalaryForm() {
             hapticTap();
             document.getElementById("salaryForm").reset();
@@ -534,7 +579,6 @@
             document.getElementById('fuelLiveMileage').innerText = "-- km/l";
         }
 
-        // --- TAB ROUTING & INSIGHTS FILTER ---
         function toggleExpenseSubTab(view) {
             hapticTap();
             document.getElementById('expense-checklist-pane').style.display = view === 'checklist' ? 'block' : 'none';
@@ -559,7 +603,6 @@
             renderExpenseInsights();
         }
 
-        // --- SMART UNCHECK & DUPLICATE BLOCKER ---
         function smartUncheck(elem) {
             const row = elem.closest('.exp-row');
             if (row.classList.contains('is-done')) {
@@ -595,8 +638,8 @@
             }
         }
 
-        async function fetchCloudFuel() {
-            const lastSync = localStorage.getItem('lastFuelSync') || '0';
+        async function fetchCloudFuel(forceHardSync = false) {
+            const lastSync = forceHardSync ? '0' : (localStorage.getItem('lastFuelSync') || '0');
             try {
                 const response = await fetch(`${API_URL}?type=fuel&since=${lastSync}`);
                 const res = await response.json();
@@ -640,29 +683,10 @@
                 setTimeout(() => { btn.innerHTML = originalHtml; btn.style.backgroundColor = ""; resetFuelForm(); prepareFuelUI(); calcFuelLive(); }, 1500);
             } catch(err) {
                 hapticError(); btn.innerHTML = `<span class="material-icons me-2">cloud_off</span> Saved Locally`; btn.style.backgroundColor = "#f59e0b";
+                const db = await dbPromise; await db.transaction('syncQueue', 'readwrite').objectStore('syncQueue').add({ payload });
                 setTimeout(() => { btn.innerHTML = originalHtml; btn.style.backgroundColor = ""; }, 2000);
             }
         });
-
-        function renderExpenseInsights() {
-            const filter = document.getElementById('insightsFilter').value;
-            let rawExpData = [];
-
-            if (filter === 'all') {
-                for(let i=0; i<localStorage.length; i++) {
-                    const key = localStorage.key(i);
-                    if(key.startsWith('exp_')) { 
-                        const arr = JSON.parse(localStorage.getItem(key)) || []; 
-                        rawExpData = rawExpData.concat(arr);
-                    }
-                }
-            } else {
-                const key = `exp_${currentExpYear}_${currentExpMonth}`;
-                rawExpData = JSON.parse(localStorage.getItem(key)) || []; 
-            }
-
-            mathWorker.postMessage({ type: 'expense', rawExpData: rawExpData, fuelData: cachedFuelData, filter: filter, targetMonth: `${currentExpYear}-${currentExpMonth}` });
-        }
 
         function getExpStorageKey() { return `exp_${currentExpYear}_${currentExpMonth}`; }
 
@@ -677,7 +701,6 @@
             if(document.getElementById('view-exp-insights').checked) renderExpenseInsights();
         }
 
-        // Now accepts category parameter
         function createExpenseRow(desc = "", amt = "", dateStr = "", isDone = false, category = "Misc") {
             const row = document.createElement('div'); 
             row.className = `exp-row ${isDone ? 'is-done' : ''}`;
@@ -700,7 +723,6 @@
             cats.forEach(cat => {
                 const container = document.getElementById(`expense-list-${cat}`);
                 container.innerHTML = '';
-                // Fallback to Misc if old data has no category
                 const catData = data.filter(item => (item.category || 'Misc') === cat);
                 
                 if (catData.length === 0) {
@@ -768,12 +790,13 @@
                 hapticSuccess(); btn.innerHTML = `<span class="material-icons me-2">check_circle</span> Synced!`; btn.style.backgroundColor = "#10b981";
             } catch (error) {
                 hapticError(); btn.innerHTML = `<span class="material-icons me-2">cloud_off</span> Saved Locally`; btn.style.backgroundColor = "#f59e0b";
+                const db = await dbPromise; await db.transaction('syncQueue', 'readwrite').objectStore('syncQueue').add({ payload });
             }
             setTimeout(() => { btn.innerHTML = originalHtml; btn.style.backgroundColor = "var(--primary)"; }, 2500);
         }
 
-        async function fetchCloudExpenses() {
-            const lastSync = localStorage.getItem('lastExpSync') || '0';
+        async function fetchCloudExpenses(forceHardSync = false) {
+            const lastSync = forceHardSync ? '0' : (localStorage.getItem('lastExpSync') || '0');
             try {
                 const response = await fetch(`${API_URL}?type=expense&since=${lastSync}`);
                 const res = await response.json();
@@ -788,7 +811,6 @@
                     const grouped = {};
                     res.data.forEach(row => {
                         if (!grouped[row.monthYear]) grouped[row.monthYear] = [];
-                        // Save category with fallback
                         grouped[row.monthYear].push({ desc: row.desc, amt: row.amt, date: row.date, isDone: row.isDone, category: row.category || 'Misc' });
                     });
                     
@@ -831,13 +853,7 @@
         }
         document.querySelectorAll('.static-field').forEach(input => { input.addEventListener('focus', function() { this.classList.remove('is-fetched'); }); input.addEventListener('input', function() { this.classList.remove('is-fetched'); }); });
         function applyFetchedValue(id, val) { const el = document.getElementById(id); if (val) { el.value = val; el.classList.add('is-fetched'); } else { el.value = ""; el.classList.remove('is-fetched'); } }
-        function parseDateInfo(str) {
-            if (!str) return { m: 0, y: 0 }; let s = String(str).trim().toUpperCase(); let parts = s.split('-');
-            if (parts.length === 2 && monthMap[parts[0]]) return { m: monthMap[parts[0]], y: parseInt(parts[1]) };
-            let d = new Date(str); if (!isNaN(d.getTime())) return { m: d.getMonth() + 1, y: d.getFullYear() }; return { m: 0, y: 0 }; 
-        }
-        function getSortValue(str) { let { m, y } = parseDateInfo(str); return m === 0 ? 0 : (y * 100) + m; }
-
+        
         function handleDateInput() {
             const m = document.getElementById("monthPart").value.toUpperCase(); const y = document.getElementById("yearPart").value;
             if (m.length === 3 && y.length === 4) {
@@ -856,28 +872,26 @@
         document.getElementById("monthPart").addEventListener("input", function() { if(this.value.length === 3) document.getElementById("yearPart").focus(); });
         document.getElementById("yearPart").addEventListener("input", debouncedHandleDateInput);
 
-        async function syncWithSheetQuietly(forceUpdate = false) {
+        async function syncWithSheetQuietly(forceHardSync = false) {
             hapticTap();
             const syncBtn = document.getElementById("syncDataBtn"); const originalIcon = syncBtn.innerHTML;
             syncBtn.innerHTML = `<span class="material-icons" style="font-size: 20px; animation: spin 1s linear infinite;">sync</span>`;
-            const lastSync = localStorage.getItem('lastSalarySync') || '0';
+            const lastSync = forceHardSync ? '0' : (localStorage.getItem('lastSalarySync') || '0');
             try {
                 const response = await fetch(`${API_URL}?since=${lastSync}`);
                 const res = await response.json();
                 if(res.status === "not_modified") {
-                    if (document.getElementById('view-insights').checked || forceUpdate) renderInsights();
+                    renderInsights();
                 } else if (res.data) {
                     cachedSalaryData = res.data;
                     const db = await dbPromise; const tx = db.transaction('salary', 'readwrite'); await tx.objectStore('salary').clear();
                     for (let record of res.data) { await tx.objectStore('salary').put(record); }
                     localStorage.setItem('lastSalarySync', res.timestamp);
-                    if (document.getElementById('view-insights').checked || forceUpdate) renderInsights();
+                    renderInsights();
                 }
-            } catch (err) { if (document.getElementById('view-insights').checked || forceUpdate) renderInsights(); } 
+            } catch (err) { renderInsights(); } 
             finally { setTimeout(() => { syncBtn.innerHTML = originalIcon; }, 500); }
         }
-
-        function renderInsights() { mathWorker.postMessage({ type: 'salary', salaryData: cachedSalaryData }); }
 
         document.getElementById("salaryForm").addEventListener("submit", async function(e) {
             e.preventDefault();
@@ -902,11 +916,17 @@
             localStorage.setItem("empNumber", payload.empNumber); localStorage.setItem("bankName", payload.bankName); localStorage.setItem("bankAccount", payload.bankAccount);
             localStorage.setItem("grade", payload.grade); localStorage.setItem("uan", payload.uan); localStorage.setItem("taxRegime", payload.taxRegime);
 
-            try { await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) }); hapticSuccess(); } 
-            catch (error) { hapticError(); await db.transaction('syncQueue', 'readwrite').objectStore('syncQueue').add({ payload }); }
+            try { 
+                await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) }); 
+                hapticSuccess(); 
+            } catch (error) { 
+                hapticError(); 
+                const db = await dbPromise; 
+                await db.transaction('syncQueue', 'readwrite').objectStore('syncQueue').add({ payload }); 
+            }
 
             btn.innerHTML = `<span class="material-icons me-2">check_circle</span> Saved!`; btn.style.backgroundColor = "#10b981";
-            if (document.getElementById('view-insights').checked) renderInsights();
+            renderInsights();
             setTimeout(() => {
                 btn.innerHTML = originalBtnHtml; btn.style.backgroundColor = ""; resetSalaryForm();
             }, 1500);

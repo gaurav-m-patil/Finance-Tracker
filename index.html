@@ -239,27 +239,27 @@
                     <div id="expense-list-Misc"></div>
                 </div>
 
-                <!-- CATEGORIZED TOTALS CARD -->
+                <!-- CATEGORIZED TOTALS CARD (50/50 Balanced Split) -->
                 <div class="premium-card border-0 p-3 mb-2" style="background: var(--input-bg);">
                     <div class="row g-2">
-                        <div class="col-7 border-end border-secondary border-opacity-25">
+                        <div class="col-6 border-end border-secondary border-opacity-25 pe-2">
                             <small class="d-block text-muted mb-1" style="font-size: 0.6rem; text-transform: uppercase; font-weight: 700;">Pending Breakdown</small>
-                            <div class="d-flex justify-content-between text-muted" style="font-size: 0.75rem; font-weight: 600;"><span>Home:</span><span>₹ <span id="pendingHome">0</span></span></div>
-                            <div class="d-flex justify-content-between text-muted" style="font-size: 0.75rem; font-weight: 600;"><span>EMI:</span><span>₹ <span id="pendingEMI">0</span></span></div>
-                            <div class="d-flex justify-content-between text-muted" style="font-size: 0.75rem; font-weight: 600;"><span>Misc:</span><span>₹ <span id="pendingMisc">0</span></span></div>
+                            <div class="d-flex justify-content-between text-muted" style="font-size: 0.7rem; font-weight: 600;"><span>Home:</span><span style="white-space: nowrap;">₹ <span id="pendingHome">0</span></span></div>
+                            <div class="d-flex justify-content-between text-muted" style="font-size: 0.7rem; font-weight: 600;"><span>EMI:</span><span style="white-space: nowrap;">₹ <span id="pendingEMI">0</span></span></div>
+                            <div class="d-flex justify-content-between text-muted" style="font-size: 0.7rem; font-weight: 600;"><span>Misc:</span><span style="white-space: nowrap;">₹ <span id="pendingMisc">0</span></span></div>
                             <hr class="my-1 border-secondary opacity-25">
-                            <div class="d-flex justify-content-between text-danger fw-bold" style="font-size: 0.8rem;"><span>Total Pending:</span><span>₹ <span id="expPendingTotal">0</span></span></div>
+                            <div class="d-flex justify-content-between text-danger fw-bold" style="font-size: 0.75rem;"><span>Total:</span><span style="white-space: nowrap;">₹ <span id="expPendingTotal">0</span></span></div>
                         </div>
-                        <div class="col-5 ps-3 d-flex flex-column justify-content-between">
+                        <div class="col-6 ps-2 d-flex flex-column justify-content-between">
                             <div>
                                 <small class="d-block text-muted mb-1" style="font-size: 0.6rem; text-transform: uppercase; font-weight: 700;">Tracked Breakdown</small>
-                                <div class="d-flex justify-content-between text-muted" style="font-size: 0.75rem; font-weight: 600;"><span>Home:</span><span>₹ <span id="trackedHome">0</span></span></div>
-                                <div class="d-flex justify-content-between text-muted" style="font-size: 0.75rem; font-weight: 600;"><span>EMI:</span><span>₹ <span id="trackedEMI">0</span></span></div>
-                                <div class="d-flex justify-content-between text-muted" style="font-size: 0.75rem; font-weight: 600;"><span>Misc:</span><span>₹ <span id="trackedMisc">0</span></span></div>
+                                <div class="d-flex justify-content-between text-muted" style="font-size: 0.7rem; font-weight: 600;"><span>Home:</span><span style="white-space: nowrap;">₹ <span id="trackedHome">0</span></span></div>
+                                <div class="d-flex justify-content-between text-muted" style="font-size: 0.7rem; font-weight: 600;"><span>EMI:</span><span style="white-space: nowrap;">₹ <span id="trackedEMI">0</span></span></div>
+                                <div class="d-flex justify-content-between text-muted" style="font-size: 0.7rem; font-weight: 600;"><span>Misc:</span><span style="white-space: nowrap;">₹ <span id="trackedMisc">0</span></span></div>
                             </div>
                             <div>
                                 <hr class="my-1 border-secondary opacity-25">
-                                <div class="d-flex justify-content-between text-main fw-bold" style="font-size: 0.8rem;"><span>Total Tracked:</span><span>₹ <span id="expGrandTotal">0</span></span></div>
+                                <div class="d-flex justify-content-between text-main fw-bold" style="font-size: 0.75rem;"><span>Total:</span><span style="white-space: nowrap;">₹ <span id="expGrandTotal">0</span></span></div>
                             </div>
                         </div>
                     </div>
@@ -764,15 +764,36 @@
             calcExpenseTotal();
         }
 
+        // --- SMART ROW PURGE & AUTO ROW ADDER ---
         function handleExpenseAutoRow(elem) {
-            const val = elem.value.trim(); const row = elem.closest('.exp-row'); const nextRow = row.nextElementSibling;
+            const val = elem.value.trim(); 
+            const row = elem.closest('.exp-row'); 
+            const nextRow = row.nextElementSibling;
             const category = row.getAttribute('data-category');
             
+            const desc = row.querySelector('.exp-desc').value.trim();
+            const amt = row.querySelector('.exp-amt').value.trim();
+            const date = row.querySelector('.exp-date').value.trim();
+
+            // If the current row is completely empty and there is another empty row below it, remove this duplicate empty row
+            if (!desc && !amt && !date && nextRow) {
+                const nextDesc = nextRow.querySelector('.exp-desc').value.trim();
+                const nextAmt = nextRow.querySelector('.exp-amt').value.trim();
+                const nextDate = nextRow.querySelector('.exp-date').value.trim();
+                if (!nextDesc && !nextAmt && !nextDate) {
+                    row.remove();
+                    return;
+                }
+            }
+
+            // Standard auto-add row when typing
             if (val.length >= 5 && !nextRow) { 
                 row.parentNode.appendChild(createExpenseRow("", "", "", false, category)); 
             } 
             else if (val.length < 5 && nextRow) {
-                const d = nextRow.querySelector('.exp-desc').value; const a = nextRow.querySelector('.exp-amt').value; const dt = nextRow.querySelector('.exp-date').value;
+                const d = nextRow.querySelector('.exp-desc').value; 
+                const a = nextRow.querySelector('.exp-amt').value; 
+                const dt = nextRow.querySelector('.exp-date').value;
                 if (!d && !a && !dt) nextRow.remove();
             }
         }
@@ -817,10 +838,16 @@
         function autoSaveExpenses() {
             const data = [];
             document.querySelectorAll('.exp-row').forEach(row => {
-                const desc = row.querySelector('.exp-desc').value; const amt = row.querySelector('.exp-amt').value; 
-                const date = row.querySelector('.exp-date').value; const isDone = row.classList.contains('is-done');
+                const desc = row.querySelector('.exp-desc').value.trim(); 
+                const amt = row.querySelector('.exp-amt').value.trim(); 
+                const date = row.querySelector('.exp-date').value.trim(); 
+                const isDone = row.classList.contains('is-done');
                 const category = row.getAttribute('data-category');
-                if (desc || amt || date) data.push({ desc, amt, date, isDone, category });
+                
+                // Only save if at least one field contains actual data (prevents saving ghost blank rows)
+                if (desc || amt || date) {
+                    data.push({ desc, amt, date, isDone, category });
+                }
             });
             localStorage.setItem(getExpStorageKey(), JSON.stringify(data));
         }
@@ -832,6 +859,8 @@
             btn.innerHTML = `<span class="material-icons me-2" style="font-size: 20px; animation: spin 1s linear infinite;">sync</span> Saving...`;
             
             autoSaveExpenses(); 
+            loadExpenses(); // Clean up DOM to purge any stray empty rows immediately on save
+            
             const data = JSON.parse(localStorage.getItem(getExpStorageKey())) || [];
             const payload = { type: "expense", monthYear: `${currentExpYear}-${currentExpMonth}`, items: data };
             try {

@@ -28,6 +28,10 @@ self.addEventListener('activate', event => {
 
 // Network-First Strategy
 self.addEventListener('fetch', event => {
+    // --- ADD THIS LINE TO PROTECT YOUR DATA SYNC ---
+    if (event.request.url.includes('script.google.com')) return; 
+    // -----------------------------------------------
+
     event.respondWith(
         fetch(event.request)
         .then(response => {

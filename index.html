@@ -12,6 +12,7 @@
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2933/2933116.png">
 
     <script src="https://cdn.jsdelivr.net/npm/idb@7/build/umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -64,7 +65,7 @@
         .insight-card-red { background: linear-gradient(135deg, #991b1b 0%, #ef4444 100%); padding: 16px; }
         .insight-card .bg-icon { position: absolute; right: -5px; bottom: -15px; font-size: 100px; opacity: 0.1; transform: rotate(-15deg); }
 
-        .exp-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; transition: opacity 0.2s ease; }
+        .exp-row { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; transition: opacity 0.2s ease; background: transparent; }
         .exp-checkbox { width: 24px; height: 24px; flex-shrink: 0; border-radius: 50%; border: 2px solid var(--input-border); display: flex; align-items: center; justify-content: center; cursor: pointer; color: transparent; background-color: transparent; transition: all 0.2s ease; }
         .exp-row.is-done .exp-checkbox { background-color: var(--success-color); border-color: var(--success-color); color: white; }
         
@@ -78,6 +79,11 @@
         .exp-row.is-done .exp-input { text-decoration: line-through; color: var(--text-muted); opacity: 0.6; }
         
         .carry-over-badge { font-size: 0.55rem; background: var(--input-border); color: var(--text-muted); padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 4px; }
+        
+        /* Drag and Drop Physics */
+        .drag-handle { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: grab; touch-action: none; flex-shrink: 0; }
+        .drag-handle:active { cursor: grabbing; }
+        .sortable-ghost { opacity: 0.4; background-color: var(--primary-glow); border-radius: 8px; }
 
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background-color: var(--nav-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid rgba(128,128,128,0.1); display: flex; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom, 15px); z-index: 1000; height: 65px; }
         .nav-link { color: var(--text-muted); padding: 10px 0; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; border: none !important; background: transparent; }
@@ -227,7 +233,7 @@
                 <div class="premium-card mb-2 p-3" style="padding-bottom: 4px !important;">
                     <div class="section-header text-primary mb-1"><span class="material-icons" style="font-size: 16px;">home</span> Home Expenses</div>
                     <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
-                        <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Component</div><div style="flex: 1.2;">Amount</div><div style="flex: 1.2;">Date</div>
+                        <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Component</div><div style="flex: 1.2; text-align: right; padding-right: 4px;">Amount</div><div style="flex: 1.2; text-align: center;">Date</div><div style="flex: 0 0 24px;"></div>
                     </div>
                     <div id="expense-list-Home"></div>
                     <div class="mt-2 pb-1">
@@ -242,7 +248,7 @@
                 <div class="premium-card mb-2 p-3" style="padding-bottom: 4px !important;">
                     <div class="section-header text-warning mb-1"><span class="material-icons" style="font-size: 16px;">category</span> Miscellaneous</div>
                     <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
-                        <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Component</div><div style="flex: 1.2;">Amount</div><div style="flex: 1.2;">Date</div>
+                        <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Component</div><div style="flex: 1.2; text-align: right; padding-right: 4px;">Amount</div><div style="flex: 1.2; text-align: center;">Date</div><div style="flex: 0 0 24px;"></div>
                     </div>
                     <div id="expense-list-Misc"></div>
                     <div class="mt-2 pb-1">
@@ -270,7 +276,7 @@
                 <div class="premium-card mb-2 p-3" style="padding-bottom: 4px !important;">
                     <div class="section-header text-danger mb-1"><span class="material-icons" style="font-size: 16px;">credit_card</span> Fixed EMIs</div>
                     <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
-                        <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Bank/Debt</div><div style="flex: 1.2;">Amount</div><div style="flex: 1.2;">Date</div>
+                        <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Bank/Debt</div><div style="flex: 1.2; text-align: right; padding-right: 4px;">Amount</div><div style="flex: 1.2; text-align: center;">Date</div><div style="flex: 0 0 24px;"></div>
                     </div>
                     <div id="expense-list-EMI"></div>
                     <div class="mt-2 pb-1">
@@ -281,26 +287,11 @@
                     </div>
                 </div>
 
-                <!-- Category: Lent -->
-                <div class="premium-card mb-2 p-3" style="padding-bottom: 4px !important;">
-                    <div class="section-header text-success mb-1"><span class="material-icons" style="font-size: 16px;">call_made</span> Money I Lent <span class="carry-over-badge">Carries Over</span></div>
-                    <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
-                        <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Person</div><div style="flex: 1.2;">Amount</div><div style="flex: 1.2;">Date</div>
-                    </div>
-                    <div id="expense-list-Lent"></div>
-                    <div class="mt-2 pb-1">
-                        <button class="btn btn-sm btn-link text-muted p-0 d-flex align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLent" style="font-size: 0.65rem; text-decoration: none; font-weight: 700; text-transform: uppercase;">
-                            <span class="material-icons" style="font-size: 14px; margin-right: 2px;">expand_more</span> Completed (₹<span id="done-Lent">0</span>)
-                        </button>
-                        <div class="collapse" id="collapseLent"><div id="expense-completed-Lent" class="pt-2 mt-2 border-top border-secondary border-opacity-25"></div></div>
-                    </div>
-                </div>
-
                 <!-- Category: Borrowed -->
                 <div class="premium-card mb-2 p-3" style="padding-bottom: 4px !important;">
                     <div class="section-header text-info mb-1"><span class="material-icons" style="font-size: 16px;">call_received</span> Money I Borrowed <span class="carry-over-badge">Carries Over</span></div>
                     <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
-                        <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Person</div><div style="flex: 1.2;">Amount</div><div style="flex: 1.2;">Date</div>
+                        <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Person</div><div style="flex: 1.2; text-align: right; padding-right: 4px;">Amount</div><div style="flex: 1.2; text-align: center;">Date</div><div style="flex: 0 0 24px;"></div>
                     </div>
                     <div id="expense-list-Borrowed"></div>
                     <div class="mt-2 pb-1">
@@ -308,6 +299,21 @@
                             <span class="material-icons" style="font-size: 14px; margin-right: 2px;">expand_more</span> Completed (₹<span id="done-Borrowed">0</span>)
                         </button>
                         <div class="collapse" id="collapseBorrowed"><div id="expense-completed-Borrowed" class="pt-2 mt-2 border-top border-secondary border-opacity-25"></div></div>
+                    </div>
+                </div>
+                
+                <!-- Category: Lent -->
+                <div class="premium-card mb-2 p-3" style="padding-bottom: 4px !important;">
+                    <div class="section-header text-success mb-1"><span class="material-icons" style="font-size: 16px;">call_made</span> Money I Lent <span class="carry-over-badge">Carries Over</span></div>
+                    <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
+                        <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Person</div><div style="flex: 1.2; text-align: right; padding-right: 4px;">Amount</div><div style="flex: 1.2; text-align: center;">Date</div><div style="flex: 0 0 24px;"></div>
+                    </div>
+                    <div id="expense-list-Lent"></div>
+                    <div class="mt-2 pb-1">
+                        <button class="btn btn-sm btn-link text-muted p-0 d-flex align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLent" style="font-size: 0.65rem; text-decoration: none; font-weight: 700; text-transform: uppercase;">
+                            <span class="material-icons" style="font-size: 14px; margin-right: 2px;">expand_more</span> Completed (₹<span id="done-Lent">0</span>)
+                        </button>
+                        <div class="collapse" id="collapseLent"><div id="expense-completed-Lent" class="pt-2 mt-2 border-top border-secondary border-opacity-25"></div></div>
                     </div>
                 </div>
 
@@ -455,6 +461,24 @@
         function hapticTap() { if(navigator.vibrate) navigator.vibrate(30); }
         function hapticSuccess() { if(navigator.vibrate) navigator.vibrate([50, 50, 50]); }
         function hapticError() { if(navigator.vibrate) navigator.vibrate([150, 50, 150]); }
+
+        function initSortable() {
+            const lists = ['Home', 'Misc', 'EMI', 'Borrowed', 'Lent'];
+            lists.forEach(cat => {
+                const el = document.getElementById(`expense-list-${cat}`);
+                if (el) {
+                    Sortable.create(el, {
+                        handle: '.drag-handle',
+                        animation: 150,
+                        ghostClass: 'sortable-ghost',
+                        onEnd: function() {
+                            if (cat === 'Home' || cat === 'Misc') debouncedAutoSaveExpenses();
+                            else debouncedAutoSaveObligations();
+                        }
+                    });
+                }
+            });
+        }
 
         const monthMap = { 
             "JAN":1, "FEB":2, "MAR":3, "APR":4, "MAY":5, "JUN":6, "JUL":7, "AUG":8, "SEP":9, "OCT":10, "NOV":11, "DEC":12,
@@ -661,8 +685,9 @@
             cachedFuelData = rawFuel.map(f => f.items).flat(); 
             
             renderInsights(); 
-            loadExpenses();
-            loadObligations();
+            await loadExpenses();
+            await loadObligations();
+            initSortable();
             
             syncWithSheetQuietly(false); 
             fetchCloudExpenses(false); 
@@ -817,15 +842,16 @@
         function getExpStorageKey() { return `exp_${currentExpYear}_${currentExpMonth}`; }
         function getOblStorageKey() { return `obl_${currentExpYear}_${currentExpMonth}`; }
 
-        function changeExpMonth(offset) {
+        async function changeExpMonth(offset) {
             hapticTap(); currentExpMonth += offset;
             if (currentExpMonth > 12) { currentExpMonth = 1; currentExpYear++; } else if (currentExpMonth < 1) { currentExpMonth = 12; currentExpYear--; }
             
             document.getElementById('expMonthLabel').innerText = `${monthNames[currentExpMonth - 1]} ${currentExpYear}`;
             document.getElementById('fuelMonth').value = `${currentExpYear}-${currentExpMonth}`;
             
-            loadExpenses();
-            loadObligations();
+            await loadExpenses();
+            await loadObligations();
+            initSortable();
             if(document.getElementById('view-exp-insights').checked) renderExpenseInsights();
         }
 
@@ -905,7 +931,6 @@
                 
                 const receiptDesc = `Repaid: ${desc}`;
                 const receiptDate = settleDate || "DONE";
-                // Receipt is ALWAYS current month, never carried over.
                 const receiptRow = createRowHtml(receiptDesc, paidAmt, receiptDate, true, category, true, getOblStorageKey(), false);
                 activeSettleRow.parentNode.insertBefore(receiptRow, activeSettleRow.nextSibling);
             }
@@ -913,16 +938,15 @@
             hapticSuccess();
             calcObligationTotal();
             await autoSaveObligations();
-            loadObligations(); 
+            await loadObligations(); 
+            initSortable();
         }
 
-        // --- THE ORIGIN TRACKER ENGINE ---
         function createRowHtml(desc, amt, dateStr, isDone, category, isObligation, origin = "", isCarriedOver = false) {
             const row = document.createElement('div'); 
             row.className = `exp-row ${isDone ? 'is-done' : ''}`;
             row.setAttribute('data-category', category);
             
-            // Assign Memory Tags
             row.setAttribute('data-origin', origin);
             if (isCarriedOver) row.setAttribute('data-carried-over', 'true');
             
@@ -944,12 +968,15 @@
             const saveFunc = isObligation ? `debouncedAutoSaveObligations()` : `debouncedAutoSaveExpenses()`;
             const dateFunc = isObligation ? `handleDateAutoFormat(this, event, true)` : `handleDateAutoFormat(this, event, false)`;
             const calcFunc = isObligation ? `calcObligationTotal()` : `calcExpenseTotal()`;
+            
+            const dragHtml = isDone ? `<div style="flex: 0 0 24px;"></div>` : `<div class="drag-handle"><span class="material-icons" style="font-size: 18px;">drag_indicator</span></div>`;
 
             row.innerHTML = `
                 ${btnHtml}
                 <input type="text" class="exp-input exp-desc" placeholder="Item" style="flex: 2;" value="${desc}" onchange="${dupeFunc}; ${saveFunc}" oninput="${uncheckFunc}; ${saveFunc}">
-                <input type="number" class="exp-input exp-amt" placeholder="₹0" style="flex: 1.2;" value="${amt}" onchange="${dupeFunc}; ${saveFunc}" oninput="${uncheckFunc}; ${calcFunc}; ${saveFunc}" inputmode="numeric">
-                <input type="text" class="exp-input exp-date" placeholder="DD-MMM" style="flex: 1.2;" value="${dateStr}" inputmode="numeric" oninput="${dateFunc}">
+                <input type="number" class="exp-input exp-amt" placeholder="₹0" style="flex: 1.2; text-align: right; padding-right: 4px;" value="${amt}" onchange="${dupeFunc}; ${saveFunc}" oninput="${uncheckFunc}; ${calcFunc}; ${saveFunc}" inputmode="numeric">
+                <input type="text" class="exp-input exp-date" placeholder="DD-MMM" style="flex: 1.2; text-align: center;" value="${dateStr}" inputmode="numeric" oninput="${dateFunc}">
+                ${dragHtml}
             `;
             return row;
         }
@@ -991,7 +1018,7 @@
         }
 
         async function loadObligations() {
-            const cats = ['EMI', 'Lent', 'Borrowed'];
+            const cats = ['EMI', 'Borrowed', 'Lent'];
             const db = await dbPromise;
             const currentOrigin = getOblStorageKey();
             const record = await db.transaction('obligations', 'readonly').objectStore('obligations').get(currentOrigin);
@@ -1001,7 +1028,6 @@
             const allObls = await db.transaction('obligations', 'readonly').objectStore('obligations').getAll();
             const currentSortVal = (currentExpYear * 100) + currentExpMonth;
             
-            // Collect historical un-done items strictly avoiding duplicates
             allObls.forEach(oblRecord => {
                 const recParts = oblRecord.monthYear.split('_'); 
                 const recSortVal = (parseInt(recParts[1]) * 100) + parseInt(recParts[2]);
@@ -1028,19 +1054,14 @@
                 const pendingCurrent = catCurrent.filter(item => !item.isDone);
                 const completedCurrent = catCurrent.filter(item => item.isDone);
 
-                // 1. Render Carried Pending
                 catCarried.forEach(item => container.appendChild(createRowHtml(item.desc, item.amt, item.date, item.isDone, cat, true, item.origin, true)));
-
-                // 2. Render Current Pending
                 pendingCurrent.forEach(item => container.appendChild(createRowHtml(item.desc, item.amt, item.date, item.isDone, cat, true, currentOrigin, false)));
                 
-                // 3. Keep 1 blank row at bottom
                 const last = pendingCurrent[pendingCurrent.length - 1];
                 if (!last || last.desc || last.amt || last.date) {
                     container.appendChild(createRowHtml("", "", "", false, cat, true, currentOrigin, false));
                 }
 
-                // 4. Render Current Completed (Historical completed stay in their origin month!)
                 let compTotal = 0;
                 completedCurrent.forEach(item => {
                     compTotal += parseFloat(item.amt) || 0;
@@ -1074,7 +1095,8 @@
             btn.closest('.exp-row').classList.toggle('is-done'); 
             calcExpenseTotal(); 
             await autoSaveExpenses(); 
-            loadExpenses(); 
+            await loadExpenses(); 
+            initSortable();
         }
 
         async function toggleOblDone(btn) { 
@@ -1082,7 +1104,8 @@
             btn.closest('.exp-row').classList.toggle('is-done'); 
             calcObligationTotal(); 
             await autoSaveObligations(); 
-            loadObligations(); 
+            await loadObligations(); 
+            initSortable();
         }
 
         function calcExpenseTotal() {
@@ -1146,7 +1169,6 @@
             const db = await dbPromise; 
             await db.transaction('obligations', 'readwrite').objectStore('obligations').put({ monthYear: currentOrigin, items: currentData });
 
-            // Safely reach back and update the past
             for (const [origin, updatedItems] of Object.entries(carriedOverUpdates)) {
                 const oldRecord = await db.transaction('obligations', 'readonly').objectStore('obligations').get(origin);
                 if (oldRecord) {
@@ -1170,7 +1192,7 @@
             const btn = document.getElementById("saveExpensesBtn"); const originalHtml = btn.innerHTML;
             btn.innerHTML = `<span class="material-icons me-2" style="font-size: 20px; animation: spin 1s linear infinite;">sync</span> Saving...`;
             
-            await autoSaveExpenses(); loadExpenses(); 
+            await autoSaveExpenses(); await loadExpenses(); initSortable();
             
             const db = await dbPromise;
             const record = await db.transaction('expenses', 'readonly').objectStore('expenses').get(getExpStorageKey());
@@ -1191,8 +1213,7 @@
             const btn = document.getElementById("saveOblBtn"); const originalHtml = btn.innerHTML;
             btn.innerHTML = `<span class="material-icons me-2" style="font-size: 20px; animation: spin 1s linear infinite;">sync</span> Saving...`;
             
-            const modifiedOldOrigins = await autoSaveObligations(); 
-            loadObligations(); 
+            const modifiedOldOrigins = await autoSaveObligations(); await loadObligations(); initSortable();
             
             const db = await dbPromise;
             const currentOrigin = getOblStorageKey();
@@ -1200,7 +1221,6 @@
             
             const payloadsToSync = [{ token: AUTH_TOKEN, type: "obligation", monthYear: `${currentExpYear}-${currentExpMonth}`, items: currentRecord ? currentRecord.items : [] }];
 
-            // Add historical months to the sync pipeline if we updated them
             for (const origin of modifiedOldOrigins) {
                 const oldRecord = await db.transaction('obligations', 'readonly').objectStore('obligations').get(origin);
                 if (oldRecord) {
@@ -1247,7 +1267,8 @@
                         await tx.objectStore('expenses').put({ monthYear: `exp_${y}_${m}`, items: items });
                     }
                     await setMeta('lastExpSync', res.timestamp); 
-                    loadExpenses();
+                    await loadExpenses();
+                    initSortable();
                     
                     if (document.getElementById('view-exp-insights').checked) renderExpenseInsights();
                 }
@@ -1277,7 +1298,8 @@
                         await tx.objectStore('obligations').put({ monthYear: `obl_${y}_${m}`, items: items });
                     }
                     await setMeta('lastOblSync', res.timestamp); 
-                    loadObligations();
+                    await loadObligations();
+                    initSortable();
                     
                     if (document.getElementById('view-exp-insights').checked) renderExpenseInsights();
                 }

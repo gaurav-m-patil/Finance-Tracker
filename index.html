@@ -633,7 +633,7 @@
 
         function toggleExpenseSubTab(view) {
             hapticTap();
-            document.getElementById('expense-checklist-pane').style.display = view === 'daily' ? 'block' : 'none';
+            document.getElementById('expense-daily-pane').style.display = view === 'daily' ? 'block' : 'none';
             document.getElementById('expense-obl-pane').style.display = view === 'obl' ? 'block' : 'none';
             document.getElementById('expense-fuel-pane').style.display = view === 'fuel' ? 'block' : 'none';
             document.getElementById('expense-insights-pane').style.display = view === 'insights' ? 'block' : 'none';
@@ -672,7 +672,7 @@
             const isDone = row.classList.contains('is-done');
 
             if (!desc || isNaN(amt) || isDone) return;
-            const contextPaneId = isObligation ? '#expense-obl-pane' : '#expense-checklist-pane';
+            const contextPaneId = isObligation ? '#expense-obl-pane' : '#expense-daily-pane';
             const allRows = Array.from(document.querySelectorAll(`${contextPaneId} .exp-row`));
             let duplicateFound = false;
 
@@ -838,7 +838,6 @@
             let data = record ? record.items : [];
             
             // SMART CARRY-OVER ENGINE
-            // If viewing a month, pull any pending 'Lent' or 'Borrowed' items from ALL historical months
             const allObls = await db.transaction('obligations', 'readonly').objectStore('obligations').getAll();
             const currentSortVal = (currentExpYear * 100) + currentExpMonth;
             
@@ -847,9 +846,7 @@
                 const recSortVal = (parseInt(recParts[1]) * 100) + parseInt(recParts[2]);
                 if (recSortVal < currentSortVal) {
                     oblRecord.items.forEach(item => {
-                        // If it's a loan and not settled, inject it into current view
                         if (!item.isDone && (item.category === 'Lent' || item.category === 'Borrowed')) {
-                            // Prevent duplicating if it's already carried over
                             if (!data.some(d => d.desc === item.desc && d.amt === item.amt && d.category === item.category)) {
                                 data.push(item);
                             }
@@ -894,7 +891,7 @@
 
         function calcExpenseTotal() {
             let grandTotal = 0, pendingTotal = 0;
-            document.querySelectorAll('#expense-checklist-pane .exp-row').forEach(row => {
+            document.querySelectorAll('#expense-daily-pane .exp-row').forEach(row => {
                 const amt = parseFloat(row.querySelector('.exp-amt').value);
                 const isDone = row.classList.contains('is-done');
                 if (!isNaN(amt) && amt > 0) { grandTotal += amt; if (!isDone) pendingTotal += amt; }
@@ -916,7 +913,7 @@
 
         async function autoSaveExpenses() {
             const data = [];
-            document.querySelectorAll('#expense-checklist-pane .exp-row').forEach(row => {
+            document.querySelectorAll('#expense-daily-pane .exp-row').forEach(row => {
                 const desc = row.querySelector('.exp-desc').value.trim(); const amt = row.querySelector('.exp-amt').value.trim(); 
                 const date = row.querySelector('.exp-date').value.trim(); const isDone = row.classList.contains('is-done');
                 const category = row.getAttribute('data-category');

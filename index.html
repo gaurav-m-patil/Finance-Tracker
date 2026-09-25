@@ -223,20 +223,34 @@
 
             <!-- Sub-Tab 1: Daily Spend -->
             <div id="expense-daily-pane">
+                <!-- Category: Home -->
                 <div class="premium-card mb-2 p-3" style="padding-bottom: 4px !important;">
                     <div class="section-header text-primary mb-1"><span class="material-icons" style="font-size: 16px;">home</span> Home Expenses</div>
                     <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
                         <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Component</div><div style="flex: 1.2;">Amount</div><div style="flex: 1.2;">Date</div>
                     </div>
                     <div id="expense-list-Home"></div>
+                    <div class="mt-2 pb-1">
+                        <button class="btn btn-sm btn-link text-muted p-0 d-flex align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapseHome" style="font-size: 0.65rem; text-decoration: none; font-weight: 700; text-transform: uppercase;">
+                            <span class="material-icons" style="font-size: 14px; margin-right: 2px;">expand_more</span> Completed (₹<span id="done-Home">0</span>)
+                        </button>
+                        <div class="collapse" id="collapseHome"><div id="expense-completed-Home" class="pt-2 mt-2 border-top border-secondary border-opacity-25"></div></div>
+                    </div>
                 </div>
 
+                <!-- Category: Misc -->
                 <div class="premium-card mb-2 p-3" style="padding-bottom: 4px !important;">
                     <div class="section-header text-warning mb-1"><span class="material-icons" style="font-size: 16px;">category</span> Miscellaneous</div>
                     <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
                         <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Component</div><div style="flex: 1.2;">Amount</div><div style="flex: 1.2;">Date</div>
                     </div>
                     <div id="expense-list-Misc"></div>
+                    <div class="mt-2 pb-1">
+                        <button class="btn btn-sm btn-link text-muted p-0 d-flex align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMisc" style="font-size: 0.65rem; text-decoration: none; font-weight: 700; text-transform: uppercase;">
+                            <span class="material-icons" style="font-size: 14px; margin-right: 2px;">expand_more</span> Completed (₹<span id="done-Misc">0</span>)
+                        </button>
+                        <div class="collapse" id="collapseMisc"><div id="expense-completed-Misc" class="pt-2 mt-2 border-top border-secondary border-opacity-25"></div></div>
+                    </div>
                 </div>
 
                 <div class="premium-card border-0 p-3 mb-2" style="background: var(--input-bg);">
@@ -252,28 +266,49 @@
 
             <!-- Sub-Tab 2: Obligations -->
             <div id="expense-obl-pane" style="display: none;">
+                <!-- Category: EMI -->
                 <div class="premium-card mb-2 p-3" style="padding-bottom: 4px !important;">
                     <div class="section-header text-danger mb-1"><span class="material-icons" style="font-size: 16px;">credit_card</span> Fixed EMIs</div>
                     <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
                         <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Bank/Debt</div><div style="flex: 1.2;">Amount</div><div style="flex: 1.2;">Date</div>
                     </div>
                     <div id="expense-list-EMI"></div>
+                    <div class="mt-2 pb-1">
+                        <button class="btn btn-sm btn-link text-muted p-0 d-flex align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapseEMI" style="font-size: 0.65rem; text-decoration: none; font-weight: 700; text-transform: uppercase;">
+                            <span class="material-icons" style="font-size: 14px; margin-right: 2px;">expand_more</span> Completed (₹<span id="done-EMI">0</span>)
+                        </button>
+                        <div class="collapse" id="collapseEMI"><div id="expense-completed-EMI" class="pt-2 mt-2 border-top border-secondary border-opacity-25"></div></div>
+                    </div>
                 </div>
 
+                <!-- Category: Lent -->
                 <div class="premium-card mb-2 p-3" style="padding-bottom: 4px !important;">
                     <div class="section-header text-success mb-1"><span class="material-icons" style="font-size: 16px;">call_made</span> Money I Lent <span class="carry-over-badge">Carries Over</span></div>
                     <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
                         <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Person</div><div style="flex: 1.2;">Amount</div><div style="flex: 1.2;">Date</div>
                     </div>
                     <div id="expense-list-Lent"></div>
+                    <div class="mt-2 pb-1">
+                        <button class="btn btn-sm btn-link text-muted p-0 d-flex align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLent" style="font-size: 0.65rem; text-decoration: none; font-weight: 700; text-transform: uppercase;">
+                            <span class="material-icons" style="font-size: 14px; margin-right: 2px;">expand_more</span> Completed (₹<span id="done-Lent">0</span>)
+                        </button>
+                        <div class="collapse" id="collapseLent"><div id="expense-completed-Lent" class="pt-2 mt-2 border-top border-secondary border-opacity-25"></div></div>
+                    </div>
                 </div>
 
+                <!-- Category: Borrowed -->
                 <div class="premium-card mb-2 p-3" style="padding-bottom: 4px !important;">
                     <div class="section-header text-info mb-1"><span class="material-icons" style="font-size: 16px;">call_received</span> Money I Borrowed <span class="carry-over-badge">Carries Over</span></div>
                     <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
                         <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Person</div><div style="flex: 1.2;">Amount</div><div style="flex: 1.2;">Date</div>
                     </div>
                     <div id="expense-list-Borrowed"></div>
+                    <div class="mt-2 pb-1">
+                        <button class="btn btn-sm btn-link text-muted p-0 d-flex align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBorrowed" style="font-size: 0.65rem; text-decoration: none; font-weight: 700; text-transform: uppercase;">
+                            <span class="material-icons" style="font-size: 14px; margin-right: 2px;">expand_more</span> Completed (₹<span id="done-Borrowed">0</span>)
+                        </button>
+                        <div class="collapse" id="collapseBorrowed"><div id="expense-completed-Borrowed" class="pt-2 mt-2 border-top border-secondary border-opacity-25"></div></div>
+                    </div>
                 </div>
 
                 <div class="premium-card border-0 p-3 mb-2" style="background: var(--input-bg);">
@@ -410,7 +445,7 @@
         let cachedFuelData = [];
         let currentExpMonth = new Date().getMonth() + 1; 
         let currentExpYear = new Date().getFullYear();
-        let activeSettleRow = null; // Stores row being partially paid
+        let activeSettleRow = null; 
 
         function debounce(func, wait) {
             let timeout;
@@ -431,7 +466,6 @@
             if (!str) return { m: 0, y: 0 };
             let s = String(str).trim().toUpperCase().replace(/['"]/g, '');
             let parts = s.split(/[-/\s]+/);
-            
             let m = 0, y = 0;
             for (let p of parts) {
                 if (monthMap[p]) { m = monthMap[p]; } 
@@ -685,7 +719,6 @@
                 row.classList.remove('is-done');
                 hapticTap(); 
                 
-                // If it was a 'Done' button, reset it back to the ₹ icon
                 const btn = row.querySelector('.exp-checkbox');
                 if (btn && btn.classList.contains('btn-settle-done')) {
                     btn.classList.remove('btn-settle-done');
@@ -693,8 +726,6 @@
                     btn.innerHTML = '₹';
                     btn.setAttribute('onclick', 'openSettleModal(this)');
                 }
-                
-                if(isObligation) calcObligationTotal(); else calcExpenseTotal();
             }
         }
 
@@ -822,7 +853,6 @@
             if(isObligation) debouncedAutoSaveObligations(); else debouncedAutoSaveExpenses();
         }
 
-        // --- INLINE SETTLEMENT ENGINE ---
         function openSettleModal(btn) {
             hapticTap();
             activeSettleRow = btn.closest('.exp-row');
@@ -832,45 +862,41 @@
             if (!desc || isNaN(amt)) return;
 
             document.getElementById('settleTitle').innerText = `Settle: ${desc}`;
-            document.getElementById('settleAmt').value = amt;
-            document.getElementById('settleDate').value = ""; // Let user auto-format current date
+            document.getElementById('settleAmt').value = ''; 
+            document.getElementById('settleAmt').placeholder = amt; 
+            document.getElementById('settleDate').value = ""; 
             
             const modalElement = document.getElementById('settleModal');
             const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
             modal.show();
         }
 
-        function confirmSettlement() {
+        async function confirmSettlement() {
             if (!activeSettleRow) return;
             
             const originalAmt = parseFloat(activeSettleRow.querySelector('.exp-amt').value);
-            const paidAmt = parseFloat(document.getElementById('settleAmt').value);
+            const paidAmtStr = document.getElementById('settleAmt').value;
+            const paidAmt = paidAmtStr ? parseFloat(paidAmtStr) : 0;
             let settleDate = document.getElementById('settleDate').value.trim();
+            const desc = activeSettleRow.querySelector('.exp-desc').value.trim();
             
             if (isNaN(paidAmt) || paidAmt <= 0) {
                 alert("Please enter a valid amount.");
                 return;
             }
+
+            if (!confirm(`Are you sure you want to log a repayment of ₹${paidAmt} for "${desc}"?`)) {
+                return;
+            }
             
             const category = activeSettleRow.getAttribute('data-category');
-            const desc = activeSettleRow.querySelector('.exp-desc').value.trim();
-
             const modalElement = document.getElementById('settleModal');
             bootstrap.Modal.getInstance(modalElement).hide();
 
             if (paidAmt >= originalAmt) {
-                // Full Payment
                 activeSettleRow.classList.add('is-done');
                 if (settleDate) activeSettleRow.querySelector('.exp-date').value = settleDate;
-                
-                // Swap the ₹ button to a checkmark permanently for this load
-                const btn = activeSettleRow.querySelector('.btn-settle');
-                btn.className = 'exp-checkbox btn-settle-done';
-                btn.innerHTML = `<span class="material-icons" style="font-size: 16px;">check</span>`;
-                btn.removeAttribute('onclick'); // Stops modal from opening again
-                btn.setAttribute('onclick', 'toggleOblDone(this)'); // Allows simple uncheck
             } else {
-                // Partial Payment (Ledger Split)
                 const remaining = originalAmt - paidAmt;
                 activeSettleRow.querySelector('.exp-amt').value = remaining;
                 
@@ -883,7 +909,8 @@
             
             hapticSuccess();
             calcObligationTotal();
-            debouncedAutoSaveObligations();
+            await autoSaveObligations();
+            loadObligations(); 
         }
 
         function createRowHtml(desc, amt, dateStr, isDone, category, isObligation) {
@@ -928,14 +955,28 @@
             
             cats.forEach(cat => {
                 const container = document.getElementById(`expense-list-${cat}`);
+                const compContainer = document.getElementById(`expense-completed-${cat}`);
                 container.innerHTML = '';
+                compContainer.innerHTML = '';
+                
                 const catData = data.filter(item => (item.category || 'Misc') === cat);
-                if (catData.length === 0) { container.appendChild(createRowHtml("", "", "", false, cat, false)); } 
-                else {
-                    catData.forEach(item => container.appendChild(createRowHtml(item.desc, item.amt, item.date, item.isDone, cat, false)));
-                    const last = catData[catData.length - 1];
+                const pendingData = catData.filter(item => !item.isDone);
+                const completedData = catData.filter(item => item.isDone);
+                
+                if (pendingData.length === 0) { 
+                    container.appendChild(createRowHtml("", "", "", false, cat, false)); 
+                } else {
+                    pendingData.forEach(item => container.appendChild(createRowHtml(item.desc, item.amt, item.date, item.isDone, cat, false)));
+                    const last = pendingData[pendingData.length - 1];
                     if (last.desc || last.amt || last.date) container.appendChild(createRowHtml("", "", "", false, cat, false));
                 }
+
+                let compTotal = 0;
+                completedData.forEach(item => {
+                    compTotal += parseFloat(item.amt) || 0;
+                    compContainer.appendChild(createRowHtml(item.desc, item.amt, item.date, item.isDone, cat, false));
+                });
+                document.getElementById(`done-${cat}`).innerText = Math.round(compTotal).toLocaleString("en-IN");
             });
             calcExpenseTotal();
         }
@@ -954,7 +995,6 @@
                 const recSortVal = (parseInt(recParts[1]) * 100) + parseInt(recParts[2]);
                 if (recSortVal < currentSortVal) {
                     oblRecord.items.forEach(item => {
-                        // Strict filter: only carry over if NOT done.
                         if (!item.isDone && (item.category === 'Lent' || item.category === 'Borrowed')) {
                             if (!data.some(d => d.desc === item.desc && d.amt === item.amt && d.category === item.category)) {
                                 data.push(item);
@@ -966,14 +1006,28 @@
 
             cats.forEach(cat => {
                 const container = document.getElementById(`expense-list-${cat}`);
+                const compContainer = document.getElementById(`expense-completed-${cat}`);
                 container.innerHTML = '';
+                compContainer.innerHTML = '';
+                
                 const catData = data.filter(item => item.category === cat);
-                if (catData.length === 0) { container.appendChild(createRowHtml("", "", "", false, cat, true)); } 
-                else {
-                    catData.forEach(item => container.appendChild(createRowHtml(item.desc, item.amt, item.date, item.isDone, cat, true)));
-                    const last = catData[catData.length - 1];
+                const pendingData = catData.filter(item => !item.isDone);
+                const completedData = catData.filter(item => item.isDone);
+
+                if (pendingData.length === 0) { 
+                    container.appendChild(createRowHtml("", "", "", false, cat, true)); 
+                } else {
+                    pendingData.forEach(item => container.appendChild(createRowHtml(item.desc, item.amt, item.date, item.isDone, cat, true)));
+                    const last = pendingData[pendingData.length - 1];
                     if (last.desc || last.amt || last.date) container.appendChild(createRowHtml("", "", "", false, cat, true));
                 }
+
+                let compTotal = 0;
+                completedData.forEach(item => {
+                    compTotal += parseFloat(item.amt) || 0;
+                    compContainer.appendChild(createRowHtml(item.desc, item.amt, item.date, item.isDone, cat, true));
+                });
+                document.getElementById(`done-${cat}`).innerText = Math.round(compTotal).toLocaleString("en-IN");
             });
             calcObligationTotal();
         }
@@ -995,8 +1049,21 @@
             }
         }
 
-        function toggleExpDone(btn) { hapticTap(); btn.closest('.exp-row').classList.toggle('is-done'); calcExpenseTotal(); autoSaveExpenses(); }
-        function toggleOblDone(btn) { hapticTap(); btn.closest('.exp-row').classList.toggle('is-done'); calcObligationTotal(); autoSaveObligations(); }
+        async function toggleExpDone(btn) { 
+            hapticTap(); 
+            btn.closest('.exp-row').classList.toggle('is-done'); 
+            calcExpenseTotal(); 
+            await autoSaveExpenses(); 
+            loadExpenses(); 
+        }
+
+        async function toggleOblDone(btn) { 
+            hapticTap(); 
+            btn.closest('.exp-row').classList.toggle('is-done'); 
+            calcObligationTotal(); 
+            await autoSaveObligations(); 
+            loadObligations(); 
+        }
 
         function calcExpenseTotal() {
             let grandTotal = 0, pendingTotal = 0;

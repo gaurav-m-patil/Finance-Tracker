@@ -81,7 +81,7 @@
         .carry-over-badge { font-size: 0.55rem; background: var(--input-border); color: var(--text-muted); padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 4px; }
         
         /* Drag and Drop Physics */
-        .drag-handle { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: grab; touch-action: none; flex-shrink: 0; }
+        .drag-handle { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; cursor: grab; touch-action: none; flex-shrink: 0; color: var(--text-muted); opacity: 0.5; }
         .drag-handle:active { cursor: grabbing; }
         .sortable-ghost { opacity: 0.4; background-color: var(--primary-glow); border-radius: 8px; }
 
@@ -931,6 +931,7 @@
                 
                 const receiptDesc = `Repaid: ${desc}`;
                 const receiptDate = settleDate || "DONE";
+                // Receipt is ALWAYS current month, never carried over.
                 const receiptRow = createRowHtml(receiptDesc, paidAmt, receiptDate, true, category, true, getOblStorageKey(), false);
                 activeSettleRow.parentNode.insertBefore(receiptRow, activeSettleRow.nextSibling);
             }
@@ -942,11 +943,13 @@
             initSortable();
         }
 
+        // --- THE ORIGIN TRACKER ENGINE ---
         function createRowHtml(desc, amt, dateStr, isDone, category, isObligation, origin = "", isCarriedOver = false) {
             const row = document.createElement('div'); 
             row.className = `exp-row ${isDone ? 'is-done' : ''}`;
             row.setAttribute('data-category', category);
             
+            // Assign Memory Tags
             row.setAttribute('data-origin', origin);
             if (isCarriedOver) row.setAttribute('data-carried-over', 'true');
             
@@ -1028,6 +1031,7 @@
             const allObls = await db.transaction('obligations', 'readonly').objectStore('obligations').getAll();
             const currentSortVal = (currentExpYear * 100) + currentExpMonth;
             
+            // Collect historical un-done items strictly avoiding duplicates
             allObls.forEach(oblRecord => {
                 const recParts = oblRecord.monthYear.split('_'); 
                 const recSortVal = (parseInt(recParts[1]) * 100) + parseInt(recParts[2]);
@@ -1054,14 +1058,19 @@
                 const pendingCurrent = catCurrent.filter(item => !item.isDone);
                 const completedCurrent = catCurrent.filter(item => item.isDone);
 
+                // 1. Render Carried Pending
                 catCarried.forEach(item => container.appendChild(createRowHtml(item.desc, item.amt, item.date, item.isDone, cat, true, item.origin, true)));
+
+                // 2. Render Current Pending
                 pendingCurrent.forEach(item => container.appendChild(createRowHtml(item.desc, item.amt, item.date, item.isDone, cat, true, currentOrigin, false)));
                 
+                // 3. Keep 1 blank row at bottom
                 const last = pendingCurrent[pendingCurrent.length - 1];
                 if (!last || last.desc || last.amt || last.date) {
                     container.appendChild(createRowHtml("", "", "", false, cat, true, currentOrigin, false));
                 }
 
+                // 4. Render Current Completed (Historical completed stay in their origin month!)
                 let compTotal = 0;
                 completedCurrent.forEach(item => {
                     compTotal += parseFloat(item.amt) || 0;
@@ -1169,6 +1178,7 @@
             const db = await dbPromise; 
             await db.transaction('obligations', 'readwrite').objectStore('obligations').put({ monthYear: currentOrigin, items: currentData });
 
+            // Safely reach back and update the past
             for (const [origin, updatedItems] of Object.entries(carriedOverUpdates)) {
                 const oldRecord = await db.transaction('obligations', 'readonly').objectStore('obligations').get(origin);
                 if (oldRecord) {
@@ -1221,6 +1231,7 @@
             
             const payloadsToSync = [{ token: AUTH_TOKEN, type: "obligation", monthYear: `${currentExpYear}-${currentExpMonth}`, items: currentRecord ? currentRecord.items : [] }];
 
+            // Add historical months to the sync pipeline if we updated them
             for (const origin of modifiedOldOrigins) {
                 const oldRecord = await db.transaction('obligations', 'readonly').objectStore('obligations').get(origin);
                 if (oldRecord) {

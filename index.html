@@ -35,9 +35,10 @@
         .premium-card { background-color: var(--card-bg); border-radius: 20px; box-shadow: var(--card-shadow); border: 1px solid rgba(128,128,128,0.05); padding: 14px 18px; transition: all 0.3s ease; }
         .section-header { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-muted); font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
 
-        .segmented-control { display: flex; background-color: var(--segmented-bg); border-radius: 12px; padding: 4px; margin-bottom: 12px; }
+        .segmented-control { display: flex; background-color: var(--segmented-bg); border-radius: 12px; padding: 4px; margin-bottom: 12px; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
+        .segmented-control::-webkit-scrollbar { display: none; }
         .segmented-control input[type="radio"] { display: none; }
-        .segmented-control label { flex: 1; text-align: center; padding: 8px 0; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); border-radius: 8px; cursor: pointer; transition: all 0.2s ease; margin: 0; white-space: nowrap; }
+        .segmented-control label { flex: 1; text-align: center; padding: 8px 12px; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); border-radius: 8px; cursor: pointer; transition: all 0.2s ease; margin: 0; }
         .segmented-control input[type="radio"]:checked + label { background-color: var(--card-bg); color: var(--text-main); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
 
         .form-floating > .form-control, .form-floating > .form-select { background-color: var(--input-bg); border: 1.5px solid var(--input-border); border-radius: 12px; color: var(--text-main); font-weight: 500; height: 54px; min-height: 54px; padding-top: 1.2rem; padding-bottom: 0.2rem; font-size: 0.95rem; transition: all 0.2s ease; }
@@ -70,6 +71,8 @@
         .exp-input:focus { border-bottom-color: var(--primary); outline: none; }
         .exp-input::placeholder { color: var(--text-muted); opacity: 0.5; }
         .exp-row.is-done .exp-input { text-decoration: line-through; color: var(--text-muted); opacity: 0.6; }
+        
+        .carry-over-badge { font-size: 0.55rem; background: var(--input-border); color: var(--text-muted); padding: 2px 6px; border-radius: 4px; font-weight: 700; margin-left: 4px; }
 
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background-color: var(--nav-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid rgba(128,128,128,0.1); display: flex; justify-content: space-around; padding-bottom: env(safe-area-inset-bottom, 15px); z-index: 1000; height: 65px; }
         .nav-link { color: var(--text-muted); padding: 10px 0; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; border: none !important; background: transparent; }
@@ -88,7 +91,7 @@
             <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center me-2" id="updateAppBtn" onclick="forceAppUpdate()" style="background: var(--input-bg); color: var(--text-muted); width: 36px; height: 36px; border: 1px solid var(--input-border);" title="Hard Refresh App">
                 <span class="material-icons" style="font-size: 20px;">system_update_alt</span>
             </button>
-            <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center me-2" id="syncDataBtn" onclick="syncWithSheetQuietly(true); fetchCloudExpenses(true); fetchCloudFuel(true);" style="background: var(--primary-glow); color: var(--primary); width: 36px; height: 36px; border: none;" title="Force Cloud Sync">
+            <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center me-2" id="syncDataBtn" onclick="forceSyncAll()" style="background: var(--primary-glow); color: var(--primary); width: 36px; height: 36px; border: none;" title="Force Cloud Sync">
                 <span class="material-icons" style="font-size: 20px;">sync</span>
             </button>
             <button class="btn btn-sm rounded-circle d-inline-flex align-items-center justify-content-center" onclick="toggleTheme()" style="background: var(--input-bg); color: var(--text-main); width: 36px; height: 36px; border: 1px solid var(--input-border);">
@@ -99,6 +102,7 @@
 
     <div class="tab-content" id="appTabsContent">
         
+        <!-- SALARY MODULE -->
         <div class="tab-pane fade show active" id="salary-module" role="tabpanel">
             <div class="segmented-control">
                 <input type="radio" name="salary-view" id="view-entry" checked onchange="toggleSalarySubTab('entry')">
@@ -193,39 +197,33 @@
             </div>
         </div>
 
+        <!-- TRACKER MODULE -->
         <div class="tab-pane fade" id="expense-module" role="tabpanel">
             <div class="segmented-control">
-                <input type="radio" name="expense-view" id="view-checklist" checked onchange="toggleExpenseSubTab('checklist')">
-                <label for="view-checklist">Checklist</label>
+                <input type="radio" name="expense-view" id="view-daily" checked onchange="toggleExpenseSubTab('daily')">
+                <label for="view-daily">Daily Spend</label>
+                <input type="radio" name="expense-view" id="view-obl" onchange="toggleExpenseSubTab('obl')">
+                <label for="view-obl">Obligations</label>
                 <input type="radio" name="expense-view" id="view-fuel" onchange="toggleExpenseSubTab('fuel')">
-                <label for="view-fuel">Jupiter ZX</label>
+                <label for="view-fuel">Fuel Log</label>
                 <input type="radio" name="expense-view" id="view-exp-insights" onchange="toggleExpenseSubTab('insights')">
                 <label for="view-exp-insights">Insights</label>
             </div>
 
-            <!-- GLOBAL TAB-WIDE MONTH NAVIGATOR -->
             <div id="global-exp-month-nav" class="premium-card mb-2 d-flex align-items-center justify-content-between p-2 px-3 border-0" style="background: var(--input-bg);">
                 <button class="btn btn-sm d-flex align-items-center p-0" style="color: var(--text-main);" onclick="changeExpMonth(-1)"><span class="material-icons">chevron_left</span></button>
                 <h6 class="mb-0" id="expMonthLabel" style="font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.9rem;">Loading...</h6>
                 <button class="btn btn-sm d-flex align-items-center p-0" style="color: var(--text-main);" onclick="changeExpMonth(1)"><span class="material-icons">chevron_right</span></button>
             </div>
 
-            <div id="expense-checklist-pane">
-                
+            <!-- Sub-Tab 1: Daily Spend -->
+            <div id="expense-daily-pane">
                 <div class="premium-card mb-2 p-3" style="padding-bottom: 4px !important;">
                     <div class="section-header text-primary mb-1"><span class="material-icons" style="font-size: 16px;">home</span> Home Expenses</div>
                     <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
                         <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Component</div><div style="flex: 1.2;">Amount</div><div style="flex: 1.2;">Date</div>
                     </div>
                     <div id="expense-list-Home"></div>
-                </div>
-
-                <div class="premium-card mb-2 p-3" style="padding-bottom: 4px !important;">
-                    <div class="section-header text-danger mb-1"><span class="material-icons" style="font-size: 16px;">credit_card</span> EMI / Debt</div>
-                    <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
-                        <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Component</div><div style="flex: 1.2;">Amount</div><div style="flex: 1.2;">Date</div>
-                    </div>
-                    <div id="expense-list-EMI"></div>
                 </div>
 
                 <div class="premium-card mb-2 p-3" style="padding-bottom: 4px !important;">
@@ -236,43 +234,60 @@
                     <div id="expense-list-Misc"></div>
                 </div>
 
-                <!-- CATEGORIZED TOTALS CARD -->
                 <div class="premium-card border-0 p-3 mb-2" style="background: var(--input-bg);">
-                    <div class="row g-2">
-                        <div class="col-6 border-end border-secondary border-opacity-25 pe-2">
-                            <small class="d-block text-muted mb-1" style="font-size: 0.6rem; text-transform: uppercase; font-weight: 700;">Pending Breakdown</small>
-                            <div class="d-flex justify-content-between text-muted" style="font-size: 0.7rem; font-weight: 600;"><span>Home:</span><span style="white-space: nowrap;">₹ <span id="pendingHome">0</span></span></div>
-                            <div class="d-flex justify-content-between text-muted" style="font-size: 0.7rem; font-weight: 600;"><span>EMI:</span><span style="white-space: nowrap;">₹ <span id="pendingEMI">0</span></span></div>
-                            <div class="d-flex justify-content-between text-muted" style="font-size: 0.7rem; font-weight: 600;"><span>Misc:</span><span style="white-space: nowrap;">₹ <span id="pendingMisc">0</span></span></div>
-                            <hr class="my-1 border-secondary opacity-25">
-                            <div class="d-flex justify-content-between text-danger fw-bold" style="font-size: 0.75rem;"><span>Total:</span><span style="white-space: nowrap;">₹ <span id="expPendingTotal">0</span></span></div>
-                        </div>
-                        <div class="col-6 ps-2 d-flex flex-column justify-content-between">
-                            <div>
-                                <small class="d-block text-muted mb-1" style="font-size: 0.6rem; text-transform: uppercase; font-weight: 700;">Tracked Breakdown</small>
-                                <div class="d-flex justify-content-between text-muted" style="font-size: 0.7rem; font-weight: 600;"><span>Home:</span><span style="white-space: nowrap;">₹ <span id="trackedHome">0</span></span></div>
-                                <div class="d-flex justify-content-between text-muted" style="font-size: 0.7rem; font-weight: 600;"><span>EMI:</span><span style="white-space: nowrap;">₹ <span id="trackedEMI">0</span></span></div>
-                                <div class="d-flex justify-content-between text-muted" style="font-size: 0.7rem; font-weight: 600;"><span>Misc:</span><span style="white-space: nowrap;">₹ <span id="trackedMisc">0</span></span></div>
-                            </div>
-                            <div>
-                                <hr class="my-1 border-secondary opacity-25">
-                                <div class="d-flex justify-content-between text-main fw-bold" style="font-size: 0.75rem;"><span>Total:</span><span style="white-space: nowrap;">₹ <span id="expGrandTotal">0</span></span></div>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="d-flex justify-content-between text-muted" style="font-size: 0.75rem; font-weight: 600;"><span>Pending Daily:</span><span style="white-space: nowrap;">₹ <span id="pendingDailyTotal">0</span></span></div>
+                    <hr class="my-2 border-secondary opacity-25">
+                    <div class="d-flex justify-content-between text-main fw-bold" style="font-size: 0.85rem;"><span>Total Daily Tracked:</span><span style="white-space: nowrap;">₹ <span id="trackedDailyTotal">0</span></span></div>
                 </div>
 
                 <button id="saveExpensesBtn" onclick="syncExpensesToCloud()" class="btn btn-submit w-100 d-flex align-items-center justify-content-center" style="background-color: var(--primary); color: white;">
-                    <span class="material-icons me-2" style="font-size: 20px;">cloud_sync</span> Save List
+                    <span class="material-icons me-2" style="font-size: 20px;">cloud_sync</span> Save Daily Log
                 </button>
             </div>
 
-            <!-- Sub-Tab: Fuel Log -->
+            <!-- Sub-Tab 2: Obligations -->
+            <div id="expense-obl-pane" style="display: none;">
+                <div class="premium-card mb-2 p-3" style="padding-bottom: 4px !important;">
+                    <div class="section-header text-danger mb-1"><span class="material-icons" style="font-size: 16px;">credit_card</span> Fixed EMIs</div>
+                    <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
+                        <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Bank/Debt</div><div style="flex: 1.2;">Amount</div><div style="flex: 1.2;">Date</div>
+                    </div>
+                    <div id="expense-list-EMI"></div>
+                </div>
+
+                <div class="premium-card mb-2 p-3" style="padding-bottom: 4px !important;">
+                    <div class="section-header text-success mb-1"><span class="material-icons" style="font-size: 16px;">call_made</span> Money I Lent <span class="carry-over-badge">Carries Over</span></div>
+                    <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
+                        <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Person</div><div style="flex: 1.2;">Amount</div><div style="flex: 1.2;">Date</div>
+                    </div>
+                    <div id="expense-list-Lent"></div>
+                </div>
+
+                <div class="premium-card mb-2 p-3" style="padding-bottom: 4px !important;">
+                    <div class="section-header text-info mb-1"><span class="material-icons" style="font-size: 16px;">call_received</span> Money I Borrowed <span class="carry-over-badge">Carries Over</span></div>
+                    <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
+                        <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Person</div><div style="flex: 1.2;">Amount</div><div style="flex: 1.2;">Date</div>
+                    </div>
+                    <div id="expense-list-Borrowed"></div>
+                </div>
+
+                <div class="premium-card border-0 p-3 mb-2" style="background: var(--input-bg);">
+                    <div class="d-flex justify-content-between text-danger" style="font-size: 0.75rem; font-weight: 600;"><span>Pending Obligations:</span><span style="white-space: nowrap;">₹ <span id="pendingOblTotal">0</span></span></div>
+                    <hr class="my-2 border-secondary opacity-25">
+                    <div class="d-flex justify-content-between text-main fw-bold" style="font-size: 0.85rem;"><span>Total Monthly Liabilities:</span><span style="white-space: nowrap;">₹ <span id="trackedOblTotal">0</span></span></div>
+                </div>
+
+                <button id="saveOblBtn" onclick="syncObligationsToCloud()" class="btn btn-submit w-100 d-flex align-items-center justify-content-center" style="background-color: var(--primary); color: white;">
+                    <span class="material-icons me-2" style="font-size: 20px;">cloud_sync</span> Save Ledger
+                </button>
+            </div>
+
+            <!-- Sub-Tab 3: Fuel Log -->
             <div id="expense-fuel-pane" style="display: none;">
                 <div class="premium-card mb-3">
                     <form id="fuelForm">
                         <div class="section-header">
-                            <div class="d-flex align-items-center gap-1"><span class="material-icons" style="font-size: 16px;">local_gas_station</span> Jupiter ZX Full Tank</div>
+                            <div class="d-flex align-items-center gap-1"><span class="material-icons" style="font-size: 16px;">local_gas_station</span> Vehicle Fuel Log</div>
                             <button type="button" class="btn-reset" onclick="resetFuelForm()" title="Clear Form"><span class="material-icons" style="font-size: 18px;">restart_alt</span></button>
                         </div>
                         <div class="form-floating mb-3"><input type="text" class="form-control static-field" id="fuelMonth" required readonly><label>Active Month & Year</label></div>
@@ -292,7 +307,7 @@
                 </div>
             </div>
 
-            <!-- Sub-Tab: Expense Insights -->
+            <!-- Sub-Tab 4: Expense Insights -->
             <div id="expense-insights-pane" style="display: none;">
                 <div class="premium-card mb-3 p-2 border-0 d-flex justify-content-end align-items-center" style="background: var(--input-bg);">
                     <select id="insightsFilter" class="form-select form-select-sm border-0 bg-transparent fw-bold" style="box-shadow: none; color: var(--text-main); width: auto;" onchange="handleInsightsFilterChange()">
@@ -303,22 +318,37 @@
 
                 <div class="insight-card insight-card-red mb-3 shadow-sm">
                     <span class="material-icons bg-icon">data_usage</span>
-                    <p class="mb-0" id="insExpTitle" style="color: rgba(255,255,255,0.8); font-weight: 600; font-size: 0.85rem;">Month Expenses</p>
-                    <h1 id="insTotalExp" style="font-weight: 800; font-size: 2.2rem; letter-spacing: -1px; margin-bottom: 12px;">₹ 0</h1>
+                    <p class="mb-0" id="insExpTitle" style="color: rgba(255,255,255,0.8); font-weight: 600; font-size: 0.85rem;">Month Liabilities vs Spend</p>
+                    <h1 id="insTotalOutflow" style="font-weight: 800; font-size: 2.2rem; letter-spacing: -1px; margin-bottom: 12px;">₹ 0</h1>
                     
                     <div class="d-flex gap-1 mb-1" style="height: 6px; border-radius: 3px; overflow: hidden; background: rgba(0,0,0,0.2);">
-                        <div id="barHome" style="width: 33%; background: #60a5fa;"></div>
-                        <div id="barEMI" style="width: 33%; background: #f87171;"></div>
-                        <div id="barMisc" style="width: 34%; background: #fbbf24;"></div>
+                        <div id="barLiab" style="width: 50%; background: #f87171;"></div>
+                        <div id="barVar" style="width: 50%; background: #60a5fa;"></div>
                     </div>
                     <div class="d-flex justify-content-between text-white" style="font-size: 0.65rem; font-weight: 600; opacity: 0.9;">
-                        <span>Home: ₹<span id="insCatHome">0</span></span>
-                        <span>EMI: ₹<span id="insCatEMI">0</span></span>
-                        <span>Misc: ₹<span id="insCatMisc">0</span></span>
+                        <span>Fixed (EMIs): ₹<span id="insCatFixed">0</span></span>
+                        <span>Variable (Home/Misc): ₹<span id="insCatVar">0</span></span>
                     </div>
                 </div>
 
-                <div class="insight-card insight-card-amber mb-3 shadow-sm">
+                <div class="row g-3 mb-3">
+                    <div class="col-6">
+                        <div class="insight-card insight-card-emerald shadow-sm">
+                            <span class="material-icons bg-icon" style="font-size: 80px; right: -5px; bottom: -5px;">call_made</span>
+                            <p class="mb-0" style="color: rgba(255,255,255,0.8); font-weight: 600; font-size: 0.75rem;">Pending Receivables</p>
+                            <h3 id="insLent" style="font-weight: 800; margin-bottom: 2px;">₹ 0</h3>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="insight-card insight-card-amber shadow-sm">
+                            <span class="material-icons bg-icon" style="font-size: 80px; right: -5px; bottom: -5px;">call_received</span>
+                            <p class="mb-0" style="color: rgba(255,255,255,0.8); font-weight: 600; font-size: 0.75rem;">Pending Payables</p>
+                            <h3 id="insBorrowed" style="font-weight: 800; margin-bottom: 2px;">₹ 0</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="insight-card insight-card-blue mb-3 shadow-sm">
                     <span class="material-icons bg-icon">two_wheeler</span>
                     <p class="mb-0" id="insFuelTitle" style="color: rgba(255,255,255,0.8); font-weight: 600; font-size: 0.85rem;">Month Fuel Spent</p>
                     <h1 id="insTotalFuel" style="font-weight: 800; font-size: 2.2rem; letter-spacing: -1px; margin-bottom: 0;">₹ 0</h1>
@@ -346,7 +376,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbxw50bYSCs1TSMYGm5HaOsc-y0jf2mAtE8l56_2NhYgI4HxQmtRQhP-9O4cKLC3vYxgsw/exec"; 
-        const AUTH_TOKEN = "FC_SECURE_AUTH_2026"; // Ensure this matches Code.gs
+        const AUTH_TOKEN = "FC_SECURE_AUTH_2026"; 
         
         let cachedSalaryData = []; 
         let cachedFuelData = [];
@@ -378,18 +408,12 @@
             
             let m = 0, y = 0;
             for (let p of parts) {
-                if (monthMap[p]) {
-                    m = monthMap[p];
-                } else if (!isNaN(p) && p.length === 4) {
-                    y = parseInt(p);
-                } else if (!isNaN(p) && p.length === 2) {
-                    y = 2000 + parseInt(p);
-                }
+                if (monthMap[p]) { m = monthMap[p]; } 
+                else if (!isNaN(p) && p.length === 4) { y = parseInt(p); } 
+                else if (!isNaN(p) && p.length === 2) { y = 2000 + parseInt(p); }
             }
             if (m === 0 || y === 0) {
-                for (let key in monthMap) {
-                    if (s.includes(key)) { m = monthMap[key]; break; }
-                }
+                for (let key in monthMap) { if (s.includes(key)) { m = monthMap[key]; break; } }
                 let yearMatch = s.match(/\d{2,4}/g);
                 if (yearMatch) {
                     let yr = yearMatch[yearMatch.length - 1];
@@ -462,25 +486,33 @@
         async function renderExpenseInsights() {
             const filter = document.getElementById('insightsFilter').value;
             let rawExpData = [];
+            let rawOblData = [];
             const db = await dbPromise;
 
             if (filter === 'all') {
                 const allExp = await db.transaction('expenses', 'readonly').objectStore('expenses').getAll();
                 allExp.forEach(record => { rawExpData = rawExpData.concat(record.items || []); });
+                const allObl = await db.transaction('obligations', 'readonly').objectStore('obligations').getAll();
+                allObl.forEach(record => { rawOblData = rawOblData.concat(record.items || []); });
             } else {
-                const record = await db.transaction('expenses', 'readonly').objectStore('expenses').get(getExpStorageKey());
-                rawExpData = record ? record.items : []; 
+                const expRecord = await db.transaction('expenses', 'readonly').objectStore('expenses').get(getExpStorageKey());
+                rawExpData = expRecord ? expRecord.items : []; 
+                const oblRecord = await db.transaction('obligations', 'readonly').objectStore('obligations').get(getOblStorageKey());
+                rawOblData = oblRecord ? oblRecord.items : []; 
             }
 
-            let totalExp = 0;
-            let catTotals = { "Home": 0, "EMI": 0, "Misc": 0 };
+            let catTotals = { "Fixed": 0, "Variable": 0, "LentPending": 0, "BorrowedPending": 0 };
             
             rawExpData.forEach(item => {
                 const amt = parseFloat(item.amt) || 0;
-                totalExp += amt;
-                if(item.category === "Home") catTotals.Home += amt;
-                else if(item.category === "EMI") catTotals.EMI += amt;
-                else catTotals.Misc += amt;
+                if(item.category === "Home" || item.category === "Misc") catTotals.Variable += amt;
+            });
+
+            rawOblData.forEach(item => {
+                const amt = parseFloat(item.amt) || 0;
+                if(item.category === "EMI") catTotals.Fixed += amt;
+                else if(item.category === "Lent" && !item.isDone) catTotals.LentPending += amt;
+                else if(item.category === "Borrowed" && !item.isDone) catTotals.BorrowedPending += amt;
             });
 
             let totalFuel = 0, avgMileage = 0;
@@ -513,46 +545,40 @@
                 if (monthLiters > 0) avgMileage = monthDistance / monthLiters;
             }
 
-            document.getElementById('insExpTitle').innerText = filter === 'all' ? "All-Time Expenses" : "Month Expenses";
+            document.getElementById('insExpTitle').innerText = filter === 'all' ? "All-Time Liabilities vs Spend" : "Month Liabilities vs Spend";
             document.getElementById('insFuelTitle').innerText = filter === 'all' ? "All-Time Fuel Spent" : "Month Fuel Spent";
             const milTitle = filter === 'all' ? "Avg Lifetime Mileage: " : "Avg Month Mileage: ";
             
-            document.getElementById('insTotalExp').innerText = "₹ " + Math.round(totalExp).toLocaleString("en-IN");
+            document.getElementById('insTotalOutflow').innerText = "₹ " + Math.round(catTotals.Fixed + catTotals.Variable).toLocaleString("en-IN");
             document.getElementById('insTotalFuel').innerText = "₹ " + Math.round(totalFuel).toLocaleString("en-IN");
             
-            document.getElementById('insCatHome').innerText = Math.round(catTotals.Home).toLocaleString("en-IN");
-            document.getElementById('insCatEMI').innerText = Math.round(catTotals.EMI).toLocaleString("en-IN");
-            document.getElementById('insCatMisc').innerText = Math.round(catTotals.Misc).toLocaleString("en-IN");
+            document.getElementById('insCatFixed').innerText = Math.round(catTotals.Fixed).toLocaleString("en-IN");
+            document.getElementById('insCatVar').innerText = Math.round(catTotals.Variable).toLocaleString("en-IN");
+            
+            document.getElementById('insLent').innerText = "₹ " + Math.round(catTotals.LentPending).toLocaleString("en-IN");
+            document.getElementById('insBorrowed').innerText = "₹ " + Math.round(catTotals.BorrowedPending).toLocaleString("en-IN");
 
-            const tot = totalExp || 1; 
-            document.getElementById('barHome').style.width = (catTotals.Home / tot * 100) + "%";
-            document.getElementById('barEMI').style.width = (catTotals.EMI / tot * 100) + "%";
-            document.getElementById('barMisc').style.width = (catTotals.Misc / tot * 100) + "%";
+            const tot = (catTotals.Fixed + catTotals.Variable) || 1; 
+            document.getElementById('barLiab').style.width = (catTotals.Fixed / tot * 100) + "%";
+            document.getElementById('barVar').style.width = (catTotals.Variable / tot * 100) + "%";
             
             if (avgMileage > 0) document.getElementById('insAvgMileage').innerText = `${milTitle}${avgMileage.toFixed(1)} km/l`;
             else document.getElementById('insAvgMileage').innerText = `${milTitle}-- km/l`;
         }
 
-        // IndexedDB Migration: Total Replacement of LocalStorage dependencies
-        const dbPromise = idb.openDB('FinCenterDB', 2, {
+        const dbPromise = idb.openDB('FinCenterDB', 3, {
             upgrade(db) {
                 if (!db.objectStoreNames.contains('salary')) db.createObjectStore('salary', { keyPath: 'monthYear' });
                 if (!db.objectStoreNames.contains('syncQueue')) db.createObjectStore('syncQueue', { keyPath: 'id', autoIncrement: true });
                 if (!db.objectStoreNames.contains('fuel')) db.createObjectStore('fuel', { keyPath: 'monthYear' });
                 if (!db.objectStoreNames.contains('expenses')) db.createObjectStore('expenses', { keyPath: 'monthYear' });
+                if (!db.objectStoreNames.contains('obligations')) db.createObjectStore('obligations', { keyPath: 'monthYear' });
                 if (!db.objectStoreNames.contains('metadata')) db.createObjectStore('metadata');
             }
         });
 
-        async function getMeta(key) {
-            const db = await dbPromise;
-            return await db.transaction('metadata', 'readonly').objectStore('metadata').get(key) || '0';
-        }
-        
-        async function setMeta(key, val) {
-            const db = await dbPromise;
-            await db.transaction('metadata', 'readwrite').objectStore('metadata').put(val, key);
-        }
+        async function getMeta(key) { const db = await dbPromise; return await db.transaction('metadata', 'readonly').objectStore('metadata').get(key) || '0'; }
+        async function setMeta(key, val) { const db = await dbPromise; await db.transaction('metadata', 'readwrite').objectStore('metadata').put(val, key); }
 
         async function flushSyncQueue() {
             if (!navigator.onLine) return;
@@ -562,7 +588,7 @@
 
             for (let q of queue) {
                 try { await fetch(API_URL, { method: "POST", body: JSON.stringify(q.payload) }); } 
-                catch(e) { return; } // Pause queue if network drops mid-flush
+                catch(e) { return; } 
             }
             await db.transaction('syncQueue', 'readwrite').objectStore('syncQueue').clear();
         }
@@ -575,13 +601,15 @@
             const db = await dbPromise; 
             cachedSalaryData = await db.transaction('salary').objectStore('salary').getAll();
             const rawFuel = await db.transaction('fuel').objectStore('fuel').getAll();
-            cachedFuelData = rawFuel.map(f => f.items).flat(); // Flatten grouped DB items
+            cachedFuelData = rawFuel.map(f => f.items).flat(); 
             
             renderInsights(); 
             loadExpenses();
+            loadObligations();
             
             syncWithSheetQuietly(false); 
             fetchCloudExpenses(false); 
+            fetchCloudObligations(false);
             fetchCloudFuel(false); 
             
             flushSyncQueue();
@@ -605,7 +633,8 @@
 
         function toggleExpenseSubTab(view) {
             hapticTap();
-            document.getElementById('expense-checklist-pane').style.display = view === 'checklist' ? 'block' : 'none';
+            document.getElementById('expense-checklist-pane').style.display = view === 'daily' ? 'block' : 'none';
+            document.getElementById('expense-obl-pane').style.display = view === 'obl' ? 'block' : 'none';
             document.getElementById('expense-fuel-pane').style.display = view === 'fuel' ? 'block' : 'none';
             document.getElementById('expense-insights-pane').style.display = view === 'insights' ? 'block' : 'none';
             
@@ -627,23 +656,24 @@
             renderExpenseInsights();
         }
 
-        function smartUncheck(elem) {
+        function smartUncheck(elem, isObligation = false) {
             const row = elem.closest('.exp-row');
             if (row.classList.contains('is-done')) {
                 row.classList.remove('is-done');
                 hapticTap(); 
-                calcExpenseTotal();
+                if(isObligation) { calcObligationTotal(); } else { calcExpenseTotal(); }
             }
         }
 
-        function checkExpenseDuplicate(elem) {
+        function checkDuplicateRow(elem, isObligation = false) {
             const row = elem.closest('.exp-row');
             const desc = row.querySelector('.exp-desc').value.trim().toLowerCase();
             const amt = parseFloat(row.querySelector('.exp-amt').value);
             const isDone = row.classList.contains('is-done');
 
             if (!desc || isNaN(amt) || isDone) return;
-            const allRows = Array.from(document.querySelectorAll('.exp-row'));
+            const contextPaneId = isObligation ? '#expense-obl-pane' : '#expense-checklist-pane';
+            const allRows = Array.from(document.querySelectorAll(`${contextPaneId} .exp-row`));
             let duplicateFound = false;
 
             for (let r of allRows) {
@@ -656,9 +686,10 @@
 
             if (duplicateFound) {
                 hapticError();
-                alert(`Duplicate Blocked: A pending expense for "${desc}" of ₹${amt} already exists!`);
+                alert(`Duplicate Blocked: A pending item for "${desc}" of ₹${amt} already exists!`);
                 row.querySelector('.exp-amt').value = ""; 
-                calcExpenseTotal(); debouncedAutoSaveExpenses();
+                if(isObligation) { calcObligationTotal(); debouncedAutoSaveObligations(); }
+                else { calcExpenseTotal(); debouncedAutoSaveExpenses(); }
             }
         }
 
@@ -720,6 +751,7 @@
         });
 
         function getExpStorageKey() { return `exp_${currentExpYear}_${currentExpMonth}`; }
+        function getOblStorageKey() { return `obl_${currentExpYear}_${currentExpMonth}`; }
 
         function changeExpMonth(offset) {
             hapticTap(); currentExpMonth += offset;
@@ -729,16 +761,18 @@
             document.getElementById('fuelMonth').value = `${currentExpYear}-${currentExpMonth}`;
             
             loadExpenses();
+            loadObligations();
             if(document.getElementById('view-exp-insights').checked) renderExpenseInsights();
         }
 
-        // Caret Lock implemented to prevent native keyboard conflicts
-        function handleDateAutoFormat(elem, event) {
+        function handleDateAutoFormat(elem, event, isObligation = false) {
             const isBackspace = event && event.inputType === 'deleteContentBackward';
             let val = elem.value.replace(/[^0-9-A-Z]/gi, ''); 
             
             if (isBackspace) {
-                smartUncheck(elem); debouncedAutoSaveExpenses(); return;
+                smartUncheck(elem, isObligation); 
+                if(isObligation) debouncedAutoSaveObligations(); else debouncedAutoSaveExpenses(); 
+                return;
             }
 
             let numVal = val.replace(/[^0-9]/g, '');
@@ -747,31 +781,38 @@
             if (numVal.length === 2 && val.length <= 2) {
                 const activeMonthShort = Object.keys(monthMap).find(key => monthMap[key] === currentExpMonth && key.length === 3) || "SEP";
                 elem.value = `${numVal}-${activeMonthShort}`;
-                handleExpenseAutoRow(elem);
+                handleAutoRow(elem, isObligation);
                 setTimeout(() => elem.setSelectionRange(elem.value.length, elem.value.length), 0);
             }
             
-            smartUncheck(elem);
-            debouncedAutoSaveExpenses();
+            smartUncheck(elem, isObligation);
+            if(isObligation) debouncedAutoSaveObligations(); else debouncedAutoSaveExpenses();
         }
 
-        function createExpenseRow(desc = "", amt = "", dateStr = "", isDone = false, category = "Misc") {
+        function createRowHtml(desc, amt, dateStr, isDone, category, isObligation) {
             const row = document.createElement('div'); 
             row.className = `exp-row ${isDone ? 'is-done' : ''}`;
             row.setAttribute('data-category', category);
+            
+            const checkFunc = isObligation ? `toggleOblDone(this)` : `toggleExpDone(this)`;
+            const dupeFunc = isObligation ? `checkDuplicateRow(this, true)` : `checkDuplicateRow(this, false)`;
+            const uncheckFunc = isObligation ? `smartUncheck(this, true)` : `smartUncheck(this, false)`;
+            const saveFunc = isObligation ? `debouncedAutoSaveObligations()` : `debouncedAutoSaveExpenses()`;
+            const dateFunc = isObligation ? `handleDateAutoFormat(this, event, true)` : `handleDateAutoFormat(this, event, false)`;
+            const calcFunc = isObligation ? `calcObligationTotal()` : `calcExpenseTotal()`;
+
             row.innerHTML = `
-                <button class="exp-checkbox" onclick="toggleExpDone(this)" type="button"><span class="material-icons" style="font-size: 16px;">check</span></button>
-                <input type="text" class="exp-input exp-desc" placeholder="Item" style="flex: 2;" value="${desc}" onchange="checkExpenseDuplicate(this); debouncedAutoSaveExpenses()" oninput="smartUncheck(this); debouncedAutoSaveExpenses()">
-                <input type="number" class="exp-input exp-amt" placeholder="₹0" style="flex: 1.2;" value="${amt}" onchange="checkExpenseDuplicate(this); debouncedAutoSaveExpenses()" oninput="smartUncheck(this); calcExpenseTotal(); debouncedAutoSaveExpenses()" inputmode="numeric">
-                <input type="text" class="exp-input exp-date" placeholder="DD-MMM" style="flex: 1.2;" value="${dateStr}" oninput="handleDateAutoFormat(this, event)">
+                <button class="exp-checkbox" onclick="${checkFunc}" type="button"><span class="material-icons" style="font-size: 16px;">check</span></button>
+                <input type="text" class="exp-input exp-desc" placeholder="Item" style="flex: 2;" value="${desc}" onchange="${dupeFunc}; ${saveFunc}" oninput="${uncheckFunc}; ${saveFunc}">
+                <input type="number" class="exp-input exp-amt" placeholder="₹0" style="flex: 1.2;" value="${amt}" onchange="${dupeFunc}; ${saveFunc}" oninput="${uncheckFunc}; ${calcFunc}; ${saveFunc}" inputmode="numeric">
+                <input type="text" class="exp-input exp-date" placeholder="DD-MMM" style="flex: 1.2;" value="${dateStr}" inputmode="numeric" oninput="${dateFunc}">
             `;
             return row;
         }
 
         async function loadExpenses() {
             document.getElementById('expMonthLabel').innerText = `${monthNames[currentExpMonth - 1]} ${currentExpYear}`;
-            
-            const cats = ['Home', 'EMI', 'Misc'];
+            const cats = ['Home', 'Misc'];
             const db = await dbPromise;
             const record = await db.transaction('expenses', 'readonly').objectStore('expenses').get(getExpStorageKey());
             const data = record ? record.items : [];
@@ -780,23 +821,60 @@
                 const container = document.getElementById(`expense-list-${cat}`);
                 container.innerHTML = '';
                 const catData = data.filter(item => (item.category || 'Misc') === cat);
-                
-                if (catData.length === 0) {
-                    container.appendChild(createExpenseRow("", "", "", false, cat));
-                } else {
-                    catData.forEach(item => container.appendChild(createExpenseRow(item.desc, item.amt, item.date, item.isDone, cat)));
+                if (catData.length === 0) { container.appendChild(createRowHtml("", "", "", false, cat, false)); } 
+                else {
+                    catData.forEach(item => container.appendChild(createRowHtml(item.desc, item.amt, item.date, item.isDone, cat, false)));
                     const last = catData[catData.length - 1];
-                    if (last.desc || last.amt || last.date) container.appendChild(createExpenseRow("", "", "", false, cat));
+                    if (last.desc || last.amt || last.date) container.appendChild(createRowHtml("", "", "", false, cat, false));
                 }
             });
-
             calcExpenseTotal();
         }
 
-        function handleExpenseAutoRow(elem) {
+        async function loadObligations() {
+            const cats = ['EMI', 'Lent', 'Borrowed'];
+            const db = await dbPromise;
+            const record = await db.transaction('obligations', 'readonly').objectStore('obligations').get(getOblStorageKey());
+            let data = record ? record.items : [];
+            
+            // SMART CARRY-OVER ENGINE
+            // If viewing a month, pull any pending 'Lent' or 'Borrowed' items from ALL historical months
+            const allObls = await db.transaction('obligations', 'readonly').objectStore('obligations').getAll();
+            const currentSortVal = (currentExpYear * 100) + currentExpMonth;
+            
+            allObls.forEach(oblRecord => {
+                const recParts = oblRecord.monthYear.split('_'); // obl_YYYY_M
+                const recSortVal = (parseInt(recParts[1]) * 100) + parseInt(recParts[2]);
+                if (recSortVal < currentSortVal) {
+                    oblRecord.items.forEach(item => {
+                        // If it's a loan and not settled, inject it into current view
+                        if (!item.isDone && (item.category === 'Lent' || item.category === 'Borrowed')) {
+                            // Prevent duplicating if it's already carried over
+                            if (!data.some(d => d.desc === item.desc && d.amt === item.amt && d.category === item.category)) {
+                                data.push(item);
+                            }
+                        }
+                    });
+                }
+            });
+
+            cats.forEach(cat => {
+                const container = document.getElementById(`expense-list-${cat}`);
+                container.innerHTML = '';
+                const catData = data.filter(item => item.category === cat);
+                if (catData.length === 0) { container.appendChild(createRowHtml("", "", "", false, cat, true)); } 
+                else {
+                    catData.forEach(item => container.appendChild(createRowHtml(item.desc, item.amt, item.date, item.isDone, cat, true)));
+                    const last = catData[catData.length - 1];
+                    if (last.desc || last.amt || last.date) container.appendChild(createRowHtml("", "", "", false, cat, true));
+                }
+            });
+            calcObligationTotal();
+        }
+
+        function handleAutoRow(elem, isObligation) {
             const val = elem.value.trim(); const row = elem.closest('.exp-row'); const nextRow = row.nextElementSibling;
             const category = row.getAttribute('data-category');
-            
             const desc = row.querySelector('.exp-desc').value.trim(); const amt = row.querySelector('.exp-amt').value.trim(); const date = row.querySelector('.exp-date').value.trim();
 
             if (!desc && !amt && !date && nextRow) {
@@ -804,63 +882,62 @@
                 if (!nD && !nA && !nDt) { row.remove(); return; }
             }
 
-            if (val.length >= 5 && !nextRow) { row.parentNode.appendChild(createExpenseRow("", "", "", false, category)); } 
+            if (val.length >= 5 && !nextRow) { row.parentNode.appendChild(createRowHtml("", "", "", false, category, isObligation)); } 
             else if (val.length < 5 && nextRow) {
                 const d = nextRow.querySelector('.exp-desc').value; const a = nextRow.querySelector('.exp-amt').value; const dt = nextRow.querySelector('.exp-date').value;
                 if (!d && !a && !dt) nextRow.remove();
             }
         }
 
-        function toggleExpDone(btn) {
-            hapticTap(); btn.closest('.exp-row').classList.toggle('is-done'); calcExpenseTotal(); autoSaveExpenses(); 
-        }
+        function toggleExpDone(btn) { hapticTap(); btn.closest('.exp-row').classList.toggle('is-done'); calcExpenseTotal(); autoSaveExpenses(); }
+        function toggleOblDone(btn) { hapticTap(); btn.closest('.exp-row').classList.toggle('is-done'); calcObligationTotal(); autoSaveObligations(); }
 
         function calcExpenseTotal() {
-            let tracked = { Home: 0, EMI: 0, Misc: 0 };
-            let pending = { Home: 0, EMI: 0, Misc: 0 };
             let grandTotal = 0, pendingTotal = 0;
-
-            document.querySelectorAll('.exp-row').forEach(row => {
+            document.querySelectorAll('#expense-checklist-pane .exp-row').forEach(row => {
                 const amt = parseFloat(row.querySelector('.exp-amt').value);
-                const category = row.getAttribute('data-category') || 'Misc';
                 const isDone = row.classList.contains('is-done');
-
-                if (!isNaN(amt) && amt > 0) {
-                    grandTotal += amt;
-                    tracked[category] = (tracked[category] || 0) + amt;
-
-                    if (!isDone) { pendingTotal += amt; pending[category] = (pending[category] || 0) + amt; }
-                }
+                if (!isNaN(amt) && amt > 0) { grandTotal += amt; if (!isDone) pendingTotal += amt; }
             });
+            document.getElementById('trackedDailyTotal').innerText = Math.round(grandTotal).toLocaleString("en-IN");
+            document.getElementById('pendingDailyTotal').innerText = Math.round(pendingTotal).toLocaleString("en-IN");
+        }
 
-            document.getElementById('trackedHome').innerText = Math.round(tracked.Home).toLocaleString("en-IN");
-            document.getElementById('trackedEMI').innerText = Math.round(tracked.EMI).toLocaleString("en-IN");
-            document.getElementById('trackedMisc').innerText = Math.round(tracked.Misc).toLocaleString("en-IN");
-
-            document.getElementById('pendingHome').innerText = Math.round(pending.Home).toLocaleString("en-IN");
-            document.getElementById('pendingEMI').innerText = Math.round(pending.EMI).toLocaleString("en-IN");
-            document.getElementById('pendingMisc').innerText = Math.round(pending.Misc).toLocaleString("en-IN");
-
-            document.getElementById('expGrandTotal').innerText = Math.round(grandTotal).toLocaleString("en-IN");
-            document.getElementById('expPendingTotal').innerText = Math.round(pendingTotal).toLocaleString("en-IN");
+        function calcObligationTotal() {
+            let grandTotal = 0, pendingTotal = 0;
+            document.querySelectorAll('#expense-obl-pane .exp-row').forEach(row => {
+                const amt = parseFloat(row.querySelector('.exp-amt').value);
+                const isDone = row.classList.contains('is-done');
+                if (!isNaN(amt) && amt > 0) { grandTotal += amt; if (!isDone) pendingTotal += amt; }
+            });
+            document.getElementById('trackedOblTotal').innerText = Math.round(grandTotal).toLocaleString("en-IN");
+            document.getElementById('pendingOblTotal').innerText = Math.round(pendingTotal).toLocaleString("en-IN");
         }
 
         async function autoSaveExpenses() {
             const data = [];
-            document.querySelectorAll('.exp-row').forEach(row => {
+            document.querySelectorAll('#expense-checklist-pane .exp-row').forEach(row => {
                 const desc = row.querySelector('.exp-desc').value.trim(); const amt = row.querySelector('.exp-amt').value.trim(); 
                 const date = row.querySelector('.exp-date').value.trim(); const isDone = row.classList.contains('is-done');
                 const category = row.getAttribute('data-category');
-                
-                if (desc || amt || date) {
-                    data.push({ desc, amt, date, isDone, category });
-                }
+                if (desc || amt || date) { data.push({ desc, amt, date, isDone, category }); }
             });
-            const db = await dbPromise;
-            await db.transaction('expenses', 'readwrite').objectStore('expenses').put({ monthYear: getExpStorageKey(), items: data });
+            const db = await dbPromise; await db.transaction('expenses', 'readwrite').objectStore('expenses').put({ monthYear: getExpStorageKey(), items: data });
+        }
+        
+        async function autoSaveObligations() {
+            const data = [];
+            document.querySelectorAll('#expense-obl-pane .exp-row').forEach(row => {
+                const desc = row.querySelector('.exp-desc').value.trim(); const amt = row.querySelector('.exp-amt').value.trim(); 
+                const date = row.querySelector('.exp-date').value.trim(); const isDone = row.classList.contains('is-done');
+                const category = row.getAttribute('data-category');
+                if (desc || amt || date) { data.push({ desc, amt, date, isDone, category }); }
+            });
+            const db = await dbPromise; await db.transaction('obligations', 'readwrite').objectStore('obligations').put({ monthYear: getOblStorageKey(), items: data });
         }
 
         const debouncedAutoSaveExpenses = debounce(autoSaveExpenses, 500);
+        const debouncedAutoSaveObligations = debounce(autoSaveObligations, 500);
 
         async function syncExpensesToCloud() {
             const btn = document.getElementById("saveExpensesBtn"); const originalHtml = btn.innerHTML;
@@ -873,6 +950,29 @@
             const record = await db.transaction('expenses', 'readonly').objectStore('expenses').get(getExpStorageKey());
             const data = record ? record.items : [];
             const payload = { token: AUTH_TOKEN, type: "expense", monthYear: `${currentExpYear}-${currentExpMonth}`, items: data };
+            
+            try {
+                const response = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+                if (!response.ok) throw new Error("Network error");
+                hapticSuccess(); btn.innerHTML = `<span class="material-icons me-2">check_circle</span> Synced!`; btn.style.backgroundColor = "#10b981";
+            } catch (error) {
+                hapticError(); btn.innerHTML = `<span class="material-icons me-2">cloud_off</span> Saved Locally`; btn.style.backgroundColor = "#f59e0b";
+                await db.transaction('syncQueue', 'readwrite').objectStore('syncQueue').add({ payload });
+            }
+            setTimeout(() => { btn.innerHTML = originalHtml; btn.style.backgroundColor = "var(--primary)"; }, 2500);
+        }
+
+        async function syncObligationsToCloud() {
+            const btn = document.getElementById("saveOblBtn"); const originalHtml = btn.innerHTML;
+            btn.innerHTML = `<span class="material-icons me-2" style="font-size: 20px; animation: spin 1s linear infinite;">sync</span> Saving...`;
+            
+            await autoSaveObligations(); 
+            loadObligations(); 
+            
+            const db = await dbPromise;
+            const record = await db.transaction('obligations', 'readonly').objectStore('obligations').get(getOblStorageKey());
+            const data = record ? record.items : [];
+            const payload = { token: AUTH_TOKEN, type: "obligation", monthYear: `${currentExpYear}-${currentExpMonth}`, items: data };
             
             try {
                 const response = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
@@ -915,6 +1015,50 @@
             } catch(err) {}
         }
 
+        async function fetchCloudObligations(forceHardSync = false) {
+            const lastSync = forceHardSync ? '0' : await getMeta('lastOblSync');
+            try {
+                const response = await fetch(`${API_URL}?type=obligation&since=${lastSync}&token=${AUTH_TOKEN}`);
+                const res = await response.json();
+                if(res.status === "not_modified") return;
+                
+                if (res.data) {
+                    const db = await dbPromise;
+                    await db.transaction('obligations', 'readwrite').objectStore('obligations').clear();
+
+                    const grouped = {};
+                    res.data.forEach(row => {
+                        if (!grouped[row.monthYear]) grouped[row.monthYear] = [];
+                        grouped[row.monthYear].push({ desc: row.desc, amt: row.amt, date: row.date, isDone: row.isDone, category: row.category || 'EMI' });
+                    });
+                    
+                    const tx = db.transaction('obligations', 'readwrite');
+                    for (const [monthKey, items] of Object.entries(grouped)) {
+                        const [y, m] = monthKey.split('-'); 
+                        await tx.objectStore('obligations').put({ monthYear: `obl_${y}_${m}`, items: items });
+                    }
+                    await setMeta('lastOblSync', res.timestamp); 
+                    loadObligations();
+                    
+                    if (document.getElementById('view-exp-insights').checked) renderExpenseInsights();
+                }
+            } catch(err) {}
+        }
+
+        async function forceSyncAll() {
+            hapticTap();
+            const btn = document.getElementById("syncDataBtn");
+            const orig = btn.innerHTML;
+            btn.innerHTML = `<span class="material-icons" style="font-size: 20px; animation: spin 1s linear infinite;">sync</span>`;
+            
+            await syncWithSheetQuietly(true);
+            await fetchCloudExpenses(true);
+            await fetchCloudObligations(true);
+            await fetchCloudFuel(true);
+            
+            setTimeout(() => { btn.innerHTML = orig; }, 1000);
+        }
+
         async function forceAppUpdate() {
             hapticTap(); document.getElementById("updateAppBtn").innerHTML = `<span class="material-icons" style="animation: spin 1s linear infinite;">sync</span>`;
             if ('caches' in window) {
@@ -926,6 +1070,7 @@
             
             const db = await dbPromise;
             await db.transaction('expenses', 'readwrite').objectStore('expenses').clear();
+            await db.transaction('obligations', 'readwrite').objectStore('obligations').clear();
             await db.transaction('salary', 'readwrite').objectStore('salary').clear();
             await db.transaction('fuel', 'readwrite').objectStore('fuel').clear();
             await db.transaction('metadata', 'readwrite').objectStore('metadata').clear();
@@ -976,9 +1121,6 @@
         document.getElementById("yearPart").addEventListener("input", debouncedHandleDateInput);
 
         async function syncWithSheetQuietly(forceHardSync = false) {
-            hapticTap();
-            const syncBtn = document.getElementById("syncDataBtn"); const originalIcon = syncBtn.innerHTML;
-            syncBtn.innerHTML = `<span class="material-icons" style="font-size: 20px; animation: spin 1s linear infinite;">sync</span>`;
             const lastSync = forceHardSync ? '0' : await getMeta('lastSalarySync');
             try {
                 const response = await fetch(`${API_URL}?since=${lastSync}&token=${AUTH_TOKEN}`);
@@ -993,7 +1135,6 @@
                     renderInsights();
                 }
             } catch (err) { renderInsights(); } 
-            finally { setTimeout(() => { syncBtn.innerHTML = originalIcon; }, 500); }
         }
 
         document.getElementById("salaryForm").addEventListener("submit", async function(e) {
@@ -1028,9 +1169,7 @@
 
             btn.innerHTML = `<span class="material-icons me-2">check_circle</span> Saved!`; btn.style.backgroundColor = "#10b981";
             renderInsights();
-            setTimeout(() => {
-                btn.innerHTML = originalBtnHtml; btn.style.backgroundColor = ""; resetSalaryForm();
-            }, 1500);
+            setTimeout(() => { btn.innerHTML = originalBtnHtml; btn.style.backgroundColor = ""; resetSalaryForm(); }, 1500);
         });
     </script>
 </body>

@@ -67,6 +67,11 @@
         .exp-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; transition: opacity 0.2s ease; }
         .exp-checkbox { width: 24px; height: 24px; flex-shrink: 0; border-radius: 50%; border: 2px solid var(--input-border); display: flex; align-items: center; justify-content: center; cursor: pointer; color: transparent; background-color: transparent; transition: all 0.2s ease; }
         .exp-row.is-done .exp-checkbox { background-color: var(--success-color); border-color: var(--success-color); color: white; }
+        
+        .btn-settle { width: 24px; height: 24px; flex-shrink: 0; border-radius: 8px; border: 1.5px solid var(--primary); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--primary); background-color: var(--primary-glow); font-size: 0.75rem; font-weight: 800; transition: all 0.2s ease; }
+        .btn-settle:active { transform: scale(0.9); }
+        .exp-row.is-done .btn-settle { background-color: var(--success-color); border-color: var(--success-color); color: white; border-radius: 50%; }
+
         .exp-input { border: none; background: transparent; border-bottom: 1px solid var(--input-border); border-radius: 0; color: var(--text-main); font-size: 0.85rem; font-weight: 500; height: 30px; padding: 0 4px; min-width: 0; transition: all 0.2s ease; }
         .exp-input:focus { border-bottom-color: var(--primary); outline: none; }
         .exp-input::placeholder { color: var(--text-muted); opacity: 0.5; }
@@ -359,6 +364,29 @@
         </div>
     </div>
 
+    <!-- Settlement Popup Modal -->
+    <div class="modal fade" id="settleModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered px-3">
+        <div class="modal-content" style="background-color: var(--card-bg); border-radius: 20px; border: 1px solid var(--input-border); box-shadow: var(--card-shadow);">
+          <div class="modal-body p-4">
+            <h6 class="mb-3 fw-bold text-center" id="settleTitle" style="color: var(--text-main);">Settle Amount</h6>
+            <div class="form-floating mb-3">
+                <input type="number" class="form-control" id="settleAmt" inputmode="numeric" placeholder=" ">
+                <label>Amount Paid (₹)</label>
+            </div>
+            <div class="date-input-wrapper mb-4" style="height: 54px;">
+                <span class="date-floating-label">Payment Date</span>
+                <input type="text" id="settleDate" placeholder="DD-MMM" inputmode="numeric" oninput="handleDateAutoFormat(this, event, true)" style="width:100%; text-align: left; padding-left: 12px; padding-top: 16px;">
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn w-50" data-bs-dismiss="modal" style="background: var(--input-bg); color: var(--text-main); border: 1px solid var(--input-border); border-radius: 12px; font-weight: 600;">Cancel</button>
+                <button type="button" class="btn w-50" onclick="confirmSettlement()" style="background-color: var(--primary); color: white; border-radius: 12px; font-weight: 600;">Save</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Bottom Nav -->
     <ul class="nav nav-tabs bottom-nav" id="bottomNav" role="tablist">
         <li class="nav-item" role="presentation">
@@ -382,13 +410,11 @@
         let cachedFuelData = [];
         let currentExpMonth = new Date().getMonth() + 1; 
         let currentExpYear = new Date().getFullYear();
+        let activeSettleRow = null; // Stores row being partially paid
 
         function debounce(func, wait) {
             let timeout;
-            return function(...args) {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => func.apply(this, args), wait);
-            };
+            return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), wait); };
         }
 
         function hapticTap() { if(navigator.vibrate) navigator.vibrate(30); }
@@ -485,8 +511,7 @@
 
         async function renderExpenseInsights() {
             const filter = document.getElementById('insightsFilter').value;
-            let rawExpData = [];
-            let rawOblData = [];
+            let rawExpData = []; let rawOblData = [];
             const db = await dbPromise;
 
             if (filter === 'all') {
@@ -551,10 +576,8 @@
             
             document.getElementById('insTotalOutflow').innerText = "₹ " + Math.round(catTotals.Fixed + catTotals.Variable).toLocaleString("en-IN");
             document.getElementById('insTotalFuel').innerText = "₹ " + Math.round(totalFuel).toLocaleString("en-IN");
-            
             document.getElementById('insCatFixed').innerText = Math.round(catTotals.Fixed).toLocaleString("en-IN");
             document.getElementById('insCatVar').innerText = Math.round(catTotals.Variable).toLocaleString("en-IN");
-            
             document.getElementById('insLent').innerText = "₹ " + Math.round(catTotals.LentPending).toLocaleString("en-IN");
             document.getElementById('insBorrowed').innerText = "₹ " + Math.round(catTotals.BorrowedPending).toLocaleString("en-IN");
 
@@ -661,7 +684,17 @@
             if (row.classList.contains('is-done')) {
                 row.classList.remove('is-done');
                 hapticTap(); 
-                if(isObligation) { calcObligationTotal(); } else { calcExpenseTotal(); }
+                
+                // If it was a 'Done' button, reset it back to the ₹ icon
+                const btn = row.querySelector('.exp-checkbox');
+                if (btn && btn.classList.contains('btn-settle-done')) {
+                    btn.classList.remove('btn-settle-done');
+                    btn.className = 'btn-settle';
+                    btn.innerHTML = '₹';
+                    btn.setAttribute('onclick', 'openSettleModal(this)');
+                }
+                
+                if(isObligation) calcObligationTotal(); else calcExpenseTotal();
             }
         }
 
@@ -789,12 +822,88 @@
             if(isObligation) debouncedAutoSaveObligations(); else debouncedAutoSaveExpenses();
         }
 
+        // --- INLINE SETTLEMENT ENGINE ---
+        function openSettleModal(btn) {
+            hapticTap();
+            activeSettleRow = btn.closest('.exp-row');
+            const desc = activeSettleRow.querySelector('.exp-desc').value.trim();
+            const amt = parseFloat(activeSettleRow.querySelector('.exp-amt').value);
+            
+            if (!desc || isNaN(amt)) return;
+
+            document.getElementById('settleTitle').innerText = `Settle: ${desc}`;
+            document.getElementById('settleAmt').value = amt;
+            document.getElementById('settleDate').value = ""; // Let user auto-format current date
+            
+            const modalElement = document.getElementById('settleModal');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+            modal.show();
+        }
+
+        function confirmSettlement() {
+            if (!activeSettleRow) return;
+            
+            const originalAmt = parseFloat(activeSettleRow.querySelector('.exp-amt').value);
+            const paidAmt = parseFloat(document.getElementById('settleAmt').value);
+            let settleDate = document.getElementById('settleDate').value.trim();
+            
+            if (isNaN(paidAmt) || paidAmt <= 0) {
+                alert("Please enter a valid amount.");
+                return;
+            }
+            
+            const category = activeSettleRow.getAttribute('data-category');
+            const desc = activeSettleRow.querySelector('.exp-desc').value.trim();
+
+            const modalElement = document.getElementById('settleModal');
+            bootstrap.Modal.getInstance(modalElement).hide();
+
+            if (paidAmt >= originalAmt) {
+                // Full Payment
+                activeSettleRow.classList.add('is-done');
+                if (settleDate) activeSettleRow.querySelector('.exp-date').value = settleDate;
+                
+                // Swap the ₹ button to a checkmark permanently for this load
+                const btn = activeSettleRow.querySelector('.btn-settle');
+                btn.className = 'exp-checkbox btn-settle-done';
+                btn.innerHTML = `<span class="material-icons" style="font-size: 16px;">check</span>`;
+                btn.removeAttribute('onclick'); // Stops modal from opening again
+                btn.setAttribute('onclick', 'toggleOblDone(this)'); // Allows simple uncheck
+            } else {
+                // Partial Payment (Ledger Split)
+                const remaining = originalAmt - paidAmt;
+                activeSettleRow.querySelector('.exp-amt').value = remaining;
+                
+                const receiptDesc = `Repaid: ${desc}`;
+                const receiptDate = settleDate || "DONE";
+                const receiptRow = createRowHtml(receiptDesc, paidAmt, receiptDate, true, category, true);
+                
+                activeSettleRow.parentNode.insertBefore(receiptRow, activeSettleRow.nextSibling);
+            }
+            
+            hapticSuccess();
+            calcObligationTotal();
+            debouncedAutoSaveObligations();
+        }
+
         function createRowHtml(desc, amt, dateStr, isDone, category, isObligation) {
             const row = document.createElement('div'); 
             row.className = `exp-row ${isDone ? 'is-done' : ''}`;
             row.setAttribute('data-category', category);
             
-            const checkFunc = isObligation ? `toggleOblDone(this)` : `toggleExpDone(this)`;
+            let btnHtml = '';
+            
+            if (isObligation && (category === 'Lent' || category === 'Borrowed')) {
+                if (isDone) {
+                    btnHtml = `<button class="exp-checkbox btn-settle-done" onclick="toggleOblDone(this)" type="button"><span class="material-icons" style="font-size: 16px;">check</span></button>`;
+                } else {
+                    btnHtml = `<button class="btn-settle" onclick="openSettleModal(this)" type="button">₹</button>`;
+                }
+            } else {
+                const checkFunc = isObligation ? `toggleOblDone(this)` : `toggleExpDone(this)`;
+                btnHtml = `<button class="exp-checkbox" onclick="${checkFunc}" type="button"><span class="material-icons" style="font-size: 16px;">check</span></button>`;
+            }
+
             const dupeFunc = isObligation ? `checkDuplicateRow(this, true)` : `checkDuplicateRow(this, false)`;
             const uncheckFunc = isObligation ? `smartUncheck(this, true)` : `smartUncheck(this, false)`;
             const saveFunc = isObligation ? `debouncedAutoSaveObligations()` : `debouncedAutoSaveExpenses()`;
@@ -802,7 +911,7 @@
             const calcFunc = isObligation ? `calcObligationTotal()` : `calcExpenseTotal()`;
 
             row.innerHTML = `
-                <button class="exp-checkbox" onclick="${checkFunc}" type="button"><span class="material-icons" style="font-size: 16px;">check</span></button>
+                ${btnHtml}
                 <input type="text" class="exp-input exp-desc" placeholder="Item" style="flex: 2;" value="${desc}" onchange="${dupeFunc}; ${saveFunc}" oninput="${uncheckFunc}; ${saveFunc}">
                 <input type="number" class="exp-input exp-amt" placeholder="₹0" style="flex: 1.2;" value="${amt}" onchange="${dupeFunc}; ${saveFunc}" oninput="${uncheckFunc}; ${calcFunc}; ${saveFunc}" inputmode="numeric">
                 <input type="text" class="exp-input exp-date" placeholder="DD-MMM" style="flex: 1.2;" value="${dateStr}" inputmode="numeric" oninput="${dateFunc}">
@@ -837,15 +946,15 @@
             const record = await db.transaction('obligations', 'readonly').objectStore('obligations').get(getOblStorageKey());
             let data = record ? record.items : [];
             
-            // SMART CARRY-OVER ENGINE
             const allObls = await db.transaction('obligations', 'readonly').objectStore('obligations').getAll();
             const currentSortVal = (currentExpYear * 100) + currentExpMonth;
             
             allObls.forEach(oblRecord => {
-                const recParts = oblRecord.monthYear.split('_'); // obl_YYYY_M
+                const recParts = oblRecord.monthYear.split('_'); 
                 const recSortVal = (parseInt(recParts[1]) * 100) + parseInt(recParts[2]);
                 if (recSortVal < currentSortVal) {
                     oblRecord.items.forEach(item => {
+                        // Strict filter: only carry over if NOT done.
                         if (!item.isDone && (item.category === 'Lent' || item.category === 'Borrowed')) {
                             if (!data.some(d => d.desc === item.desc && d.amt === item.amt && d.category === item.category)) {
                                 data.push(item);

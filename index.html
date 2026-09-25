@@ -231,7 +231,10 @@
             <div id="expense-daily-pane">
                 <!-- Category: Home -->
                 <div class="premium-card mb-2 p-3" style="padding-bottom: 4px !important;">
-                    <div class="section-header text-primary mb-1"><span class="material-icons" style="font-size: 16px;">home</span> Home Expenses</div>
+                    <div class="section-header text-primary mb-1 d-flex justify-content-between align-items-center w-100">
+                        <div class="d-flex align-items-center gap-1"><span class="material-icons" style="font-size: 16px;">home</span> Home Expenses</div>
+                        <div style="font-size: 0.8rem; letter-spacing: 0; color: var(--text-main);">₹ <span id="headerSum-Home">0</span></div>
+                    </div>
                     <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
                         <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Component</div><div style="flex: 1.2; text-align: right; padding-right: 4px;">Amount</div><div style="flex: 1.2; text-align: center;">Date</div><div style="flex: 0 0 24px;"></div>
                     </div>
@@ -246,7 +249,10 @@
 
                 <!-- Category: Misc -->
                 <div class="premium-card mb-2 p-3" style="padding-bottom: 4px !important;">
-                    <div class="section-header text-warning mb-1"><span class="material-icons" style="font-size: 16px;">category</span> Miscellaneous</div>
+                    <div class="section-header text-warning mb-1 d-flex justify-content-between align-items-center w-100">
+                        <div class="d-flex align-items-center gap-1"><span class="material-icons" style="font-size: 16px;">category</span> Miscellaneous</div>
+                        <div style="font-size: 0.8rem; letter-spacing: 0; color: var(--text-main);">₹ <span id="headerSum-Misc">0</span></div>
+                    </div>
                     <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
                         <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Component</div><div style="flex: 1.2; text-align: right; padding-right: 4px;">Amount</div><div style="flex: 1.2; text-align: center;">Date</div><div style="flex: 0 0 24px;"></div>
                     </div>
@@ -274,7 +280,10 @@
             <div id="expense-obl-pane" style="display: none;">
                 <!-- Category: EMI -->
                 <div class="premium-card mb-2 p-3" style="padding-bottom: 4px !important;">
-                    <div class="section-header text-danger mb-1"><span class="material-icons" style="font-size: 16px;">credit_card</span> Fixed EMIs</div>
+                    <div class="section-header text-danger mb-1 d-flex justify-content-between align-items-center w-100">
+                        <div class="d-flex align-items-center gap-1"><span class="material-icons" style="font-size: 16px;">credit_card</span> Fixed EMIs</div>
+                        <div style="font-size: 0.8rem; letter-spacing: 0; color: var(--text-main);">₹ <span id="headerSum-EMI">0</span></div>
+                    </div>
                     <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
                         <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Bank/Debt</div><div style="flex: 1.2; text-align: right; padding-right: 4px;">Amount</div><div style="flex: 1.2; text-align: center;">Date</div><div style="flex: 0 0 24px;"></div>
                     </div>
@@ -289,7 +298,10 @@
 
                 <!-- Category: Borrowed -->
                 <div class="premium-card mb-2 p-3" style="padding-bottom: 4px !important;">
-                    <div class="section-header text-info mb-1"><span class="material-icons" style="font-size: 16px;">call_received</span> Money I Borrowed <span class="carry-over-badge">Carries Over</span></div>
+                    <div class="section-header text-info mb-1 d-flex justify-content-between align-items-center w-100">
+                        <div class="d-flex align-items-center gap-1"><span class="material-icons" style="font-size: 16px;">call_received</span> Money I Borrowed <span class="carry-over-badge">Carries Over</span></div>
+                        <div style="font-size: 0.8rem; letter-spacing: 0; color: var(--text-main);">₹ <span id="headerSum-Borrowed">0</span></div>
+                    </div>
                     <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
                         <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Person</div><div style="flex: 1.2; text-align: right; padding-right: 4px;">Amount</div><div style="flex: 1.2; text-align: center;">Date</div><div style="flex: 0 0 24px;"></div>
                     </div>
@@ -304,7 +316,10 @@
                 
                 <!-- Category: Lent -->
                 <div class="premium-card mb-2 p-3" style="padding-bottom: 4px !important;">
-                    <div class="section-header text-success mb-1"><span class="material-icons" style="font-size: 16px;">call_made</span> Money I Lent <span class="carry-over-badge">Carries Over</span></div>
+                    <div class="section-header text-success mb-1 d-flex justify-content-between align-items-center w-100">
+                        <div class="d-flex align-items-center gap-1"><span class="material-icons" style="font-size: 16px;">call_made</span> Money I Lent <span class="carry-over-badge">Carries Over</span></div>
+                        <div style="font-size: 0.8rem; letter-spacing: 0; color: var(--text-main);">₹ <span id="headerSum-Lent">0</span></div>
+                    </div>
                     <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
                         <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Person</div><div style="flex: 1.2; text-align: right; padding-right: 4px;">Amount</div><div style="flex: 1.2; text-align: center;">Date</div><div style="flex: 0 0 24px;"></div>
                     </div>
@@ -855,6 +870,7 @@
             
             await loadExpenses();
             await loadObligations();
+            initSortable();
             if(document.getElementById('view-exp-insights').checked) renderExpenseInsights();
         }
 
@@ -942,6 +958,7 @@
             calcObligationTotal();
             await autoSaveObligations();
             await loadObligations(); 
+            initSortable();
         }
 
         function createRowHtml(desc, amt, dateStr, isDone, category, isObligation, origin = "", isCarriedOver = false) {
@@ -1098,6 +1115,7 @@
             calcExpenseTotal(); 
             await autoSaveExpenses(); 
             await loadExpenses(); 
+            initSortable();
         }
 
         async function toggleOblDone(btn) { 
@@ -1106,28 +1124,50 @@
             calcObligationTotal(); 
             await autoSaveObligations(); 
             await loadObligations(); 
+            initSortable();
         }
 
         function calcExpenseTotal() {
             let grandTotal = 0, pendingTotal = 0;
+            let pendingCat = { "Home": 0, "Misc": 0 };
             document.querySelectorAll('#expense-daily-pane .exp-row').forEach(row => {
                 const amt = parseFloat(row.querySelector('.exp-amt').value);
                 const isDone = row.classList.contains('is-done');
-                if (!isNaN(amt) && amt > 0) { grandTotal += amt; if (!isDone) pendingTotal += amt; }
+                const cat = row.getAttribute('data-category');
+                if (!isNaN(amt) && amt > 0) { 
+                    grandTotal += amt; 
+                    if (!isDone) { 
+                        pendingTotal += amt; 
+                        if(pendingCat[cat] !== undefined) pendingCat[cat] += amt;
+                    } 
+                }
             });
             document.getElementById('trackedDailyTotal').innerText = Math.round(grandTotal).toLocaleString("en-IN");
             document.getElementById('pendingDailyTotal').innerText = Math.round(pendingTotal).toLocaleString("en-IN");
+            document.getElementById('headerSum-Home').innerText = Math.round(pendingCat["Home"]).toLocaleString("en-IN");
+            document.getElementById('headerSum-Misc').innerText = Math.round(pendingCat["Misc"]).toLocaleString("en-IN");
         }
 
         function calcObligationTotal() {
             let grandTotal = 0, pendingTotal = 0;
+            let pendingCat = { "EMI": 0, "Lent": 0, "Borrowed": 0 };
             document.querySelectorAll('#expense-obl-pane .exp-row').forEach(row => {
                 const amt = parseFloat(row.querySelector('.exp-amt').value);
                 const isDone = row.classList.contains('is-done');
-                if (!isNaN(amt) && amt > 0) { grandTotal += amt; if (!isDone) pendingTotal += amt; }
+                const cat = row.getAttribute('data-category');
+                if (!isNaN(amt) && amt > 0) { 
+                    grandTotal += amt; 
+                    if (!isDone) { 
+                        pendingTotal += amt; 
+                        if(pendingCat[cat] !== undefined) pendingCat[cat] += amt;
+                    } 
+                }
             });
             document.getElementById('trackedOblTotal').innerText = Math.round(grandTotal).toLocaleString("en-IN");
             document.getElementById('pendingOblTotal').innerText = Math.round(pendingTotal).toLocaleString("en-IN");
+            document.getElementById('headerSum-EMI').innerText = Math.round(pendingCat["EMI"]).toLocaleString("en-IN");
+            document.getElementById('headerSum-Borrowed').innerText = Math.round(pendingCat["Borrowed"]).toLocaleString("en-IN");
+            document.getElementById('headerSum-Lent').innerText = Math.round(pendingCat["Lent"]).toLocaleString("en-IN");
         }
 
         async function autoSaveExpenses() {
@@ -1192,7 +1232,7 @@
             const btn = document.getElementById("saveExpensesBtn"); const originalHtml = btn.innerHTML;
             btn.innerHTML = `<span class="material-icons me-2" style="font-size: 20px; animation: spin 1s linear infinite;">sync</span> Saving...`;
             
-            await autoSaveExpenses(); await loadExpenses();
+            await autoSaveExpenses(); await loadExpenses(); initSortable();
             
             const db = await dbPromise;
             const record = await db.transaction('expenses', 'readonly').objectStore('expenses').get(getExpStorageKey());
@@ -1213,7 +1253,7 @@
             const btn = document.getElementById("saveOblBtn"); const originalHtml = btn.innerHTML;
             btn.innerHTML = `<span class="material-icons me-2" style="font-size: 20px; animation: spin 1s linear infinite;">sync</span> Saving...`;
             
-            const modifiedOldOrigins = await autoSaveObligations(); await loadObligations();
+            const modifiedOldOrigins = await autoSaveObligations(); await loadObligations(); initSortable();
             
             const db = await dbPromise;
             const currentOrigin = getOblStorageKey();
@@ -1268,6 +1308,7 @@
                     }
                     await setMeta('lastExpSync', res.timestamp); 
                     await loadExpenses();
+                    initSortable();
                     
                     if (document.getElementById('view-exp-insights').checked) renderExpenseInsights();
                 }
@@ -1298,6 +1339,7 @@
                     }
                     await setMeta('lastOblSync', res.timestamp); 
                     await loadObligations();
+                    initSortable();
                     
                     if (document.getElementById('view-exp-insights').checked) renderExpenseInsights();
                 }

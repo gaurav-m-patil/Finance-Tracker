@@ -863,7 +863,7 @@
 
             document.getElementById('settleTitle').innerText = `Settle: ${desc}`;
             document.getElementById('settleAmt').value = ''; 
-            document.getElementById('settleAmt').placeholder = amt; 
+            document.getElementById('settleAmt').placeholder = `Max: ${amt}`; 
             document.getElementById('settleDate').value = ""; 
             
             const modalElement = document.getElementById('settleModal');
@@ -890,6 +890,9 @@
             }
             
             const category = activeSettleRow.getAttribute('data-category');
+            const origin = activeSettleRow.getAttribute('data-origin');
+            const isCarriedOver = activeSettleRow.getAttribute('data-carried-over') === 'true';
+
             const modalElement = document.getElementById('settleModal');
             bootstrap.Modal.getInstance(modalElement).hide();
 
@@ -902,8 +905,8 @@
                 
                 const receiptDesc = `Repaid: ${desc}`;
                 const receiptDate = settleDate || "DONE";
-                const receiptRow = createRowHtml(receiptDesc, paidAmt, receiptDate, true, category, true);
-                
+                // Receipt is ALWAYS current month, never carried over.
+                const receiptRow = createRowHtml(receiptDesc, paidAmt, receiptDate, true, category, true, getOblStorageKey(), false);
                 activeSettleRow.parentNode.insertBefore(receiptRow, activeSettleRow.nextSibling);
             }
             
@@ -913,10 +916,15 @@
             loadObligations(); 
         }
 
-        function createRowHtml(desc, amt, dateStr, isDone, category, isObligation) {
+        // --- THE ORIGIN TRACKER ENGINE ---
+        function createRowHtml(desc, amt, dateStr, isDone, category, isObligation, origin = "", isCarriedOver = false) {
             const row = document.createElement('div'); 
             row.className = `exp-row ${isDone ? 'is-done' : ''}`;
             row.setAttribute('data-category', category);
+            
+            // Assign Memory Tags
+            row.setAttribute('data-origin', origin);
+            if (isCarriedOver) row.setAttribute('data-carried-over', 'true');
             
             let btnHtml = '';
             
@@ -950,7 +958,8 @@
             document.getElementById('expMonthLabel').innerText = `${monthNames[currentExpMonth - 1]} ${currentExpYear}`;
             const cats = ['Home', 'Misc'];
             const db = await dbPromise;
-            const record = await db.transaction('expenses', 'readonly').objectStore('expenses').get(getExpStorageKey());
+            const currentOrigin = getExpStorageKey();
+            const record = await db.transaction('expenses', 'readonly').objectStore('expenses').get(currentOrigin);
             const data = record ? record.items : [];
             
             cats.forEach(cat => {
@@ -964,17 +973,17 @@
                 const completedData = catData.filter(item => item.isDone);
                 
                 if (pendingData.length === 0) { 
-                    container.appendChild(createRowHtml("", "", "", false, cat, false)); 
+                    container.appendChild(createRowHtml("", "", "", false, cat, false, currentOrigin, false)); 
                 } else {
-                    pendingData.forEach(item => container.appendChild(createRowHtml(item.desc, item.amt, item.date, item.isDone, cat, false)));
+                    pendingData.forEach(item => container.appendChild(createRowHtml(item.desc, item.amt, item.date, item.isDone, cat, false, currentOrigin, false)));
                     const last = pendingData[pendingData.length - 1];
-                    if (last.desc || last.amt || last.date) container.appendChild(createRowHtml("", "", "", false, cat, false));
+                    if (last.desc || last.amt || last.date) container.appendChild(createRowHtml("", "", "", false, cat, false, currentOrigin, false));
                 }
 
                 let compTotal = 0;
                 completedData.forEach(item => {
                     compTotal += parseFloat(item.amt) || 0;
-                    compContainer.appendChild(createRowHtml(item.desc, item.amt, item.date, item.isDone, cat, false));
+                    compContainer.appendChild(createRowHtml(item.desc, item.amt, item.date, item.isDone, cat, false, currentOrigin, false));
                 });
                 document.getElementById(`done-${cat}`).innerText = Math.round(compTotal).toLocaleString("en-IN");
             });
@@ -984,20 +993,23 @@
         async function loadObligations() {
             const cats = ['EMI', 'Lent', 'Borrowed'];
             const db = await dbPromise;
-            const record = await db.transaction('obligations', 'readonly').objectStore('obligations').get(getOblStorageKey());
-            let data = record ? record.items : [];
+            const currentOrigin = getOblStorageKey();
+            const record = await db.transaction('obligations', 'readonly').objectStore('obligations').get(currentOrigin);
+            let currentData = record ? record.items : [];
+            let carriedData = [];
             
             const allObls = await db.transaction('obligations', 'readonly').objectStore('obligations').getAll();
             const currentSortVal = (currentExpYear * 100) + currentExpMonth;
             
+            // Collect historical un-done items strictly avoiding duplicates
             allObls.forEach(oblRecord => {
                 const recParts = oblRecord.monthYear.split('_'); 
                 const recSortVal = (parseInt(recParts[1]) * 100) + parseInt(recParts[2]);
                 if (recSortVal < currentSortVal) {
                     oblRecord.items.forEach(item => {
                         if (!item.isDone && (item.category === 'Lent' || item.category === 'Borrowed')) {
-                            if (!data.some(d => d.desc === item.desc && d.amt === item.amt && d.category === item.category)) {
-                                data.push(item);
+                            if (!carriedData.some(d => d.desc.toLowerCase() === item.desc.toLowerCase() && d.category === item.category)) {
+                                carriedData.push({ ...item, origin: oblRecord.monthYear });
                             }
                         }
                     });
@@ -1010,22 +1022,29 @@
                 container.innerHTML = '';
                 compContainer.innerHTML = '';
                 
-                const catData = data.filter(item => item.category === cat);
-                const pendingData = catData.filter(item => !item.isDone);
-                const completedData = catData.filter(item => item.isDone);
+                const catCurrent = currentData.filter(item => item.category === cat);
+                const catCarried = carriedData.filter(item => item.category === cat);
+                
+                const pendingCurrent = catCurrent.filter(item => !item.isDone);
+                const completedCurrent = catCurrent.filter(item => item.isDone);
 
-                if (pendingData.length === 0) { 
-                    container.appendChild(createRowHtml("", "", "", false, cat, true)); 
-                } else {
-                    pendingData.forEach(item => container.appendChild(createRowHtml(item.desc, item.amt, item.date, item.isDone, cat, true)));
-                    const last = pendingData[pendingData.length - 1];
-                    if (last.desc || last.amt || last.date) container.appendChild(createRowHtml("", "", "", false, cat, true));
+                // 1. Render Carried Pending
+                catCarried.forEach(item => container.appendChild(createRowHtml(item.desc, item.amt, item.date, item.isDone, cat, true, item.origin, true)));
+
+                // 2. Render Current Pending
+                pendingCurrent.forEach(item => container.appendChild(createRowHtml(item.desc, item.amt, item.date, item.isDone, cat, true, currentOrigin, false)));
+                
+                // 3. Keep 1 blank row at bottom
+                const last = pendingCurrent[pendingCurrent.length - 1];
+                if (!last || last.desc || last.amt || last.date) {
+                    container.appendChild(createRowHtml("", "", "", false, cat, true, currentOrigin, false));
                 }
 
+                // 4. Render Current Completed (Historical completed stay in their origin month!)
                 let compTotal = 0;
-                completedData.forEach(item => {
+                completedCurrent.forEach(item => {
                     compTotal += parseFloat(item.amt) || 0;
-                    compContainer.appendChild(createRowHtml(item.desc, item.amt, item.date, item.isDone, cat, true));
+                    compContainer.appendChild(createRowHtml(item.desc, item.amt, item.date, item.isDone, cat, true, currentOrigin, false));
                 });
                 document.getElementById(`done-${cat}`).innerText = Math.round(compTotal).toLocaleString("en-IN");
             });
@@ -1035,6 +1054,7 @@
         function handleAutoRow(elem, isObligation) {
             const val = elem.value.trim(); const row = elem.closest('.exp-row'); const nextRow = row.nextElementSibling;
             const category = row.getAttribute('data-category');
+            const origin = isObligation ? getOblStorageKey() : getExpStorageKey();
             const desc = row.querySelector('.exp-desc').value.trim(); const amt = row.querySelector('.exp-amt').value.trim(); const date = row.querySelector('.exp-date').value.trim();
 
             if (!desc && !amt && !date && nextRow) {
@@ -1042,7 +1062,7 @@
                 if (!nD && !nA && !nDt) { row.remove(); return; }
             }
 
-            if (val.length >= 5 && !nextRow) { row.parentNode.appendChild(createRowHtml("", "", "", false, category, isObligation)); } 
+            if (val.length >= 5 && !nextRow) { row.parentNode.appendChild(createRowHtml("", "", "", false, category, isObligation, origin, false)); } 
             else if (val.length < 5 && nextRow) {
                 const d = nextRow.querySelector('.exp-desc').value; const a = nextRow.querySelector('.exp-amt').value; const dt = nextRow.querySelector('.exp-date').value;
                 if (!d && !a && !dt) nextRow.remove();
@@ -1089,24 +1109,58 @@
 
         async function autoSaveExpenses() {
             const data = [];
+            const currentOrigin = getExpStorageKey();
+            
             document.querySelectorAll('#expense-daily-pane .exp-row').forEach(row => {
-                const desc = row.querySelector('.exp-desc').value.trim(); const amt = row.querySelector('.exp-amt').value.trim(); 
-                const date = row.querySelector('.exp-date').value.trim(); const isDone = row.classList.contains('is-done');
-                const category = row.getAttribute('data-category');
-                if (desc || amt || date) { data.push({ desc, amt, date, isDone, category }); }
+                const desc = row.querySelector('.exp-desc').value.trim(); const amtStr = row.querySelector('.exp-amt').value.trim(); 
+                const amt = amtStr ? parseFloat(amtStr) : 0; const date = row.querySelector('.exp-date').value.trim(); 
+                const isDone = row.classList.contains('is-done'); const category = row.getAttribute('data-category');
+                
+                if (desc || amtStr || date) { data.push({ desc, amt, date, isDone, category }); }
             });
-            const db = await dbPromise; await db.transaction('expenses', 'readwrite').objectStore('expenses').put({ monthYear: getExpStorageKey(), items: data });
+            const db = await dbPromise; await db.transaction('expenses', 'readwrite').objectStore('expenses').put({ monthYear: currentOrigin, items: data });
         }
         
         async function autoSaveObligations() {
-            const data = [];
+            const currentData = [];
+            const carriedOverUpdates = {}; 
+            const currentOrigin = getOblStorageKey();
+
             document.querySelectorAll('#expense-obl-pane .exp-row').forEach(row => {
-                const desc = row.querySelector('.exp-desc').value.trim(); const amt = row.querySelector('.exp-amt').value.trim(); 
-                const date = row.querySelector('.exp-date').value.trim(); const isDone = row.classList.contains('is-done');
-                const category = row.getAttribute('data-category');
-                if (desc || amt || date) { data.push({ desc, amt, date, isDone, category }); }
+                const desc = row.querySelector('.exp-desc').value.trim(); const amtStr = row.querySelector('.exp-amt').value.trim(); 
+                const amt = amtStr ? parseFloat(amtStr) : 0; const date = row.querySelector('.exp-date').value.trim(); 
+                const isDone = row.classList.contains('is-done'); const category = row.getAttribute('data-category');
+                const isCarriedOver = row.getAttribute('data-carried-over') === 'true'; const origin = row.getAttribute('data-origin');
+
+                if (desc || amtStr || date) { 
+                    const item = { desc, amt, date, isDone, category };
+                    if (isCarriedOver && origin && origin !== currentOrigin) {
+                        if (!carriedOverUpdates[origin]) carriedOverUpdates[origin] = [];
+                        carriedOverUpdates[origin].push(item);
+                    } else {
+                        currentData.push(item); 
+                    }
+                }
             });
-            const db = await dbPromise; await db.transaction('obligations', 'readwrite').objectStore('obligations').put({ monthYear: getOblStorageKey(), items: data });
+            
+            const db = await dbPromise; 
+            await db.transaction('obligations', 'readwrite').objectStore('obligations').put({ monthYear: currentOrigin, items: currentData });
+
+            // Safely reach back and update the past
+            for (const [origin, updatedItems] of Object.entries(carriedOverUpdates)) {
+                const oldRecord = await db.transaction('obligations', 'readonly').objectStore('obligations').get(origin);
+                if (oldRecord) {
+                    let oldItems = oldRecord.items;
+                    updatedItems.forEach(uItem => {
+                        const idx = oldItems.findIndex(oi => oi.desc.toLowerCase() === uItem.desc.toLowerCase() && oi.category === uItem.category);
+                        if (idx !== -1) {
+                            oldItems[idx].amt = uItem.amt; oldItems[idx].isDone = uItem.isDone; oldItems[idx].date = uItem.date; 
+                        }
+                    });
+                    await db.transaction('obligations', 'readwrite').objectStore('obligations').put({ monthYear: origin, items: oldItems });
+                }
+            }
+            return Object.keys(carriedOverUpdates); 
         }
 
         const debouncedAutoSaveExpenses = debounce(autoSaveExpenses, 500);
@@ -1116,13 +1170,11 @@
             const btn = document.getElementById("saveExpensesBtn"); const originalHtml = btn.innerHTML;
             btn.innerHTML = `<span class="material-icons me-2" style="font-size: 20px; animation: spin 1s linear infinite;">sync</span> Saving...`;
             
-            await autoSaveExpenses(); 
-            loadExpenses(); 
+            await autoSaveExpenses(); loadExpenses(); 
             
             const db = await dbPromise;
             const record = await db.transaction('expenses', 'readonly').objectStore('expenses').get(getExpStorageKey());
-            const data = record ? record.items : [];
-            const payload = { token: AUTH_TOKEN, type: "expense", monthYear: `${currentExpYear}-${currentExpMonth}`, items: data };
+            const payload = { token: AUTH_TOKEN, type: "expense", monthYear: `${currentExpYear}-${currentExpMonth}`, items: record ? record.items : [] };
             
             try {
                 const response = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
@@ -1139,21 +1191,35 @@
             const btn = document.getElementById("saveOblBtn"); const originalHtml = btn.innerHTML;
             btn.innerHTML = `<span class="material-icons me-2" style="font-size: 20px; animation: spin 1s linear infinite;">sync</span> Saving...`;
             
-            await autoSaveObligations(); 
+            const modifiedOldOrigins = await autoSaveObligations(); 
             loadObligations(); 
             
             const db = await dbPromise;
-            const record = await db.transaction('obligations', 'readonly').objectStore('obligations').get(getOblStorageKey());
-            const data = record ? record.items : [];
-            const payload = { token: AUTH_TOKEN, type: "obligation", monthYear: `${currentExpYear}-${currentExpMonth}`, items: data };
+            const currentOrigin = getOblStorageKey();
+            const currentRecord = await db.transaction('obligations', 'readonly').objectStore('obligations').get(currentOrigin);
+            
+            const payloadsToSync = [{ token: AUTH_TOKEN, type: "obligation", monthYear: `${currentExpYear}-${currentExpMonth}`, items: currentRecord ? currentRecord.items : [] }];
+
+            // Add historical months to the sync pipeline if we updated them
+            for (const origin of modifiedOldOrigins) {
+                const oldRecord = await db.transaction('obligations', 'readonly').objectStore('obligations').get(origin);
+                if (oldRecord) {
+                    const [prefix, y, m] = origin.split('_');
+                    payloadsToSync.push({ token: AUTH_TOKEN, type: "obligation", monthYear: `${y}-${m}`, items: oldRecord.items });
+                }
+            }
             
             try {
-                const response = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
-                if (!response.ok) throw new Error("Network error");
+                for (const payload of payloadsToSync) {
+                    const response = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+                    if (!response.ok) throw new Error("Network error");
+                }
                 hapticSuccess(); btn.innerHTML = `<span class="material-icons me-2">check_circle</span> Synced!`; btn.style.backgroundColor = "#10b981";
             } catch (error) {
                 hapticError(); btn.innerHTML = `<span class="material-icons me-2">cloud_off</span> Saved Locally`; btn.style.backgroundColor = "#f59e0b";
-                await db.transaction('syncQueue', 'readwrite').objectStore('syncQueue').add({ payload });
+                for (const payload of payloadsToSync) {
+                    await db.transaction('syncQueue', 'readwrite').objectStore('syncQueue').add({ payload });
+                }
             }
             setTimeout(() => { btn.innerHTML = originalHtml; btn.style.backgroundColor = "var(--primary)"; }, 2500);
         }

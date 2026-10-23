@@ -236,7 +236,7 @@
                         <div style="font-size: 0.8rem; letter-spacing: 0; color: var(--text-main); width: 85px; text-align: right; flex-shrink: 0;">₹ <span id="headerSum-Home">0</span></div>
                     </div>
                     <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
-                        <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Component</div><div style="flex: 1.2; text-align: right; padding-right: 4px;">Amount</div><div style="flex: 1.2; text-align: center;">Date</div><div style="flex: 0 0 24px;"></div>
+                        <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Component</div><div style="width: 85px; text-align: right; padding-right: 4px; flex-shrink: 0;">Amount</div><div style="flex: 1.2; text-align: center;">Date</div><div style="flex: 0 0 24px;"></div>
                     </div>
                     <div id="expense-list-Home"></div>
                     <div class="mt-2 pb-1">
@@ -254,7 +254,7 @@
                         <div style="font-size: 0.8rem; letter-spacing: 0; color: var(--text-main); width: 85px; text-align: right; flex-shrink: 0;">₹ <span id="headerSum-Misc">0</span></div>
                     </div>
                     <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
-                        <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Component</div><div style="flex: 1.2; text-align: right; padding-right: 4px;">Amount</div><div style="flex: 1.2; text-align: center;">Date</div><div style="flex: 0 0 24px;"></div>
+                        <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Component</div><div style="width: 85px; text-align: right; padding-right: 4px; flex-shrink: 0;">Amount</div><div style="flex: 1.2; text-align: center;">Date</div><div style="flex: 0 0 24px;"></div>
                     </div>
                     <div id="expense-list-Misc"></div>
                     <div class="mt-2 pb-1">
@@ -285,7 +285,7 @@
                         <div style="font-size: 0.8rem; letter-spacing: 0; color: var(--text-main); width: 85px; text-align: right; flex-shrink: 0;">₹ <span id="headerSum-EMI">0</span></div>
                     </div>
                     <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
-                        <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Bank/Debt</div><div style="flex: 1.2; text-align: right; padding-right: 4px;">Amount</div><div style="flex: 1.2; text-align: center;">Date</div><div style="flex: 0 0 24px;"></div>
+                        <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Bank/Debt</div><div style="width: 85px; text-align: right; padding-right: 4px; flex-shrink: 0;">Amount</div><div style="flex: 1.2; text-align: center;">Date</div><div style="flex: 0 0 24px;"></div>
                     </div>
                     <div id="expense-list-EMI"></div>
                     <div class="mt-2 pb-1">
@@ -306,7 +306,7 @@
                         </div>
                     </div>
                     <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
-                        <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Person</div><div style="flex: 1.2; text-align: right; padding-right: 4px;">Amount</div><div style="flex: 1.2; text-align: center;">Date</div><div style="flex: 0 0 24px;"></div>
+                        <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Person</div><div style="width: 85px; text-align: right; padding-right: 4px; flex-shrink: 0;">Amount</div><div style="flex: 1.2; text-align: center;">Date</div><div style="flex: 0 0 24px;"></div>
                     </div>
                     <div id="expense-list-Borrowed"></div>
                     <div class="mt-2 pb-1">
@@ -327,7 +327,7 @@
                         </div>
                     </div>
                     <div class="d-flex gap-2 mb-1 px-1 text-muted" style="font-size: 0.65rem; text-transform: uppercase; font-weight: 700;">
-                        <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Person</div><div style="flex: 1.2; text-align: right; padding-right: 4px;">Amount</div><div style="flex: 1.2; text-align: center;">Date</div><div style="flex: 0 0 24px;"></div>
+                        <div style="flex: 0 0 24px;"></div><div style="flex: 2;">Person</div><div style="width: 85px; text-align: right; padding-right: 4px; flex-shrink: 0;">Amount</div><div style="flex: 1.2; text-align: center;">Date</div><div style="flex: 0 0 24px;"></div>
                     </div>
                     <div id="expense-list-Lent"></div>
                     <div class="mt-2 pb-1">
@@ -357,11 +357,16 @@
                             <div class="d-flex align-items-center gap-1"><span class="material-icons" style="font-size: 16px;">local_gas_station</span> Vehicle Fuel Log</div>
                             <button type="button" class="btn-reset" onclick="resetFuelForm()" title="Clear Form"><span class="material-icons" style="font-size: 18px;">restart_alt</span></button>
                         </div>
+                        
                         <div class="date-input-wrapper mb-3" style="height: 54px; width: 100%;">
                             <span class="date-floating-label">Refuel Date</span>
                             <input type="text" id="fuelDate" placeholder="DD-MMM" inputmode="numeric" oninput="handleDateOnlyFormat(this, event)" style="width:100%; text-align: left; padding-left: 12px; padding-top: 16px;" required>
                         </div>
-                        <div class="form-floating mb-3"><input type="number" class="form-control" id="fuelOdo" required oninput="debouncedCalcFuelLive()"><label>Current Odometer (km)</label></div>
+                        
+                        <div class="row g-2 mb-3">
+                            <div class="col-6"><div class="form-floating"><input type="number" class="form-control" id="fuelOdo" required oninput="debouncedCalcFuelLive()"><label>Main Odo (km)</label></div></div>
+                            <div class="col-6"><div class="form-floating"><input type="number" class="form-control" id="fuelFTrip" step="0.1" required oninput="debouncedCalcFuelLive()"><label>F-Trip (km)</label></div></div>
+                        </div>
                         <div class="row g-2 mb-3">
                             <div class="col-6"><div class="form-floating"><input type="number" class="form-control" id="fuelAmount" required oninput="debouncedCalcFuelLive()"><label>Amount (₹)</label></div></div>
                             <div class="col-6"><div class="form-floating"><input type="number" class="form-control" id="fuelRate" required oninput="debouncedCalcFuelLive()"><label>Rate (₹/L)</label></div></div>
@@ -441,7 +446,7 @@
             </div>
             <div class="date-input-wrapper mb-4" style="height: 54px;">
                 <span class="date-floating-label">Payment Date</span>
-                <input type="text" id="settleDate" placeholder="DD-MMM" inputmode="numeric" oninput="handleDateOnlyFormat(this, event)" style="width:100%; text-align: left; padding-left: 12px; padding-top: 16px;">
+                <input type="text" id="settleDate" placeholder="DD-MMM" inputmode="numeric" oninput="handleDateAutoFormat(this, event, true)" style="width:100%; text-align: left; padding-left: 12px; padding-top: 16px;">
             </div>
             <div class="d-flex gap-2">
                 <button type="button" class="btn w-50" data-bs-dismiss="modal" style="background: var(--input-bg); color: var(--text-main); border: 1px solid var(--input-border); border-radius: 12px; font-weight: 600;">Cancel</button>
@@ -627,38 +632,43 @@
             });
 
             let totalFuel = 0, avgMileage = 0;
+            const targetMonthShort = Object.keys(monthMap).find(key => monthMap[key] === currentExpMonth && key.length === 3) || "";
+
+            let sortedFuel = [...cachedFuelData].sort((a,b) => a.odo - b.odo);
+            let totalDistance = 0, totalConsumedLiters = 0;
 
             if (filter === 'all') {
-                let minOdo = 9999999, maxOdo = 0, totalLiters = 0;
-                cachedFuelData.forEach(f => {
-                    totalFuel += f.amount;
-                    if (f.odo < minOdo) minOdo = f.odo;
-                    if (f.odo > maxOdo) maxOdo = f.odo;
-                    if (f.rate > 0) totalLiters += (f.amount / f.rate);
-                });
-                if (totalLiters > 0 && maxOdo > minOdo) { avgMileage = (maxOdo - minOdo) / totalLiters; }
+                cachedFuelData.forEach(f => { totalFuel += f.amount; });
+                if (sortedFuel.length > 1) {
+                    for (let i = 1; i < sortedFuel.length; i++) {
+                        let curr = sortedFuel[i];
+                        let prev = sortedFuel[i-1];
+                        let dist = (curr.odo - (curr.fTrip || 0)) - (prev.odo - (prev.fTrip || 0));
+                        let lit = prev.amount / prev.rate;
+                        if (dist > 0 && lit > 0) { totalDistance += dist; totalConsumedLiters += lit; }
+                    }
+                }
             } else {
-                const targetMonthShort = Object.keys(monthMap).find(key => monthMap[key] === currentExpMonth && key.length === 3) || "";
                 const monthFuel = cachedFuelData.filter(f => {
                     if (!f.date) return false;
                     const parts = f.date.split('-');
                     return parts.length >= 3 && parts[1] === targetMonthShort && parseInt(parts[2]) === currentExpYear;
                 });
                 monthFuel.forEach(f => { totalFuel += f.amount; });
-                let sortedFuel = [...cachedFuelData].sort((a,b) => a.odo - b.odo);
-                let monthLiters = 0, monthDistance = 0;
-
-                monthFuel.forEach(mf => {
-                    const idx = sortedFuel.findIndex(f => f.odo === mf.odo);
-                    if (idx > 0) {
-                        const prev = sortedFuel[idx - 1];
-                        const dist = mf.odo - prev.odo;
-                        const liters = mf.amount / mf.rate;
-                        if (liters > 0) { monthDistance += dist; monthLiters += liters; }
+                
+                if (sortedFuel.length > 1) {
+                    for (let i = 1; i < sortedFuel.length; i++) {
+                        let curr = sortedFuel[i];
+                        let prev = sortedFuel[i-1];
+                        if (curr.date && curr.date.includes(targetMonthShort + "-" + currentExpYear)) {
+                            let dist = (curr.odo - (curr.fTrip || 0)) - (prev.odo - (prev.fTrip || 0));
+                            let lit = prev.amount / prev.rate;
+                            if (dist > 0 && lit > 0) { totalDistance += dist; totalConsumedLiters += lit; }
+                        }
                     }
-                });
-                if (monthLiters > 0) avgMileage = monthDistance / monthLiters;
+                }
             }
+            if (totalConsumedLiters > 0) avgMileage = totalDistance / totalConsumedLiters;
 
             document.getElementById('insExpTitle').innerText = filter === 'all' ? "All-Time Liabilities vs Spend" : "Month Liabilities vs Spend";
             document.getElementById('insFuelTitle').innerText = filter === 'all' ? "All-Time Fuel Spent" : "Month Fuel Spent";
@@ -709,6 +719,7 @@
 
         window.onload = async () => {
             initTheme(); 
+            document.getElementById('fuelDate').value = ""; 
             
             const db = await dbPromise; 
             cachedSalaryData = await db.transaction('salary').objectStore('salary').getAll();
@@ -837,11 +848,38 @@
         }
 
         function calcFuelLive() {
-            const amt = parseFloat(document.getElementById('fuelAmount').value) || 0; const rate = parseFloat(document.getElementById('fuelRate').value) || 0;
-            const currentOdo = parseFloat(document.getElementById('fuelOdo').value) || 0; const lastOdo = parseFloat(document.getElementById('fuelLastOdo').innerText) || 0;
-            let liters = 0; if (amt > 0 && rate > 0) liters = amt / rate; document.getElementById('fuelLiveLiters').innerText = liters.toFixed(2) + " L";
-            if (lastOdo > 0 && currentOdo > lastOdo && liters > 0) { const dist = currentOdo - lastOdo; document.getElementById('fuelLiveMileage').innerText = (dist / liters).toFixed(1) + " km/l";
-            } else { document.getElementById('fuelLiveMileage').innerText = "-- km/l"; }
+            const amt = parseFloat(document.getElementById('fuelAmount').value) || 0; 
+            const rate = parseFloat(document.getElementById('fuelRate').value) || 0;
+            const currentOdo = parseFloat(document.getElementById('fuelOdo').value) || 0; 
+            const currentFTrip = parseFloat(document.getElementById('fuelFTrip').value) || 0;
+
+            let liters = 0; 
+            if (amt > 0 && rate > 0) liters = amt / rate; 
+            document.getElementById('fuelLiveLiters').innerText = liters.toFixed(2) + " L";
+
+            if (cachedFuelData.length > 0 && currentOdo > 0) {
+                const sorted = [...cachedFuelData].sort((a,b) => a.odo - b.odo); 
+                const lastEntry = sorted[sorted.length - 1];
+                const lastOdo = lastEntry.odo || 0;
+                const lastFTrip = lastEntry.fTrip || 0;
+                const lastAmount = lastEntry.amount || 0;
+                const lastRate = lastEntry.rate || 0;
+
+                let lastLiters = 0;
+                if (lastAmount > 0 && lastRate > 0) lastLiters = lastAmount / lastRate;
+
+                const currentTrueReserve = currentOdo - currentFTrip;
+                const lastTrueReserve = lastOdo - lastFTrip;
+                const distance = currentTrueReserve - lastTrueReserve;
+
+                if (distance > 0 && lastLiters > 0 && currentOdo > lastOdo) { 
+                    document.getElementById('fuelLiveMileage').innerText = (distance / lastLiters).toFixed(1) + " km/l";
+                } else { 
+                    document.getElementById('fuelLiveMileage').innerText = "-- km/l"; 
+                }
+            } else { 
+                document.getElementById('fuelLiveMileage').innerText = "-- km/l"; 
+            }
         }
 
         const debouncedCalcFuelLive = debounce(calcFuelLive, 150);
@@ -863,7 +901,16 @@
             }
 
             btn.innerHTML = `<span class="material-icons me-2" style="font-size: 20px; animation: spin 1s linear infinite;">sync</span> Saving...`;
-            const payload = { token: AUTH_TOKEN, type: "fuel", date: payloadDate, odo: payloadOdo, amount: parseFloat(document.getElementById('fuelAmount').value), rate: parseFloat(document.getElementById('fuelRate').value) };
+            const payload = { 
+                token: AUTH_TOKEN, 
+                type: "fuel", 
+                monthYear: `${currentExpYear}-${currentExpMonth}`, 
+                date: payloadDate,
+                odo: payloadOdo, 
+                fTrip: parseFloat(document.getElementById('fuelFTrip').value) || 0, 
+                amount: parseFloat(document.getElementById('fuelAmount').value), 
+                rate: parseFloat(document.getElementById('fuelRate').value) 
+            };
             
             cachedFuelData.push(payload); 
             const db = await dbPromise;
@@ -1027,7 +1074,7 @@
             row.innerHTML = `
                 ${btnHtml}
                 <input type="text" class="exp-input exp-desc" placeholder="Item" style="flex: 2;" value="${desc}" onchange="${dupeFunc}; ${saveFunc}" oninput="${uncheckFunc}; ${saveFunc}">
-                <input type="number" class="exp-input exp-amt" placeholder="₹0" style="flex: 1.2; text-align: right; padding-right: 4px;" value="${amt}" onchange="${dupeFunc}; ${saveFunc}" oninput="${uncheckFunc}; ${calcFunc}; ${saveFunc}" inputmode="numeric">
+                <input type="number" class="exp-input exp-amt" placeholder="₹0" style="width: 85px; text-align: right; padding-right: 4px; flex-shrink: 0;" value="${amt}" onchange="${dupeFunc}; ${saveFunc}" oninput="${uncheckFunc}; ${calcFunc}; ${saveFunc}" inputmode="numeric">
                 <input type="text" class="exp-input exp-date" placeholder="DD-MMM" style="flex: 1.2; text-align: center;" value="${dateStr}" inputmode="numeric" oninput="${dateFunc}">
                 ${dragHtml}
             `;

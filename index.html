@@ -357,7 +357,10 @@
                             <div class="d-flex align-items-center gap-1"><span class="material-icons" style="font-size: 16px;">local_gas_station</span> Vehicle Fuel Log</div>
                             <button type="button" class="btn-reset" onclick="resetFuelForm()" title="Clear Form"><span class="material-icons" style="font-size: 18px;">restart_alt</span></button>
                         </div>
-                        <div class="form-floating mb-3"><input type="text" class="form-control static-field" id="fuelMonth" required readonly><label>Active Month & Year</label></div>
+                        <div class="date-input-wrapper mb-3" style="height: 54px; width: 100%;">
+                            <span class="date-floating-label">Refuel Date</span>
+                            <input type="text" id="fuelDate" placeholder="DD-MMM" inputmode="numeric" oninput="handleDateOnlyFormat(this, event)" style="width:100%; text-align: left; padding-left: 12px; padding-top: 16px;" required>
+                        </div>
                         <div class="form-floating mb-3"><input type="number" class="form-control" id="fuelOdo" required oninput="debouncedCalcFuelLive()"><label>Current Odometer (km)</label></div>
                         <div class="row g-2 mb-3">
                             <div class="col-6"><div class="form-floating"><input type="number" class="form-control" id="fuelAmount" required oninput="debouncedCalcFuelLive()"><label>Amount (₹)</label></div></div>
@@ -438,7 +441,7 @@
             </div>
             <div class="date-input-wrapper mb-4" style="height: 54px;">
                 <span class="date-floating-label">Payment Date</span>
-                <input type="text" id="settleDate" placeholder="DD-MMM" inputmode="numeric" oninput="handleDateAutoFormat(this, event, true)" style="width:100%; text-align: left; padding-left: 12px; padding-top: 16px;">
+                <input type="text" id="settleDate" placeholder="DD-MMM" inputmode="numeric" oninput="handleDateOnlyFormat(this, event)" style="width:100%; text-align: left; padding-left: 12px; padding-top: 16px;">
             </div>
             <div class="d-flex gap-2">
                 <button type="button" class="btn w-50" data-bs-dismiss="modal" style="background: var(--input-bg); color: var(--text-main); border: 1px solid var(--input-border); border-radius: 12px; font-weight: 600;">Cancel</button>
@@ -624,7 +627,6 @@
             });
 
             let totalFuel = 0, avgMileage = 0;
-            const targetMonthStr = `${currentExpYear}-${currentExpMonth}`;
 
             if (filter === 'all') {
                 let minOdo = 9999999, maxOdo = 0, totalLiters = 0;
@@ -636,7 +638,12 @@
                 });
                 if (totalLiters > 0 && maxOdo > minOdo) { avgMileage = (maxOdo - minOdo) / totalLiters; }
             } else {
-                const monthFuel = cachedFuelData.filter(f => f.monthYear === targetMonthStr);
+                const targetMonthShort = Object.keys(monthMap).find(key => monthMap[key] === currentExpMonth && key.length === 3) || "";
+                const monthFuel = cachedFuelData.filter(f => {
+                    if (!f.date) return false;
+                    const parts = f.date.split('-');
+                    return parts.length >= 3 && parts[1] === targetMonthShort && parseInt(parts[2]) === currentExpYear;
+                });
                 monthFuel.forEach(f => { totalFuel += f.amount; });
                 let sortedFuel = [...cachedFuelData].sort((a,b) => a.odo - b.odo);
                 let monthLiters = 0, monthDistance = 0;
@@ -702,7 +709,6 @@
 
         window.onload = async () => {
             initTheme(); 
-            document.getElementById('fuelMonth').value = `${currentExpYear}-${currentExpMonth}`;
             
             const db = await dbPromise; 
             cachedSalaryData = await db.transaction('salary').objectStore('salary').getAll();
@@ -733,7 +739,7 @@
         function resetFuelForm() {
             hapticTap();
             document.getElementById("fuelForm").reset();
-            document.getElementById('fuelMonth').value = `${currentExpYear}-${currentExpMonth}`;
+            document.getElementById('fuelDate').value = "";
             document.getElementById('fuelLiveLiters').innerText = "0.0 L";
             document.getElementById('fuelLiveMileage').innerText = "-- km/l";
         }
@@ -841,13 +847,23 @@
         const debouncedCalcFuelLive = debounce(calcFuelLive, 150);
 
         document.getElementById("fuelForm").addEventListener("submit", async function(e) {
-            e.preventDefault(); const btn = document.getElementById("saveFuelBtn"); const originalHtml = btn.innerHTML;
-            const payloadMonth = document.getElementById('fuelMonth').value;
+            e.preventDefault(); 
+            const btn = document.getElementById("saveFuelBtn"); 
+            const originalHtml = btn.innerHTML;
+            
+            const fuelDateInput = document.getElementById('fuelDate').value.trim();
+            if(fuelDateInput.length < 5) { alert("Please enter a valid Refuel Date (e.g. 05-OCT)"); return; }
+            const payloadDate = fuelDateInput + "-" + currentExpYear;
+            const payloadOdo = parseFloat(document.getElementById('fuelOdo').value);
 
-            if (cachedFuelData.some(f => f.monthYear === payloadMonth)) { hapticError(); alert(`Duplicate Blocked: Fuel entry for ${payloadMonth} already exists!`); return; }
+            if (cachedFuelData.some(f => f.odo === payloadOdo)) { 
+                hapticError(); 
+                alert(`Duplicate Blocked: Fuel entry for ${payloadOdo} km already exists!`); 
+                return; 
+            }
 
             btn.innerHTML = `<span class="material-icons me-2" style="font-size: 20px; animation: spin 1s linear infinite;">sync</span> Saving...`;
-            const payload = { token: AUTH_TOKEN, type: "fuel", monthYear: payloadMonth, odo: parseFloat(document.getElementById('fuelOdo').value), amount: parseFloat(document.getElementById('fuelAmount').value), rate: parseFloat(document.getElementById('fuelRate').value) };
+            const payload = { token: AUTH_TOKEN, type: "fuel", date: payloadDate, odo: payloadOdo, amount: parseFloat(document.getElementById('fuelAmount').value), rate: parseFloat(document.getElementById('fuelRate').value) };
             
             cachedFuelData.push(payload); 
             const db = await dbPromise;
@@ -872,12 +888,24 @@
             if (currentExpMonth > 12) { currentExpMonth = 1; currentExpYear++; } else if (currentExpMonth < 1) { currentExpMonth = 12; currentExpYear--; }
             
             document.getElementById('expMonthLabel').innerText = `${monthNames[currentExpMonth - 1]} ${currentExpYear}`;
-            document.getElementById('fuelMonth').value = `${currentExpYear}-${currentExpMonth}`;
             
             await loadExpenses();
             await loadObligations();
             initSortable();
             if(document.getElementById('view-exp-insights').checked) renderExpenseInsights();
+        }
+        
+        function handleDateOnlyFormat(elem, event) {
+            const isBackspace = event && event.inputType === 'deleteContentBackward';
+            let val = elem.value.replace(/[^0-9-A-Z]/gi, ''); 
+            if (isBackspace) return;
+            let numVal = val.replace(/[^0-9]/g, '');
+            if (numVal.length > 2) numVal = numVal.slice(0, 2); 
+            if (numVal.length === 2 && val.length <= 2) {
+                const activeMonthShort = Object.keys(monthMap).find(key => monthMap[key] === currentExpMonth && key.length === 3) || "SEP";
+                elem.value = `${numVal}-${activeMonthShort}`;
+                setTimeout(() => elem.setSelectionRange(elem.value.length, elem.value.length), 0);
+            }
         }
 
         function handleDateAutoFormat(elem, event, isObligation = false) {
